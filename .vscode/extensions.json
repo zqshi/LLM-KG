@@ -1,0 +1,31 @@
+{
+  "recommendations": [
+    // Vue 生态
+    "Vue.volar",
+    "Vue.vscode-typescript-vue-plugin",
+    
+    // TypeScript
+    "ms-vscode.vscode-typescript-next",
+    
+    // 代码质量
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    
+    // 测试
+    "vitest.explorer",
+    
+    // Git
+    "eamodio.gitlens",
+    
+    // 其他有用的工具
+    "bradlc.vscode-tailwindcss",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "streetsidesoftware.code-spell-checker",
+    "ms-vscode.vscode-json"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript-next",
+    "octref.vetur"
+  ]
+}
