@@ -160,7 +160,7 @@
       </el-table-column>
       <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" @click="viewWorkflowDiagram(row)">流程图</el-button>
+          <el-button link type="primary" @click="viewWorkflowDiagram(row)">查看流程</el-button>
           <el-button link type="info" @click="exportRecord(row)">导出</el-button>
         </template>
       </el-table-column>
@@ -179,52 +179,25 @@
     </div>
 
     <!-- 流程图对话框 -->
-    <el-dialog v-model="diagramDialogVisible" title="审批流程图" width="1000px">
-      <div class="workflow-diagram" v-if="currentWorkflow">
-        <div class="diagram-header">
-          <h3>{{ currentWorkflow.bannerTitle }}</h3>
-          <el-tag :type="getStatusType(currentWorkflow.currentStatus)">
-            {{ getStatusText(currentWorkflow.currentStatus) }}
-          </el-tag>
-        </div>
-        
-        <div class="diagram-content">
-          <div class="workflow-steps">
-            <div class="start-node">开始</div>
-            <div 
-              v-for="(step, index) in currentWorkflow.workflowSteps" 
-              :key="index" 
-              class="workflow-step"
-              :class="{
-                'step-approved': step.status === 'approved',
-                'step-rejected': step.status === 'rejected',
-                'step-processing': step.status === 'processing',
-                'step-pending': step.status === 'pending'
-              }"
-            >
-              <div class="step-header">
-                <div class="step-name">{{ step.name }}</div>
-                <div class="step-status">
-                  <el-tag :type="getStepTagType(step.status)" size="small">
-                    {{ getStepStatusText(step.status) }}
-                  </el-tag>
-                </div>
-              </div>
-              <div class="step-info">
-                <div class="step-approvers">审批人: {{ step.approvers.join(', ') }}</div>
-                <div class="step-time" v-if="step.processTime">
-                  处理时间: {{ step.processTime }}
-                </div>
-                <div class="step-comment" v-if="step.comment">
-                  处理意见: {{ step.comment }}
-                </div>
-              </div>
-            </div>
-            <div class="end-node" :class="{ 'reached': isWorkflowComplete(currentWorkflow) }">
-              结束
-            </div>
-          </div>
-        </div>
+    <el-dialog 
+      v-model="diagramDialogVisible" 
+      title="审批流程" 
+      width="1200px"
+      :destroy-on-close="true"
+      class="workflow-dialog"
+    >
+      <UnifiedWorkflowViewer
+        v-if="currentWorkflow && currentBannerInfo"
+        :workflow-data="currentWorkflow"
+        :banner-info="currentBannerInfo"
+        :view-mode="'auto'"
+        :show-mode-switch="true"
+        :show-banner-info="true"
+        :responsive="true"
+        @mode-change="onWorkflowModeChange"
+      />
+      <div v-else class="empty-workflow">
+        <el-empty description="暂无流程数据" />
       </div>
     </el-dialog>
   </div>
@@ -234,24 +207,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { SuccessFilled, CircleCloseFilled, Loading } from '@element-plus/icons-vue'
-
-interface WorkflowStep {
-  name: string
-  approvers: string[]
-  status: 'pending' | 'processing' | 'approved' | 'rejected'
-  processTime?: string
-  comment?: string
-  duration?: string
-}
-
-interface OperationRecord {
-  time: string
-  operator: string
-  action: 'submit' | 'approve' | 'reject' | 'delegate' | 'revoke' | 'publish' | 'offline'
-  comment?: string
-  node?: string
-  duration?: string
-}
+import UnifiedWorkflowViewer from '@/components/workflow/UnifiedWorkflowViewer.vue'
+import type { WorkflowData, BannerInfo } from '@/components/workflow/UnifiedWorkflowViewer.vue'
 
 interface TrackingItem {
   id: number
@@ -267,8 +224,24 @@ interface TrackingItem {
   bannerType: string
   priority: 'high' | 'normal' | 'low'
   description?: string
-  workflowSteps: WorkflowStep[]
-  operationHistory: OperationRecord[]
+  workflowSteps: {
+    id: string | number
+    name: string
+    status: 'pending' | 'processing' | 'approved' | 'rejected'
+    approvers?: string[]
+    processTime?: string
+    comment?: string
+    duration?: string
+    approvalType?: 'any' | 'all'
+  }[]
+  operationHistory: {
+    time: string
+    operator: string
+    action: 'submit' | 'approve' | 'reject' | 'delegate' | 'revoke' | 'publish' | 'offline'
+    comment?: string
+    node?: string
+    duration?: string
+  }[]
 }
 
 const loading = ref(false)
@@ -288,7 +261,42 @@ const pagination = reactive({
 })
 
 const trackingList = ref<TrackingItem[]>([])
-const currentWorkflow = ref<TrackingItem | null>(null)
+const currentWorkflow = ref<WorkflowData | null>(null)
+const currentBannerInfo = ref<BannerInfo | null>(null)
+
+// 数据转换函数：将TrackingItem转换为UnifiedWorkflowViewer所需的格式
+const transformToWorkflowData = (item: TrackingItem): { workflowData: WorkflowData; bannerInfo: BannerInfo } => {
+  const workflowData: WorkflowData = {
+    steps: item.workflowSteps.map((step, index) => ({
+      id: step.id || `step-${index}`,
+      name: step.name,
+      status: step.status,
+      approvers: step.approvers,
+      processTime: step.processTime,
+      comment: step.comment,
+      duration: step.duration,
+      approvalType: step.approvalType
+    })),
+    operationHistory: item.operationHistory,
+    currentStatus: item.currentStatus,
+    totalDuration: calculateTotalDuration(item)
+  }
+
+  const bannerInfo: BannerInfo = {
+    id: item.id,
+    title: item.bannerTitle,
+    imageUrl: item.bannerImageUrl,
+    linkUrl: item.linkUrl,
+    startTime: item.startTime,
+    endTime: item.endTime,
+    status: item.currentStatus as any,
+    description: item.description,
+    creator: item.submitter,
+    createTime: item.submitTime
+  }
+
+  return { workflowData, bannerInfo }
+}
 
 const getPriorityType = (priority: string) => {
   const typeMap: Record<string, string> = {
@@ -342,6 +350,7 @@ const getStepStatus = (step: WorkflowStep) => {
   return statusMap[step.status] || 'wait'
 }
 
+// 这些函数现在由UnifiedWorkflowViewer组件处理，保留供表格显示使用
 const getStepTagType = (status: string) => {
   const typeMap: Record<string, string> = {
     pending: 'info',
@@ -436,18 +445,22 @@ const calculateTotalDuration = (item: TrackingItem) => {
   }
 }
 
-const isWorkflowComplete = (workflow: TrackingItem) => {
-  return ['approved', 'published', 'rejected'].includes(workflow.currentStatus)
-}
+// isWorkflowComplete函数现在由UnifiedWorkflowViewer组件处理
 
 const viewWorkflowDiagram = (item: TrackingItem) => {
-  currentWorkflow.value = item
+  const { workflowData, bannerInfo } = transformToWorkflowData(item)
+  currentWorkflow.value = workflowData
+  currentBannerInfo.value = bannerInfo
   diagramDialogVisible.value = true
 }
 
 const exportRecord = (item: TrackingItem) => {
   console.log('导出记录:', item)
   ElMessage.success('导出功能开发中...')
+}
+
+const onWorkflowModeChange = (mode: 'steps' | 'diagram') => {
+  console.log('流程视图模式变更:', mode)
 }
 
 const handleSearch = () => {
@@ -498,23 +511,29 @@ const fetchTrackingList = async () => {
         description: '春节活动推广Banner，需要尽快上线',
         workflowSteps: [
           {
+            id: 'step-1',
             name: '部门主管审核',
             approvers: ['李四'],
             status: 'approved',
             processTime: '2024-01-25 14:30:00',
             comment: '设计符合要求，同意通过',
-            duration: '4小时30分钟'
+            duration: '4小时30分钟',
+            approvalType: 'any'
           },
           {
+            id: 'step-2',
             name: '运营总监审核',
             approvers: ['王五'],
             status: 'processing',
-            processTime: '2024-01-26 09:00:00'
+            processTime: '2024-01-26 09:00:00',
+            approvalType: 'any'
           },
           {
+            id: 'step-3',
             name: '总经理审批',
             approvers: ['赵六'],
-            status: 'pending'
+            status: 'pending',
+            approvalType: 'any'
           }
         ],
         operationHistory: [
@@ -550,20 +569,24 @@ const fetchTrackingList = async () => {
         description: '新产品发布会宣传Banner',
         workflowSteps: [
           {
+            id: 'step-1',
             name: '部门主管审核',
             approvers: ['王五'],
             status: 'approved',
             processTime: '2024-02-21 09:15:00',
             comment: '产品信息准确，批准发布',
-            duration: '18小时45分钟'
+            duration: '18小时45分钟',
+            approvalType: 'any'
           },
           {
+            id: 'step-2',
             name: '运营总监审核',
             approvers: ['赵六'],
             status: 'approved',
             processTime: '2024-02-21 15:30:00',
             comment: '营销策略合理，同意上线',
-            duration: '6小时15分钟'
+            duration: '6小时15分钟',
+            approvalType: 'any'
           }
         ],
         operationHistory: [
@@ -720,149 +743,14 @@ onMounted(() => {
   color: #c0c4cc;
 }
 
-.workflow-diagram {
-  padding: 20px;
+.workflow-dialog {
+  .el-dialog__body {
+    padding: 0;
+  }
 }
 
-.diagram-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e4e7ed;
-}
-
-.diagram-content {
-  padding: 20px 0;
-}
-
-.workflow-steps {
-  display: flex;
-  align-items: flex-start;
-  gap: 30px;
-  overflow-x: auto;
-  padding: 20px 0;
-}
-
-.start-node, .end-node {
-  min-width: 80px;
-  padding: 15px 20px;
-  background: #67c23a;
-  color: white;
-  border-radius: 25px;
-  font-weight: bold;
+.empty-workflow {
+  padding: 40px 0;
   text-align: center;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.end-node {
-  background: #909399;
-}
-
-.end-node.reached {
-  background: #67c23a;
-}
-
-.workflow-step {
-  min-width: 200px;
-  max-width: 250px;
-  padding: 20px;
-  border: 2px solid #dcdfe6;
-  border-radius: 12px;
-  background: white;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.workflow-step::before {
-  content: '';
-  position: absolute;
-  left: -31px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-right: 10px solid #dcdfe6;
-}
-
-.step-approved {
-  border-color: #67c23a;
-  background: #f0f9ff;
-}
-
-.step-approved::before {
-  border-right-color: #67c23a;
-}
-
-.step-rejected {
-  border-color: #f56c6c;
-  background: #fef0f0;
-}
-
-.step-rejected::before {
-  border-right-color: #f56c6c;
-}
-
-.step-processing {
-  border-color: #e6a23c;
-  background: #fdf6ec;
-  animation: pulse 2s infinite;
-}
-
-.step-processing::before {
-  border-right-color: #e6a23c;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(230, 162, 60, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(230, 162, 60, 0);
-  }
-}
-
-.step-header {
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.step-name {
-  font-size: 16px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 8px;
-}
-
-.step-status {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.step-info {
-  font-size: 12px;
-  color: #606266;
-  line-height: 1.6;
-}
-
-.step-approvers {
-  margin-bottom: 5px;
-}
-
-.step-time {
-  margin-bottom: 5px;
-  color: #909399;
-}
-
-.step-comment {
-  color: #303133;
-  font-style: italic;
 }
 </style>

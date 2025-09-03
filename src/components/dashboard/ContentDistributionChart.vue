@@ -250,10 +250,11 @@ const contentIconMap = {
 
 // 模拟增长率数据
 const growthRateMap = {
-  'article': 12.5,
-  'post': 8.3,
-  'product': -2.1,
-  'quote': 15.8
+  'article': 18.5,
+  'post': 12.3,
+  'product': -3.2,
+  'quote': 22.1,
+  'news': 8.7
 }
 
 // 计算属性
@@ -766,16 +767,23 @@ const handleExport = (type: string) => {
 @media (max-width: 1024px) {
   .chart-main {
     flex-direction: column;
+    gap: var(--spacing-md);
   }
   
   .chart-legend {
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
+    padding: var(--spacing-sm);
   }
   
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .chart-wrapper {
+    min-height: 300px;
   }
 }
 

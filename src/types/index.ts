@@ -1172,3 +1172,149 @@ export interface AuditNodePerformance {
   errorRate: number
   throughput: number
 }
+
+// ======================== Banner智能审批相关类型定义 ========================
+
+// Banner状态枚举
+export type BannerStatus = 'draft' | 'pending' | 'reviewing' | 'approved' | 'rejected' | 'published' | 'offline'
+
+// Banner接口定义
+export interface Banner {
+  id: number
+  title: string
+  imageUrl: string
+  linkUrl: string
+  startTime: string
+  endTime: string
+  status: BannerStatus
+  description?: string
+  creator: string
+  createTime: string
+  updateTime?: string
+  auditTaskId?: string
+  rejectReason?: string
+  rejectDetail?: string
+}
+
+// Banner表单接口
+export interface BannerForm {
+  id?: number
+  title: string
+  imageUrl: string
+  linkUrl: string
+  startTime: string
+  endTime: string
+  description?: string
+  auditOptions?: {
+    submitForAuditImmediately?: boolean
+    priority?: 'high' | 'normal' | 'low'
+    metadata?: Record<string, any>
+    approvalConfig?: ApprovalConfig
+    approvalReady?: boolean
+  }
+}
+
+// 审批配置接口
+export interface ApprovalConfig {
+  mode: 'smart' | 'template' | 'custom'
+  smart?: SmartApprovalConfig
+  template?: TemplateApprovalConfig
+  custom?: CustomApprovalConfig
+  preview: ApprovalStep[]
+}
+
+// 智能审批配置
+export interface SmartApprovalConfig {
+  priority: 'high' | 'normal' | 'low'
+  expectedCompleteTime?: string
+  autoReminder: boolean
+  smartEscalation: boolean
+  parallelProcessing: boolean
+  recommendation?: ApprovalRecommendation
+}
+
+// 模板审批配置
+export interface TemplateApprovalConfig {
+  templateId: number
+  priority: 'high' | 'normal' | 'low'
+  features: string[]
+  selected?: ApprovalTemplate
+}
+
+// 自定义审批配置
+export interface CustomApprovalConfig {
+  steps: CustomApprovalStep[]
+  globalPriority: 'high' | 'normal' | 'low'
+  parallelEnabled: boolean
+  reminderEnabled: boolean
+}
+
+// 审批步骤接口
+export interface ApprovalStep {
+  name: string
+  approver?: string
+  timeLimit?: string
+  type?: 'manual' | 'auto' | 'conditional'
+  description?: string
+  estimatedTime?: string
+}
+
+// 自定义审批步骤
+export interface CustomApprovalStep {
+  id: number
+  name: string
+  approverId?: number
+  timeLimit: string
+  type: 'manual' | 'auto' | 'conditional'
+  required: boolean
+  description?: string
+}
+
+// 审批推荐
+export interface ApprovalRecommendation {
+  confidence: number
+  reason: string
+  steps: ApprovalStep[]
+  estimatedTotalTime?: string
+}
+
+// 审批模板
+export interface ApprovalTemplate {
+  id: number
+  name: string
+  description: string
+  recommended: boolean
+  avgProcessTime: string
+  stepCount: number
+  successRate: number
+  steps: ApprovalStep[]
+}
+
+// Banner查询参数
+export interface BannerQueryParams {
+  title?: string
+  status?: BannerStatus
+  creator?: string
+  startTime?: string
+  endTime?: string
+  page?: number
+  size?: number
+}
+
+// Banner列表响应
+export interface BannerListResponse {
+  list: Banner[]
+  total: number
+}
+
+// 审批人员接口
+export interface Approver {
+  id: number
+  name: string
+  department: string
+  role?: string
+  email?: string
+  avatar?: string
+  workload?: number
+  averageResponseTime?: string
+}

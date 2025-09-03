@@ -48,36 +48,60 @@
         class="metrics-section"
       />
 
-      <!-- 图表区域 -->
-      <div class="charts-section">
+      <!-- 数据概览卡片区域 -->
+      <div class="overview-cards-section">
         <el-row :gutter="24">
-          <!-- 用户活跃度趋势 -->
-          <el-col :span="16" :xs="24" :sm="24" :md="16">
-            <ActivityChart
+          <!-- 活跃度趋势卡片 -->
+          <el-col :span="6" :xs="12" :sm="12" :md="6">
+            <ActivityPreviewCard
               :activity-data="dashboardStore.activityTrend"
-              :active-time-range="dashboardStore.activeTimeRange"
-              :active-category="dashboardStore.activeCategory"
               :loading="dashboardStore.loading.charts"
               :error="dashboardStore.error.charts"
-              @time-range-change="handleTimeRangeChange"
-              @category-change="handleCategoryChange"
+              @view-detail="handleViewActivityDetail"
               @refresh="handleChartsRefresh"
-              @chart-click="handleActivityChartClick"
             />
           </el-col>
           
-          <!-- 内容类型分布 -->
-          <el-col :span="8" :xs="24" :sm="24" :md="8">
-            <ContentDistributionChart
+          <!-- 内容分布卡片 -->
+          <el-col :span="6" :xs="12" :sm="12" :md="6">
+            <ContentPreviewCard
               :content-data="dashboardStore.contentDistribution"
-              :time-range="dashboardStore.activeTimeRange"
-              :last-update-time="dashboardStore.lastUpdateTime"
               :loading="dashboardStore.loading.charts"
               :error="dashboardStore.error.charts"
+              @view-detail="handleViewContentDetail"
               @refresh="handleChartsRefresh"
-              @chart-click="handleContentChartClick"
-              @legend-click="handleContentLegendClick"
-              @export="handleChartExport"
+            />
+          </el-col>
+          
+          <!-- 系统监控卡片 -->
+          <el-col :span="6" :xs="12" :sm="12" :md="6">
+            <DashboardCard
+              title="系统监控"
+              subtitle="服务器运行状态和资源使用"
+              :icon="Monitor"
+              type="warning"
+              :metrics="systemMetrics"
+              :loading="dashboardStore.loading.overview"
+              :error="dashboardStore.error.overview"
+              :status="systemStatus"
+              @click="handleViewSystemDetail"
+              @refresh="handleSystemRefresh"
+            />
+          </el-col>
+          
+          <!-- 待办任务卡片 -->
+          <el-col :span="6" :xs="12" :sm="12" :md="6">
+            <DashboardCard
+              title="待办任务"
+              subtitle="需要处理的审核和管理任务"
+              :icon="List"
+              type="danger"
+              :metrics="taskMetrics"
+              :loading="dashboardStore.loading.tasks"
+              :error="dashboardStore.error.tasks"
+              :status="taskStatus"
+              @click="handleViewTaskDetail"
+              @refresh="handleTasksRefresh"
             />
           </el-col>
         </el-row>
@@ -87,7 +111,7 @@
       <div class="function-section">
         <el-row :gutter="24">
           <!-- 待办任务 -->
-          <el-col :span="12" :xs="24" :sm="24" :md="12">
+          <el-col :span="12" :xs="24" :sm="24" :md="12" v-if="false">
             <PendingTasks
               :pending-tasks="dashboardStore.pendingTasks"
               :loading="dashboardStore.loading.tasks"
@@ -109,14 +133,29 @@
               @customize="handleCustomizeActions"
             />
           </el-col>
+
+          <!-- 最新反馈 -->
+          <el-col :span="12" :xs="24" :sm="24" :md="12">
+            <RecentFeedback
+              :feedback-list="dashboardStore.recentFeedback"
+              :loading="dashboardStore.loading.overview"
+              :error="dashboardStore.error.overview"
+              @feedback-click="handleFeedbackClick"
+              @mark-all-read="handleMarkAllFeedbackRead"
+              @mark-read="handleMarkFeedbackRead"
+              @reply="handleFeedbackReply"
+              @action="handleFeedbackAction"
+              @view-all="handleViewAllFeedback"
+            />
+          </el-col>
         </el-row>
       </div>
 
       <!-- 监控和反馈区域 -->
-      <div class="monitor-section">
+      <div class="monitor-section" v-if="false">
         <el-row :gutter="24">
           <!-- 系统监控 -->
-          <el-col :span="12" :xs="24" :sm="24" :md="12">
+          <el-col :span="12" :xs="24" :sm="24" :md="12" v-if="false">
             <SystemMonitor
               :system-resources="dashboardStore.systemResources"
               :system-announcement="dashboardStore.systemAnnouncement"
@@ -144,6 +183,86 @@
         </el-row>
       </div>
     </div>
+
+    <!-- 详情模态框 -->
+    <el-dialog
+      v-model="detailModal.visible"
+      :title="detailModal.title"
+      width="80%"
+      :before-close="handleCloseDetailModal"
+      destroy-on-close
+      class="detail-modal"
+    >
+      <!-- 活跃度趋势详情 -->
+      <template v-if="detailModal.type === 'activity'">
+        <ActivityChart
+          :activity-data="dashboardStore.activityTrend"
+          :active-time-range="dashboardStore.activeTimeRange"
+          :active-category="dashboardStore.activeCategory"
+          :loading="dashboardStore.loading.charts"
+          :error="dashboardStore.error.charts"
+          :chart-height="'400px'"
+          @time-range-change="handleTimeRangeChange"
+          @category-change="handleCategoryChange"
+          @refresh="handleChartsRefresh"
+          @chart-click="handleActivityChartClick"
+        />
+      </template>
+
+      <!-- 内容分布详情 -->
+      <template v-if="detailModal.type === 'content'">
+        <ContentDistributionChart
+          :content-data="dashboardStore.contentDistribution"
+          :time-range="dashboardStore.activeTimeRange"
+          :last-update-time="dashboardStore.lastUpdateTime"
+          :loading="dashboardStore.loading.charts"
+          :error="dashboardStore.error.charts"
+          :chart-height="'400px'"
+          @refresh="handleChartsRefresh"
+          @chart-click="handleContentChartClick"
+          @legend-click="handleContentLegendClick"
+          @export="handleChartExport"
+        />
+      </template>
+
+      <!-- 系统监控详情 -->
+      <template v-if="detailModal.type === 'system'">
+        <SystemMonitor
+          :system-resources="dashboardStore.systemResources"
+          :system-announcement="dashboardStore.systemAnnouncement"
+          :loading="dashboardStore.loading.overview"
+          :error="dashboardStore.error.overview"
+          @refresh="handleSystemRefresh"
+          @view-detail="handleViewSystemDetail"
+        />
+      </template>
+
+      <!-- 待办任务详情 -->
+      <template v-if="detailModal.type === 'tasks'">
+        <PendingTasks
+          :pending-tasks="dashboardStore.pendingTasks"
+          :loading="dashboardStore.loading.tasks"
+          :error="dashboardStore.error.tasks"
+          @refresh="handleTasksRefresh"
+          @task-click="handleTaskClick"
+          @task-action="handleTaskAction"
+          @view-all="handleViewAllTasks"
+        />
+      </template>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="handleCloseDetailModal">关闭</el-button>
+          <el-button 
+            type="primary" 
+            @click="handleJumpToPage"
+            v-if="detailModal.jumpUrl"
+          >
+            前往详情页
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- 全局加载遮罩 -->
     <div v-if="isInitialLoading" class="initial-loading">
@@ -178,8 +297,13 @@ import QuickActions from '@/components/dashboard/QuickActions.vue'
 import SystemMonitor from '@/components/dashboard/SystemMonitor.vue'
 import RecentFeedback from '@/components/dashboard/RecentFeedback.vue'
 
+// 导入新的卡片组件
+import DashboardCard from '@/components/dashboard/DashboardCard.vue'
+import ActivityPreviewCard from '@/components/dashboard/ActivityPreviewCard.vue'
+import ContentPreviewCard from '@/components/dashboard/ContentPreviewCard.vue'
+
 import {
-  Monitor, Refresh, Loading
+  Monitor, Refresh, Loading, List
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -193,6 +317,14 @@ const loadingProgress = ref(0)
 const autoRefreshTimer = ref<NodeJS.Timeout | null>(null)
 const loadingTimer = ref<NodeJS.Timeout | null>(null)
 const isMobile = ref(false)
+
+// 详情模态框状态
+const detailModal = ref({
+  visible: false,
+  type: '', // 'activity' | 'content' | 'system' | 'tasks'
+  title: '',
+  jumpUrl: ''
+})
 
 // 计算属性
 const currentUser = computed(() => authStore.user)
@@ -209,6 +341,76 @@ const hasPermissionError = computed(() => {
     'rbac:user:view',
     'content:view'
   ])
+})
+
+// 系统监控卡片指标
+const systemMetrics = computed(() => {
+  const metrics = dashboardStore.metrics
+  if (!metrics) {
+    return [
+      { label: 'CPU使用率', value: '0%', class: 'success' },
+      { label: '内存使用', value: '0%', class: 'success' }
+    ]
+  }
+
+  const cpuClass = metrics.systemCpuUsage > 80 ? 'danger' : metrics.systemCpuUsage > 60 ? 'warning' : 'success'
+  const memoryClass = metrics.systemMemoryUsage > 85 ? 'danger' : metrics.systemMemoryUsage > 70 ? 'warning' : 'success'
+
+  return [
+    { 
+      label: 'CPU使用率', 
+      value: `${metrics.systemCpuUsage.toFixed(1)}%`, 
+      class: cpuClass
+    },
+    { 
+      label: '内存使用', 
+      value: `${metrics.systemMemoryUsage.toFixed(1)}%`, 
+      class: memoryClass
+    }
+  ]
+})
+
+const systemStatus = computed(() => {
+  const metrics = dashboardStore.metrics
+  if (!metrics) return null
+  
+  if (metrics.systemCpuUsage > 80 || metrics.systemMemoryUsage > 85) {
+    return 'error'
+  }
+  if (metrics.systemCpuUsage > 60 || metrics.systemMemoryUsage > 70) {
+    return 'warning'
+  }
+  return 'active'
+})
+
+// 任务卡片指标
+const taskMetrics = computed(() => {
+  const tasks = dashboardStore.pendingTasks
+  const totalTasks = tasks.reduce((sum, task) => sum + task.count, 0)
+  const highPriorityTasks = tasks.filter(task => task.priority === 'high').reduce((sum, task) => sum + task.count, 0)
+
+  return [
+    { 
+      label: '待处理', 
+      value: totalTasks.toString(), 
+      class: totalTasks > 10 ? 'danger' : totalTasks > 5 ? 'warning' : 'success'
+    },
+    { 
+      label: '高优先级', 
+      value: highPriorityTasks.toString(), 
+      class: highPriorityTasks > 0 ? 'danger' : 'success'
+    }
+  ]
+})
+
+const taskStatus = computed(() => {
+  const totalTasks = dashboardStore.pendingTasks.reduce((sum, task) => sum + task.count, 0)
+  const highPriorityTasks = dashboardStore.pendingTasks.filter(task => task.priority === 'high').reduce((sum, task) => sum + task.count, 0)
+  
+  if (highPriorityTasks > 0 || totalTasks > 10) return 'error'
+  if (totalTasks > 5) return 'warning'
+  if (totalTasks > 0) return 'active'
+  return 'active'
 })
 
 // 方法
@@ -387,10 +589,6 @@ const handleSystemRefresh = async () => {
   await dashboardStore.loadOverviewData()
 }
 
-const handleViewSystemDetail = () => {
-  router.push('/system/monitor')
-}
-
 const handleFeedbackClick = (feedback: any) => {
   console.log('💬 反馈点击:', feedback)
 }
@@ -414,6 +612,54 @@ const handleFeedbackAction = (feedback: any, action: string) => {
 
 const handleViewAllFeedback = () => {
   router.push('/system/feedback')
+}
+
+// 新增的详情查看方法
+const handleViewActivityDetail = () => {
+  detailModal.value = {
+    visible: true,
+    type: 'activity',
+    title: '用户活跃度趋势详情',
+    jumpUrl: '/analytics/activity'
+  }
+}
+
+const handleViewContentDetail = () => {
+  detailModal.value = {
+    visible: true,
+    type: 'content',
+    title: '内容类型分布详情',
+    jumpUrl: '/analytics/content'
+  }
+}
+
+const handleViewSystemDetail = () => {
+  detailModal.value = {
+    visible: true,
+    type: 'system',
+    title: '系统监控详情',
+    jumpUrl: '/system/monitor'
+  }
+}
+
+const handleViewTaskDetail = () => {
+  detailModal.value = {
+    visible: true,
+    type: 'tasks',
+    title: '待办任务详情',
+    jumpUrl: '/audit/center'
+  }
+}
+
+const handleCloseDetailModal = () => {
+  detailModal.value.visible = false
+}
+
+const handleJumpToPage = () => {
+  if (detailModal.value.jumpUrl) {
+    router.push(detailModal.value.jumpUrl)
+    handleCloseDetailModal()
+  }
 }
 
 // 删除旧的模拟数据，使用 Store 中的数据
@@ -462,15 +708,20 @@ onUnmounted(() => {
   padding: var(--spacing-lg);
   background: var(--color-bg-page);
   min-height: calc(100vh - 120px);
+  overflow-x: hidden;
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: var(--spacing-xl);
   background: linear-gradient(135deg, var(--color-bg-card) 0%, #f8f9fa 100%);
   padding: var(--spacing-xl);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--color-border-light);
+  gap: var(--spacing-lg);
 }
 
 .header-content {
@@ -498,6 +749,29 @@ onUnmounted(() => {
 .header-actions {
   display: flex;
   align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.metrics-section {
+  margin-bottom: 0;
+}
+
+.charts-section {
+  margin-bottom: 0;
+}
+
+.function-section {
+  margin-bottom: 0;
+}
+
+.monitor-section {
+  margin-bottom: 0;
 }
 
 .stats-row {
@@ -858,27 +1132,105 @@ onUnmounted(() => {
   padding: var(--spacing-sm) 0;
 }
 
-/* 图表响应式设计 */
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .dashboard {
+    padding: var(--spacing-md);
+  }
+  
+  .page-header {
+    padding: var(--spacing-lg);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  
+  .header-actions {
+    justify-content: flex-end;
+  }
+  
+  .dashboard-content {
+    gap: var(--spacing-lg);
+  }
+}
+
 @media (max-width: 768px) {
-  .charts-row .el-col {
+  .dashboard {
+    padding: var(--spacing-sm);
+  }
+  
+  .page-header {
+    padding: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
   }
   
-  .chart-card {
+  .page-title {
+    font-size: 22px;
+  }
+  
+  .page-subtitle {
+    font-size: 14px;
+  }
+  
+  .dashboard-content {
+    gap: var(--spacing-md);
+  }
+  
+  /* 概览卡片响应式 */
+  .overview-cards-section .el-col {
     margin-bottom: var(--spacing-md);
   }
   
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
+  .overview-cards-section .el-row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
   
-  .chart-actions {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
+  .overview-cards-section .el-col {
+    padding-left: var(--spacing-xs) !important;
+    padding-right: var(--spacing-xs) !important;
   }
+}
+
+@media (max-width: 480px) {
+  .dashboard {
+    padding: var(--spacing-xs);
+  }
+  
+  .page-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .page-title {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+  
+  .title-icon {
+    font-size: 20px !important;
+  }
+  
+  .refresh-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 数据概览卡片区域 */
+.overview-cards-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.overview-cards-section .el-row {
+  margin-left: -12px;
+  margin-right: -12px;
+}
+
+.overview-cards-section .el-col {
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 /* 图表加载状态 */
@@ -921,5 +1273,76 @@ onUnmounted(() => {
 .chart-fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+/* 详情模态框样式 */
+.detail-modal :deep(.el-dialog) {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.detail-modal :deep(.el-dialog__header) {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #722ed1 100%);
+  color: white;
+  padding: var(--spacing-xl);
+  margin: 0;
+}
+
+.detail-modal :deep(.el-dialog__title) {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.detail-modal :deep(.el-dialog__headerbtn) .el-dialog__close {
+  color: white;
+  font-size: 20px;
+}
+
+.detail-modal :deep(.el-dialog__headerbtn):hover .el-dialog__close {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.detail-modal :deep(.el-dialog__body) {
+  padding: var(--spacing-xl);
+  background: var(--color-bg-page);
+  min-height: 400px;
+}
+
+.detail-modal :deep(.el-dialog__footer) {
+  background: var(--color-bg-card);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 响应式模态框 */
+@media (max-width: 768px) {
+  .detail-modal :deep(.el-dialog) {
+    width: 95% !important;
+    margin: 0 auto !important;
+  }
+  
+  .detail-modal :deep(.el-dialog__body) {
+    padding: var(--spacing-md);
+  }
+  
+  .detail-modal :deep(.el-dialog__header) {
+    padding: var(--spacing-md);
+  }
+  
+  .detail-modal :deep(.el-dialog__footer) {
+    padding: var(--spacing-md);
+  }
+  
+  .dialog-footer {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
 }
 </style>

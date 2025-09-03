@@ -744,6 +744,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   min-height: 80px;
+  padding: 8px 0;
 }
 
 .stats-icon {
@@ -771,6 +772,10 @@ onMounted(() => {
 
 .stats-icon.users {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stats-info {
+  flex: 1;
 }
 
 .stats-value {
@@ -887,7 +892,7 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-/* Responsive tweaks: let stats columns wrap gracefully */
+/* 统计卡片响应式：中屏两列，小屏一列，避免挤压导致内容裁切 */
 @media (max-width: 992px) {
   .stats-row .el-col {
     width: 50% !important;

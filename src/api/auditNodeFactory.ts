@@ -1,7 +1,9 @@
 import { auditNodeManager, type AuditNodeConfig } from './auditNode'
 import { ContentAuditNode } from './nodes/contentAuditNode'
 import { FleaMarketAuditNode } from './nodes/fleaMarketAuditNode'
+import { request } from './request'
 import type { BizType } from '@/types'
+import type { AuditCallbackData } from './auditNode'
 
 /**
  * Banner审核节点配置
@@ -20,6 +22,126 @@ class BannerAuditNode extends ContentAuditNode {
         legalCompliance: true
       }
     })
+  }
+
+  /**
+   * 重写处理审核结果方法，使用banner专用的API路径
+   */
+  protected async processAuditResult(callbackData: AuditCallbackData): Promise<void> {
+    try {
+      const { taskId, status, reason, detail } = callbackData
+
+      // 获取原始业务数据
+      const taskInfo = await this.getTaskInfo(taskId)
+      if (!taskInfo) {
+        throw new Error('任务信息不存在')
+      }
+
+      // 根据审核结果更新Banner状态
+      switch (status) {
+        case 'approved':
+        case 'auto_approved':
+          await this.approveBanner(taskInfo.bizId, callbackData)
+          break
+        
+        case 'rejected':
+        case 'auto_rejected':
+          await this.rejectBanner(taskInfo.bizId, reason, detail)
+          break
+        
+        default:
+          console.warn('未知的审核状态:', status)
+      }
+
+      // 通知Banner创建者
+      await this.notifyAuthor(taskInfo, status, reason)
+
+    } catch (error) {
+      console.error('处理Banner审核结果失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 通过Banner审核，更新状态为已审核
+   */
+  private async approveBanner(bizId: string, callbackData: AuditCallbackData): Promise<void> {
+    try {
+      await request.post(`/api/banner/${bizId}/approve`, {
+        auditTime: new Date().toISOString(),
+        auditorId: callbackData.auditorId,
+        processTime: callbackData.processTime
+      })
+    } catch (error) {
+      console.error('Banner审核通过处理失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 拒绝Banner审核，设置拒绝状态和原因
+   */
+  private async rejectBanner(bizId: string, reason?: string, detail?: string): Promise<void> {
+    try {
+      await request.post(`/api/banner/${bizId}/reject`, {
+        reason,
+        detail,
+        rejectTime: new Date().toISOString()
+      })
+    } catch (error) {
+      console.error('Banner审核拒绝处理失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 获取任务信息
+   */
+  private async getTaskInfo(taskId: string): Promise<any> {
+    try {
+      const response = await request.get(`/audit/tasks/${taskId}`)
+      return response.data
+    } catch (error) {
+      console.error('获取任务信息失败:', error)
+      return null
+    }
+  }
+
+  /**
+   * 通知Banner创建者
+   */
+  private async notifyAuthor(taskInfo: any, status: string, reason?: string): Promise<void> {
+    try {
+      const message = this.buildNotificationMessage(status, reason)
+      
+      await request.post('/api/notifications/send', {
+        userId: taskInfo.submitterId,
+        type: 'audit_result',
+        title: 'Banner审核结果通知',
+        content: message,
+        bizType: this.config.bizType,
+        bizId: taskInfo.bizId
+      })
+    } catch (error) {
+      console.error('通知Banner创建者失败:', error)
+      // 通知失败不影响主流程
+    }
+  }
+
+  /**
+   * 构建通知消息
+   */
+  private buildNotificationMessage(status: string, reason?: string): string {
+    switch (status) {
+      case 'approved':
+      case 'auto_approved':
+        return '您的Banner已通过审核，可以进行发布！'
+      case 'rejected':
+      case 'auto_rejected':
+        return `您的Banner审核未通过。${reason ? `原因：${reason}` : '请修改后重新提交审核。'}`
+      default:
+        return '您的Banner审核状态已更新。'
+    }
   }
 }
 

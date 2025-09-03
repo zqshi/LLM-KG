@@ -284,10 +284,11 @@ export const mockDashboardApi = {
         ],
         activityTrend: generateActivityTrendData('30d', 'all'),
         contentDistribution: [
-          { type: 'article', name: '文章', count: 856, percentage: 47.8, color: '#667eea' },
-          { type: 'post', name: '帖子', count: 542, percentage: 30.2, color: '#52c41a' },
-          { type: 'product', name: '商品', count: 234, percentage: 13.1, color: '#faad14' },
-          { type: 'quote', name: '名言', count: 156, percentage: 8.9, color: '#ff4d4f' }
+          { type: 'article', name: '技术文章', count: 1286, percentage: 42.5, color: '#667eea' },
+          { type: 'post', name: '论坛帖子', count: 932, percentage: 30.8, color: '#52c41a' },
+          { type: 'product', name: '商品信息', count: 456, percentage: 15.0, color: '#faad14' },
+          { type: 'quote', name: '知识问答', count: 268, percentage: 8.8, color: '#ff4d4f' },
+          { type: 'news', name: '行业资讯', count: 87, percentage: 2.9, color: '#722ed1' }
         ],
         departmentContributions: [
           { departmentId: 1, departmentName: '技术部', contentCount: 320, userCount: 45, trend: 15.2 },
@@ -347,6 +348,69 @@ export const mockDashboardApi = {
         lastUpdateTime: new Date().toISOString()
       }
     }
+  },
+
+  async getActivityTrend(timeRange: string = '30d', category: string = 'all'): Promise<ApiResponse<ActivityData[]>> {
+    await new Promise(resolve => setTimeout(resolve, 200))
+    return {
+      code: 200,
+      message: 'success',
+      data: generateActivityTrendData(timeRange, category)
+    }
+  },
+
+  async getContentDistribution(timeRange: string = '30d'): Promise<ApiResponse<ContentDistribution[]>> {
+    await new Promise(resolve => setTimeout(resolve, 150))
+    return {
+      code: 200,
+      message: 'success',
+      data: [
+        { type: 'article', name: '技术文章', count: 1286, percentage: 42.5, color: '#667eea' },
+        { type: 'post', name: '论坛帖子', count: 932, percentage: 30.8, color: '#52c41a' },
+        { type: 'product', name: '商品信息', count: 456, percentage: 15.0, color: '#faad14' },
+        { type: 'quote', name: '知识问答', count: 268, percentage: 8.8, color: '#ff4d4f' },
+        { type: 'news', name: '行业资讯', count: 87, percentage: 2.9, color: '#722ed1' }
+      ]
+    }
+  },
+
+  async getDepartmentContributions(): Promise<ApiResponse<DepartmentContribution[]>> {
+    await new Promise(resolve => setTimeout(resolve, 180))
+    return {
+      code: 200,
+      message: 'success',
+      data: [
+        { departmentId: 1, departmentName: '技术部', contentCount: 320, userCount: 45, trend: 15.2 },
+        { departmentId: 2, departmentName: '产品部', contentCount: 280, userCount: 38, trend: 8.5 },
+        { departmentId: 3, departmentName: '运营部', contentCount: 256, userCount: 32, trend: -2.1 },
+        { departmentId: 4, departmentName: '市场部', contentCount: 189, userCount: 28, trend: 12.3 },
+        { departmentId: 5, departmentName: '人事部', contentCount: 156, userCount: 22, trend: 5.7 },
+        { departmentId: 6, departmentName: '财务部', contentCount: 98, userCount: 15, trend: -1.2 }
+      ]
+    }
+  },
+
+  async getSystemResources(): Promise<ApiResponse<SystemResource[]>> {
+    await new Promise(resolve => setTimeout(resolve, 120))
+    return {
+      code: 200,
+      message: 'success',
+      data: [
+        { name: 'CPU使用率', type: 'cpu', usage: 45, status: 'normal', unit: '%' },
+        { name: '内存使用率', type: 'memory', usage: 62, status: 'warning', unit: '%' },
+        { name: '磁盘使用率', type: 'disk', usage: 28, status: 'normal', unit: '%' },
+        { name: '网络使用率', type: 'network', usage: 35, status: 'normal', unit: '%' }
+      ]
+    }
+  },
+
+  async markTaskCompleted(taskId: number): Promise<ApiResponse<void>> {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    return {
+      code: 200,
+      message: 'success',
+      data: undefined
+    }
   }
 }
 
@@ -359,10 +423,10 @@ function generateActivityTrendData(range: string, category: string = 'all'): Act
   // 根据板块调整基础数据
   const categoryMultipliers = {
     all: { users: 1, content: 1 },
-    knowledge: { users: 0.4, content: 0.6 },
-    forum: { users: 0.3, content: 0.8 },
-    news: { users: 0.2, content: 0.3 },
-    marketplace: { users: 0.1, content: 0.2 }
+    knowledge: { users: 0.6, content: 0.8 },
+    forum: { users: 0.7, content: 0.9 },
+    news: { users: 0.3, content: 0.4 },
+    marketplace: { users: 0.2, content: 0.3 }
   } as const
 
   const multiplier = categoryMultipliers[category as keyof typeof categoryMultipliers] || categoryMultipliers.all
@@ -371,17 +435,35 @@ function generateActivityTrendData(range: string, category: string = 'all'): Act
     const date = new Date(today)
     date.setDate(date.getDate() - i)
     
-    // 生成带有趋势和随机性的模拟数据
-    const baseActiveUsers = 1000 * multiplier.users
-    const baseNewContent = 30 * multiplier.content
-    const trend = Math.sin(i / days * Math.PI) * 200
-    const randomFactor = Math.random() * 0.3 - 0.15
+    // 模拟工作日和周末的差异
+    const dayOfWeek = date.getDay()
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+    const weekendFactor = isWeekend ? 0.7 : 1.2
+    
+    // 生成带有增长趋势的模拟数据
+    const baseActiveUsers = 1200 * multiplier.users
+    const baseNewContent = 45 * multiplier.content
+    
+    // 添加长期增长趋势
+    const growthTrend = ((days - i) / days) * 300
+    // 添加周期性波动
+    const cycleTrend = Math.sin((i / days) * Math.PI * 2) * 150
+    // 随机波动
+    const randomFactor = (Math.random() * 0.4 - 0.2) * weekendFactor
+    
+    const activeUsers = Math.max(100, Math.round(
+      (baseActiveUsers + growthTrend + cycleTrend) * weekendFactor * (1 + randomFactor)
+    ))
+    
+    const newContent = Math.max(5, Math.round(
+      (baseNewContent + growthTrend * 0.15 + cycleTrend * 0.1) * weekendFactor * (1 + randomFactor)
+    ))
     
     data.push({
       date: date.toISOString().split('T')[0],
-      activeUsers: Math.max(50, Math.round(baseActiveUsers + trend * multiplier.users + baseActiveUsers * randomFactor)),
-      newContent: Math.max(1, Math.round(baseNewContent + trend * 0.1 * multiplier.content + baseNewContent * randomFactor)),
-      auditedContent: Math.max(1, Math.round((baseNewContent + trend * 0.1 * multiplier.content) * 0.8))
+      activeUsers,
+      newContent,
+      auditedContent: Math.max(3, Math.round(newContent * (0.75 + Math.random() * 0.2)))
     })
   }
 

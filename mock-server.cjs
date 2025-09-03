@@ -443,12 +443,43 @@ const mockAuditData = {
       name: '内容安全策略',
       bizType: 'forum_post',
       description: '检查论坛帖子内容是否包含敏感信息',
+      mode: 'pre',
+      sampleRate: null,
+      priority: 'normal',
+      assignRule: 'auto',
+      assigneeId: null,
+      roleId: null,
+      ruleConfig: {
+        sensitiveWordCheck: true,
+        duplicateCheck: true,
+        contentLengthMin: 10
+      },
       isActive: true,
-      priority: 1,
-      rules: [
-        { type: 'sensitive_words', action: 'block' },
-        { type: 'spam_detection', action: 'review' }
-      ]
+      createTime: '2024-01-01 00:00:00',
+      updateTime: '2024-01-01 00:00:00'
+    },
+    {
+      id: 2,
+      name: 'Banner内容审核策略',
+      bizType: 'banner',
+      description: '检查Banner内容合规性，包括敏感词、图片内容、链接安全性等',
+      mode: 'pre',
+      sampleRate: null,
+      priority: 'normal',
+      assignRule: 'auto',
+      assigneeId: null,
+      roleId: null,
+      ruleConfig: {
+        sensitiveWordCheck: true,
+        imageContentCheck: true,
+        linkSafetyCheck: true,
+        timeValidityCheck: true,
+        dimensionCheck: false,
+        brandCheck: false
+      },
+      isActive: true,
+      createTime: '2024-03-01 00:00:00',
+      updateTime: '2024-03-01 00:00:00'
     }
   ],
   
@@ -1642,6 +1673,74 @@ app.post('/api/audit/tasks/batch', (req, res) => {
   })
 })
 
+// 提交审核任务（业务方调用）
+app.post('/api/audit/tasks/submit', (req, res) => {
+  const { bizType, bizId, content, submitterId, submitterName, metadata } = req.body
+  
+  // 生成任务ID
+  const taskId = 'audit-' + Date.now().toString().slice(-6)
+  
+  // 创建审核任务
+  const newTask = {
+    id: mockAuditData.tasks.length + 1,
+    taskId,
+    bizType,
+    bizId,
+    title: content.title || `${bizType}审核任务`,
+    content: typeof content === 'object' ? JSON.stringify(content) : content,
+    images: content.imageUrl ? [content.imageUrl] : [],
+    contentSnapshot: content,
+    submitterId,
+    submitterName,
+    status: 'pending',
+    priority: 'normal',
+    auditPolicyId: null,
+    assigneeId: null,
+    assigneeName: null,
+    createTime: new Date().toLocaleString('zh-CN'),
+    updateTime: new Date().toLocaleString('zh-CN'),
+    riskLevel: 'low',
+    contentLength: typeof content === 'string' ? content.length : JSON.stringify(content).length,
+    estimatedProcessTime: Math.floor(Math.random() * 10) + 3,
+    metadata: metadata || {}
+  }
+  
+  mockAuditData.tasks.push(newTask)
+  
+  // 更新统计数据
+  mockAuditData.stats.todayNew++
+  
+  res.json({
+    code: 200,
+    message: '审核任务提交成功',
+    data: { taskId, status: 'pending' }
+  })
+})
+
+// 查询审核结果（业务方调用）
+app.get('/api/audit/tasks/result', (req, res) => {
+  const { bizType, bizId } = req.query
+  const task = mockAuditData.tasks.find(t => t.bizType === bizType && t.bizId === bizId)
+  
+  if (task) {
+    res.json({
+      code: 200,
+      message: '获取成功',
+      data: { 
+        status: task.status,
+        reason: task.rejectReason,
+        detail: task.rejectDetail,
+        processTime: task.processTime
+      }
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '未找到审核任务'
+    })
+  }
+})
+
 // 转交任务
 app.post('/api/audit/tasks/:taskId/transfer', (req, res) => {
   const { taskId } = req.params
@@ -1681,6 +1780,25 @@ app.get('/api/audit/policies', (req, res) => {
     message: '获取成功',
     data: mockAuditData.policies
   })
+})
+
+// 根据业务类型获取审核策略
+app.get('/api/audit/policies/by-biztype/:bizType', (req, res) => {
+  const { bizType } = req.params
+  const policy = mockAuditData.policies.find(p => p.bizType === bizType && p.isActive)
+  
+  if (policy) {
+    res.json({
+      code: 200,
+      message: '获取成功',
+      data: policy
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '未找到对应的审核策略'
+    })
+  }
 })
 
 // 获取审核员列表
@@ -2567,9 +2685,797 @@ console.log('- GET /api/flea-market/reports - 获取举报列表')
 console.log('- POST /api/flea-market/reports/:id/handle - 处理举报')
 console.log('- GET /api/flea-market/statistics - 获取统计数据')
 
+// ========================
+// Banner管理 API 接口
+// ========================
+
+// Banner Mock数据
+const mockBannerData = {
+  banners: [
+    {
+      id: 1,
+      title: '春节活动Banner',
+      imageUrl: 'https://via.placeholder.com/800x400/FF6B6B/FFFFFF?text=Spring+Festival',
+      linkUrl: 'https://example.com/spring-festival',
+      startTime: '2024-02-01 00:00:00',
+      endTime: '2024-02-29 23:59:59',
+      status: 'published',
+      creator: '张三',
+      createTime: '2024-01-20 10:00:00',
+      updateTime: '2024-01-20 10:00:00',
+      description: '春节活动推广Banner',
+      auditTaskId: null,
+      rejectReason: null,
+      rejectDetail: null
+    },
+    {
+      id: 2,
+      title: '产品发布会Banner',
+      imageUrl: 'https://via.placeholder.com/800x400/4ECDC4/FFFFFF?text=Product+Launch',
+      linkUrl: 'https://example.com/product-launch',
+      startTime: '2024-03-01 00:00:00',
+      endTime: '2024-03-15 23:59:59',
+      status: 'approved',
+      creator: '李四',
+      createTime: '2024-02-25 14:30:00',
+      updateTime: '2024-02-25 14:30:00',
+      description: '新产品发布会宣传Banner',
+      auditTaskId: 'audit-004',
+      rejectReason: null,
+      rejectDetail: null
+    },
+    {
+      id: 3,
+      title: '员工培训Banner',
+      imageUrl: 'https://via.placeholder.com/800x400/45B7D1/FFFFFF?text=Training',
+      linkUrl: 'https://example.com/training',
+      startTime: '2024-03-10 00:00:00',
+      endTime: '2024-03-20 23:59:59',
+      status: 'reviewing',
+      creator: '王五',
+      createTime: '2024-03-05 09:15:00',
+      updateTime: '2024-03-05 09:15:00',
+      description: '员工技能培训Banner',
+      auditTaskId: 'audit-003',
+      rejectReason: null,
+      rejectDetail: null
+    },
+    {
+      id: 4,
+      title: '夏季促销Banner',
+      imageUrl: 'https://via.placeholder.com/800x400/FFA726/FFFFFF?text=Summer+Sale',
+      linkUrl: 'https://example.com/summer-sale',
+      startTime: '2024-06-01 00:00:00',
+      endTime: '2024-08-31 23:59:59',
+      status: 'rejected',
+      creator: '赵六',
+      createTime: '2024-05-20 16:20:00',
+      updateTime: '2024-05-21 10:30:00',
+      description: '夏季大促销Banner',
+      auditTaskId: 'audit-005',
+      rejectReason: '图片质量不符合要求',
+      rejectDetail: '图片分辨率过低，文字模糊，请重新制作'
+    },
+    {
+      id: 5,
+      title: '会员专享Banner',
+      imageUrl: 'https://via.placeholder.com/800x400/AB47BC/FFFFFF?text=VIP+Exclusive',
+      linkUrl: 'https://example.com/vip-exclusive',
+      startTime: '2024-04-01 00:00:00',
+      endTime: '2024-04-30 23:59:59',
+      status: 'draft',
+      creator: '孙七',
+      createTime: '2024-03-28 11:45:00',
+      updateTime: '2024-03-28 11:45:00',
+      description: '会员专享活动Banner',
+      auditTaskId: null,
+      rejectReason: null,
+      rejectDetail: null
+    }
+  ]
+}
+
+// 获取Banner列表
+app.get('/api/banner', (req, res) => {
+  const { 
+    page = 1, 
+    size = 20, 
+    title = '', 
+    status, 
+    creator, 
+    startTime, 
+    endTime 
+  } = req.query
+  
+  let filteredBanners = [...mockBannerData.banners]
+  
+  // 按标题搜索
+  if (title) {
+    filteredBanners = filteredBanners.filter(banner => 
+      banner.title.includes(title)
+    )
+  }
+  
+  // 按状态筛选
+  if (status) {
+    filteredBanners = filteredBanners.filter(banner => banner.status === status)
+  }
+  
+  // 按创建者筛选
+  if (creator) {
+    filteredBanners = filteredBanners.filter(banner => banner.creator.includes(creator))
+  }
+  
+  // 按创建时间范围筛选
+  if (startTime) {
+    filteredBanners = filteredBanners.filter(banner => banner.createTime >= startTime)
+  }
+  if (endTime) {
+    filteredBanners = filteredBanners.filter(banner => banner.createTime <= endTime)
+  }
+  
+  // 分页
+  const total = filteredBanners.length
+  const start = (page - 1) * size
+  const end = start + parseInt(size)
+  const list = filteredBanners.slice(start, end)
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: { list, total }
+  })
+})
+
+// 获取Banner详情
+app.get('/api/banner/:id', (req, res) => {
+  const { id } = req.params
+  const banner = mockBannerData.banners.find(b => b.id == id)
+  
+  if (banner) {
+    res.json({
+      code: 200,
+      message: '获取成功',
+      data: banner
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 创建Banner
+app.post('/api/banner', (req, res) => {
+  const { title, imageUrl, linkUrl, startTime, endTime, description } = req.body
+  
+  const newBanner = {
+    id: Math.max(...mockBannerData.banners.map(b => b.id)) + 1,
+    title,
+    imageUrl,
+    linkUrl,
+    startTime,
+    endTime,
+    description: description || '',
+    status: 'draft',
+    creator: '当前用户',
+    createTime: new Date().toLocaleString('zh-CN'),
+    updateTime: new Date().toLocaleString('zh-CN'),
+    auditTaskId: null,
+    rejectReason: null,
+    rejectDetail: null
+  }
+  
+  mockBannerData.banners.push(newBanner)
+  
+  res.json({
+    code: 200,
+    message: 'Banner创建成功',
+    data: newBanner
+  })
+})
+
+// 更新Banner
+app.put('/api/banner/:id', (req, res) => {
+  const { id } = req.params
+  const { title, imageUrl, linkUrl, startTime, endTime, description } = req.body
+  
+  const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+  if (bannerIndex !== -1) {
+    const banner = mockBannerData.banners[bannerIndex]
+    
+    // 只有草稿和已拒绝状态的Banner才能编辑
+    if (['draft', 'rejected'].includes(banner.status)) {
+      mockBannerData.banners[bannerIndex] = {
+        ...banner,
+        title,
+        imageUrl,
+        linkUrl,
+        startTime,
+        endTime,
+        description: description || '',
+        updateTime: new Date().toLocaleString('zh-CN')
+      }
+      
+      res.json({
+        code: 200,
+        message: 'Banner更新成功',
+        data: mockBannerData.banners[bannerIndex]
+      })
+    } else {
+      res.status(400).json({
+        code: 400,
+        message: '当前状态下不允许编辑'
+      })
+    }
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 删除Banner
+app.delete('/api/banner/:id', (req, res) => {
+  const { id } = req.params
+  const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+  
+  if (bannerIndex !== -1) {
+    const banner = mockBannerData.banners[bannerIndex]
+    
+    // 只有草稿、已拒绝、已下线状态的Banner才能删除
+    if (['draft', 'rejected', 'offline'].includes(banner.status)) {
+      mockBannerData.banners.splice(bannerIndex, 1)
+      res.json({
+        code: 200,
+        message: 'Banner删除成功'
+      })
+    } else {
+      res.status(400).json({
+        code: 400,
+        message: '当前状态下不允许删除'
+      })
+    }
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 更新Banner状态（包括审核任务ID）
+app.patch('/api/banner/:id/status', (req, res) => {
+  const { id } = req.params
+  const { status, auditTaskId, rejectReason, rejectDetail } = req.body
+  
+  const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+  if (bannerIndex !== -1) {
+    mockBannerData.banners[bannerIndex].status = status
+    mockBannerData.banners[bannerIndex].updateTime = new Date().toLocaleString('zh-CN')
+    
+    if (auditTaskId) {
+      mockBannerData.banners[bannerIndex].auditTaskId = auditTaskId
+    }
+    
+    if (rejectReason) {
+      mockBannerData.banners[bannerIndex].rejectReason = rejectReason
+      mockBannerData.banners[bannerIndex].rejectDetail = rejectDetail
+    }
+    
+    res.json({
+      code: 200,
+      message: 'Banner状态更新成功',
+      data: mockBannerData.banners[bannerIndex]
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 审核通过Banner
+app.post('/api/banner/:id/approve', (req, res) => {
+  const { id } = req.params
+  const { remark } = req.body
+  
+  const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+  if (bannerIndex !== -1) {
+    mockBannerData.banners[bannerIndex].status = 'approved'
+    mockBannerData.banners[bannerIndex].updateTime = new Date().toLocaleString('zh-CN')
+    
+    res.json({
+      code: 200,
+      message: 'Banner审核通过'
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 审核拒绝Banner
+app.post('/api/banner/:id/reject', (req, res) => {
+  const { id } = req.params
+  const { reason, detail } = req.body
+  
+  const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+  if (bannerIndex !== -1) {
+    mockBannerData.banners[bannerIndex].status = 'rejected'
+    mockBannerData.banners[bannerIndex].rejectReason = reason
+    mockBannerData.banners[bannerIndex].rejectDetail = detail
+    mockBannerData.banners[bannerIndex].updateTime = new Date().toLocaleString('zh-CN')
+    
+    res.json({
+      code: 200,
+      message: 'Banner审核拒绝'
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 发布Banner
+app.post('/api/banner/:id/publish', (req, res) => {
+  const { id } = req.params
+  const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+  
+  if (bannerIndex !== -1) {
+    const banner = mockBannerData.banners[bannerIndex]
+    
+    if (banner.status === 'approved') {
+      mockBannerData.banners[bannerIndex].status = 'published'
+      mockBannerData.banners[bannerIndex].updateTime = new Date().toLocaleString('zh-CN')
+      
+      res.json({
+        code: 200,
+        message: 'Banner发布成功'
+      })
+    } else {
+      res.status(400).json({
+        code: 400,
+        message: '只有审核通过的Banner才能发布'
+      })
+    }
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 下线Banner
+app.post('/api/banner/:id/offline', (req, res) => {
+  const { id } = req.params
+  const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+  
+  if (bannerIndex !== -1) {
+    const banner = mockBannerData.banners[bannerIndex]
+    
+    if (banner.status === 'published') {
+      mockBannerData.banners[bannerIndex].status = 'offline'
+      mockBannerData.banners[bannerIndex].updateTime = new Date().toLocaleString('zh-CN')
+      
+      res.json({
+        code: 200,
+        message: 'Banner下线成功'
+      })
+    } else {
+      res.status(400).json({
+        code: 400,
+        message: '只有已发布的Banner才能下线'
+      })
+    }
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 获取Banner审核记录
+app.get('/api/banner/:id/audit-records', (req, res) => {
+  const { id } = req.params
+  const banner = mockBannerData.banners.find(b => b.id == id)
+  
+  if (banner) {
+    // 模拟审核记录数据
+    const records = [
+      {
+        id: 1,
+        bannerId: banner.id,
+        taskId: banner.auditTaskId,
+        status: banner.status,
+        reason: banner.rejectReason,
+        detail: banner.rejectDetail,
+        auditorId: 2001,
+        auditorName: '审核员A',
+        processTime: 300,
+        createTime: banner.updateTime
+      }
+    ]
+    
+    res.json({
+      code: 200,
+      message: '获取成功',
+      data: records
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: 'Banner不存在'
+    })
+  }
+})
+
+// 批量操作Banner
+app.post('/api/banner/batch', (req, res) => {
+  const { bannerIds, operation, params } = req.body
+  let successCount = 0
+  
+  bannerIds.forEach(id => {
+    const bannerIndex = mockBannerData.banners.findIndex(b => b.id == id)
+    if (bannerIndex !== -1) {
+      const banner = mockBannerData.banners[bannerIndex]
+      
+      switch (operation) {
+        case 'approve':
+          if (['pending', 'reviewing'].includes(banner.status)) {
+            mockBannerData.banners[bannerIndex].status = 'approved'
+            successCount++
+          }
+          break
+        case 'reject':
+          if (['pending', 'reviewing'].includes(banner.status)) {
+            mockBannerData.banners[bannerIndex].status = 'rejected'
+            mockBannerData.banners[bannerIndex].rejectReason = params?.reason || '批量拒绝'
+            mockBannerData.banners[bannerIndex].rejectDetail = params?.detail
+            successCount++
+          }
+          break
+        case 'publish':
+          if (banner.status === 'approved') {
+            mockBannerData.banners[bannerIndex].status = 'published'
+            successCount++
+          }
+          break
+        case 'offline':
+          if (banner.status === 'published') {
+            mockBannerData.banners[bannerIndex].status = 'offline'
+            successCount++
+          }
+          break
+        case 'delete':
+          if (['draft', 'rejected', 'offline'].includes(banner.status)) {
+            mockBannerData.banners.splice(bannerIndex, 1)
+            successCount++
+          }
+          break
+      }
+      
+      if (bannerIndex < mockBannerData.banners.length) {
+        mockBannerData.banners[bannerIndex].updateTime = new Date().toLocaleString('zh-CN')
+      }
+    }
+  })
+  
+  res.json({
+    code: 200,
+    message: '批量操作成功',
+    data: { successCount }
+  })
+})
+
+// ======================== 
+// Banner智能审批相关API接口
+// ========================
+
+// Banner智能推荐数据
+const mockApprovalData = {
+  // 审批模板
+  templates: [
+    {
+      id: 1,
+      name: '标准Banner审批',
+      description: '适用于常规营销Banner的审批流程',
+      recommended: true,
+      avgProcessTime: '8小时',
+      stepCount: 3,
+      successRate: 95,
+      steps: [
+        { name: '内容初审', approver: '内容审核员', timeLimit: '2小时' },
+        { name: '设计审核', approver: '设计主管', timeLimit: '4小时' },
+        { name: '运营审批', approver: '运营总监', timeLimit: '2小时' }
+      ]
+    },
+    {
+      id: 2,
+      name: '快速审批流程',
+      description: '适用于紧急或简单Banner的快速审批',
+      recommended: false,
+      avgProcessTime: '2小时',
+      stepCount: 2,
+      successRate: 88,
+      steps: [
+        { name: '自动检测', approver: '系统自动', timeLimit: '10分钟' },
+        { name: '主管审批', approver: '部门主管', timeLimit: '2小时' }
+      ]
+    },
+    {
+      id: 3,
+      name: '重要活动审批',
+      description: '适用于重大活动或品牌相关Banner',
+      recommended: false,
+      avgProcessTime: '24小时',
+      stepCount: 5,
+      successRate: 98,
+      steps: [
+        { name: '内容审核', approver: '内容审核员', timeLimit: '4小时' },
+        { name: '法务审核', approver: '法务专员', timeLimit: '8小时' },
+        { name: '设计审核', approver: '设计总监', timeLimit: '4小时' },
+        { name: '运营审批', approver: '运营总监', timeLimit: '4小时' },
+        { name: '最终确认', approver: 'CEO', timeLimit: '4小时' }
+      ]
+    }
+  ],
+  // 审批人员
+  approvers: [
+    { id: 1, name: '张三', department: '运营部', role: '审核员' },
+    { id: 2, name: '李四', department: '市场部', role: '主管' },
+    { id: 3, name: '王五', department: '内容部', role: '审核员' },
+    { id: 4, name: '赵六', department: '技术部', role: '总监' },
+    { id: 5, name: '孙七', department: '设计部', role: '设计师' },
+    { id: 6, name: '周八', department: '法务部', role: '法务专员' }
+  ]
+}
+
+// 获取智能审批推荐
+app.post('/api/banner/approval-recommendation', (req, res) => {
+  const { title, imageUrl, linkUrl, description } = req.body
+  
+  // 模拟分析处理时间
+  setTimeout(() => {
+    let confidence = 85
+    let steps = []
+    let reason = '基于内容分析和历史数据'
+
+    // 根据不同条件调整推荐
+    if (linkUrl?.includes('activity') || title?.includes('活动')) {
+      confidence = 92
+      reason = '检测到活动相关内容，推荐使用活动专用审批流程'
+      steps = [
+        {
+          name: '内容合规检查',
+          description: '检查活动内容是否符合平台规范',
+          estimateTime: '1小时',
+          approver: '内容审核员',
+          type: 'manual'
+        },
+        {
+          name: '活动审核',
+          description: '审核活动策划和执行方案',
+          estimateTime: '4小时',
+          approver: '活动策划主管',
+          type: 'manual'
+        },
+        {
+          name: '法务风控',
+          description: '评估活动的法律风险和合规性',
+          estimateTime: '2小时',
+          approver: '法务专员',
+          type: 'manual'
+        },
+        {
+          name: '最终审批',
+          description: '运营总监最终确认',
+          estimateTime: '1小时',
+          approver: '运营总监',
+          type: 'manual'
+        }
+      ]
+    } else if (title?.includes('品牌') || title?.includes('官方')) {
+      confidence = 88
+      reason = '检测到品牌相关内容，推荐使用品牌审批流程'
+      steps = [
+        {
+          name: '品牌合规审核',
+          description: '检查品牌元素使用是否规范',
+          estimateTime: '2小时',
+          approver: '品牌管理员',
+          type: 'manual'
+        },
+        {
+          name: '设计审核',
+          description: '审核设计质量和品牌一致性',
+          estimateTime: '4小时',
+          approver: '设计总监',
+          type: 'manual'
+        },
+        {
+          name: '运营确认',
+          description: '运营部门最终确认',
+          estimateTime: '2小时',
+          approver: '运营总监',
+          type: 'manual'
+        }
+      ]
+    } else {
+      // 标准流程
+      steps = [
+        {
+          name: '自动检测',
+          description: 'AI自动检测内容合规性',
+          estimateTime: '10分钟',
+          approver: '系统自动',
+          type: 'auto'
+        },
+        {
+          name: '人工审核',
+          description: '人工审核内容质量和合规性',
+          estimateTime: '2小时',
+          approver: '内容审核员',
+          type: 'manual'
+        },
+        {
+          name: '主管审批',
+          description: '部门主管最终审批',
+          estimateTime: '1小时',
+          approver: '部门主管',
+          type: 'manual'
+        }
+      ]
+    }
+
+    const recommendation = {
+      confidence,
+      reason,
+      steps,
+      estimatedTotalTime: steps.reduce((total, step) => {
+        const time = parseInt(step.estimateTime) || 1
+        return total + time
+      }, 0) + '小时'
+    }
+
+    res.json({
+      code: 200,
+      message: '智能推荐生成成功',
+      data: recommendation
+    })
+  }, 1500) // 1.5秒处理时间
+})
+
+// 获取审批模板列表
+app.get('/api/banner/approval-templates', (req, res) => {
+  const { keyword } = req.query
+  let templates = [...mockApprovalData.templates]
+  
+  if (keyword) {
+    templates = templates.filter(t => 
+      t.name.includes(keyword) || t.description.includes(keyword)
+    )
+  }
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: templates
+  })
+})
+
+// 获取审批人员列表
+app.get('/api/banner/approvers', (req, res) => {
+  const { department } = req.query
+  let approvers = [...mockApprovalData.approvers]
+  
+  if (department) {
+    approvers = approvers.filter(a => a.department === department)
+  }
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: approvers
+  })
+})
+
+// 验证审批配置
+app.post('/api/banner/validate-approval-config', (req, res) => {
+  const config = req.body
+  
+  // 模拟验证逻辑
+  const errors = []
+  const warnings = []
+  let estimatedTime = '未知'
+  
+  if (!config.preview || config.preview.length === 0) {
+    errors.push('至少需要一个审批步骤')
+  }
+  
+  if (config.mode === 'custom' && config.custom?.steps) {
+    config.custom.steps.forEach((step, index) => {
+      if (!step.name) {
+        errors.push(`第${index + 1}个步骤缺少名称`)
+      }
+      if (!step.approverId && step.type === 'manual') {
+        warnings.push(`第${index + 1}个步骤未指定审批人员`)
+      }
+    })
+  }
+  
+  if (config.preview?.length) {
+    const totalHours = config.preview.length * 4 // 简化计算
+    estimatedTime = `约${totalHours}小时`
+  }
+  
+  setTimeout(() => {
+    res.json({
+      code: 200,
+      message: '验证完成',
+      data: {
+        valid: errors.length === 0,
+        errors,
+        warnings,
+        estimatedTime
+      }
+    })
+  }, 800)
+})
+
+// 获取审核节点配置信息
+app.get('/api/banner/audit-node-info', (req, res) => {
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: {
+      enabled: true,
+      rules: [
+        '图片内容审核：检查图片尺寸、品牌合规性',
+        '文字内容审核：标题和描述敏感词检查', 
+        '链接安全性审核：检查跳转链接安全性'
+      ],
+      priority: 'normal',
+      estimatedTime: '2-24小时（根据优先级）',
+      description: 'Banner智能审核系统，支持多模态内容检测'
+    }
+  })
+})
+
+console.log('\n=== Banner管理API接口 ===')
+console.log('- GET /api/banner - 获取Banner列表')
+console.log('- GET /api/banner/:id - 获取Banner详情')
+console.log('- POST /api/banner - 创建Banner')
+console.log('- PUT /api/banner/:id - 更新Banner')
+console.log('- DELETE /api/banner/:id - 删除Banner')
+console.log('- PATCH /api/banner/:id/status - 更新Banner状态')
+console.log('- POST /api/banner/:id/approve - 审核通过Banner')
+console.log('- POST /api/banner/:id/reject - 审核拒绝Banner')
+console.log('- POST /api/banner/:id/publish - 发布Banner')
+console.log('- POST /api/banner/:id/offline - 下线Banner')
+console.log('- GET /api/banner/:id/audit-records - 获取审核记录')
+console.log('- POST /api/banner/batch - 批量操作Banner')
+
+console.log('\n=== Banner智能审批API接口 ===')
+console.log('- POST /api/banner/approval-recommendation - 获取智能审批推荐')
+console.log('- GET /api/banner/approval-templates - 获取审批模板列表')
+console.log('- GET /api/banner/approvers - 获取审批人员列表')
+console.log('- POST /api/banner/validate-approval-config - 验证审批配置')
+console.log('- GET /api/banner/audit-node-info - 获取审核节点信息')
+
 app.listen(port, () => {
   console.log(`\n🚀 Mock服务器启动成功！`)
   console.log(`📡 API地址: http://localhost:${port}`)
   console.log(`🔑 测试账号: admin / 123456`)
-  console.log(`\n✅ 名言管理API已添加，解决404问题！`)
+  console.log(`\n✅ Banner管理API已添加，实现先审后发审核模式！`)
+  console.log(`🤖 智能审批系统已集成，支持多层级审批配置！`)
 })

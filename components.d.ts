@@ -8,7 +8,11 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ActivityChart: typeof import('./src/components/dashboard/ActivityChart.vue')['default']
+    ActivityPreviewCard: typeof import('./src/components/dashboard/ActivityPreviewCard.vue')['default']
+    ApprovalConfigPanel: typeof import('./src/components/ApprovalConfigPanel.vue')['default']
     ContentDistributionChart: typeof import('./src/components/dashboard/ContentDistributionChart.vue')['default']
+    ContentPreviewCard: typeof import('./src/components/dashboard/ContentPreviewCard.vue')['default']
+    DashboardCard: typeof import('./src/components/dashboard/DashboardCard.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']
@@ -96,6 +100,8 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SystemMonitor: typeof import('./src/components/dashboard/SystemMonitor.vue')['default']
     ThemeToggle: typeof import('./src/components/ThemeToggle.vue')['default']
+    UnifiedWorkflowViewer: typeof import('./src/components/workflow/UnifiedWorkflowViewer.vue')['default']
+    WorkflowViewerExample: typeof import('./src/components/workflow/WorkflowViewerExample.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

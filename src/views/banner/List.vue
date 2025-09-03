@@ -60,18 +60,21 @@
       </el-table-column>
       <el-table-column prop="creator" label="创建人" width="100" />
       <el-table-column prop="createTime" label="创建时间" width="160" />
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="280" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" @click="editBanner(row)">编辑</el-button>
+          <el-button v-if="canEdit(row)" link type="primary" @click="editBanner(row)">编辑</el-button>
           <el-button link type="info" @click="viewWorkflow(row)">查看流程</el-button>
           <el-button v-if="canSubmitApproval(row)" link type="warning" @click="submitApproval(row)">
-            提交审批
+            提交审核
           </el-button>
           <el-button v-if="canPublish(row)" link type="success" @click="publishBanner(row)">
             发布
           </el-button>
           <el-button v-if="canOffline(row)" link type="danger" @click="offlineBanner(row)">
             下线
+          </el-button>
+          <el-button v-if="canDelete(row)" link type="danger" @click="deleteBanner(row)">
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -88,6 +91,19 @@
         @current-change="handleCurrentChange"
       />
     </div>
+
+    <!-- 查看流程对话框 -->
+    <el-dialog v-model="workflowDialogVisible" title="查看Banner审批流程" width="1000px">
+      <div class="unified-workflow-container" v-loading="workflowLoading">
+        <UnifiedWorkflowViewer
+          :workflow-data="currentWorkflowData"
+          :banner-info="currentBannerInfo"
+          view-mode="auto"
+          :show-mode-switch="true"
+          :show-banner-info="true"
+        />
+      </div>
+    </el-dialog>
 
     <!-- 创建/编辑Banner对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="800px">
@@ -133,6 +149,29 @@
             placeholder="请输入Banner描述"
           />
         </el-form-item>
+
+        <!-- 审核配置部分 -->
+        <el-divider content-position="left">审核配置</el-divider>
+        
+        <el-form-item>
+          <el-checkbox v-model="bannerForm.auditOptions.submitForAuditImmediately">
+            创建后立即提交审核
+          </el-checkbox>
+        </el-form-item>
+
+        <div v-if="bannerForm.auditOptions.submitForAuditImmediately">
+          <ApprovalConfigPanel 
+            :banner-data="{
+              title: bannerForm.title,
+              imageUrl: bannerForm.imageUrl,
+              linkUrl: bannerForm.linkUrl,
+              description: bannerForm.description
+            }"
+            :initial-config="bannerForm.auditOptions.approvalConfig"
+            @config-change="handleApprovalConfigChange"
+            @ready="handleApprovalConfigReady"
+          />
+        </div>
       </el-form>
 
       <template #footer>
@@ -146,41 +185,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, SuccessFilled, CircleCloseFilled, Loading } from '@element-plus/icons-vue'
 import type { FormInstance, UploadProps } from 'element-plus'
+import { bannerApi, bannerStatusUtils, type Banner, type BannerForm, type BannerQueryParams } from '@/api/banner'
+import { useAuthStore } from '@/stores/auth'
+import UnifiedWorkflowViewer from '@/components/workflow/UnifiedWorkflowViewer.vue'
+import ApprovalConfigPanel from '@/components/ApprovalConfigPanel.vue'
+import type { WorkflowData, BannerInfo } from '@/components/workflow/UnifiedWorkflowViewer.vue'
 
-interface Banner {
-  id: number
-  title: string
-  imageUrl: string
-  linkUrl: string
-  startTime: string
-  endTime: string
-  status: string
-  creator: string
-  createTime: string
-  description?: string
-}
+// 使用用户信息
+const authStore = useAuthStore()
 
 const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('创建Banner')
 const bannerFormRef = ref<FormInstance>()
 
-const searchForm = reactive({
+// 工作流对话框相关
+const workflowDialogVisible = ref(false)
+const workflowLoading = ref(false)
+const currentBanner = ref<Banner | null>(null)
+
+// 工作流步骤接口定义
+interface WorkflowStep {
+  id: number
+  name: string
+  status: 'pending' | 'processing' | 'approved' | 'rejected'
+  approver?: string
+  processTime?: string
+  comment?: string
+  duration?: string
+}
+
+const workflowSteps = ref<WorkflowStep[]>([])
+
+const searchForm = reactive<BannerQueryParams>({
   title: '',
-  status: ''
+  status: undefined
 })
 
-const bannerForm = reactive({
+const bannerForm = reactive<BannerForm & { id?: number, timeRange: string[] }>({
   id: 0,
   title: '',
   imageUrl: '',
   linkUrl: '',
+  startTime: '',
+  endTime: '',
   timeRange: [] as string[],
-  description: ''
+  description: '',
+  auditOptions: {
+    submitForAuditImmediately: false,
+    priority: 'normal' as 'high' | 'normal' | 'low',
+    metadata: {},
+    approvalConfig: null,
+    approvalReady: false
+  }
 })
 
 const pagination = reactive({
@@ -200,47 +261,84 @@ const rules = {
   timeRange: [{ required: true, message: '请选择生效时间', trigger: 'change' }]
 }
 
-const getStatusType = (status: string) => {
-  const statusMap: Record<string, string> = {
-    draft: '',
-    pending: 'warning',
-    reviewing: 'info',
-    approved: 'success',
-    rejected: 'danger',
-    published: 'success',
-    offline: 'info'
-  }
-  return statusMap[status] || ''
-}
-
-const getStatusText = (status: string) => {
-  const statusMap: Record<string, string> = {
-    draft: '草稿',
-    pending: '待审批',
-    reviewing: '审批中',
-    approved: '已通过',
-    rejected: '已拒绝',
-    published: '已发布',
-    offline: '已下线'
-  }
-  return statusMap[status] || status
-}
+const getStatusType = bannerStatusUtils.getStatusType
+const getStatusText = bannerStatusUtils.getStatusText
 
 const formatDateRange = (start: string, end: string) => {
   return `${start} ~ ${end}`
 }
 
 const canSubmitApproval = (banner: Banner) => {
-  return ['draft', 'rejected'].includes(banner.status)
+  return bannerStatusUtils.canSubmitAudit(banner.status)
 }
 
 const canPublish = (banner: Banner) => {
-  return banner.status === 'approved'
+  return bannerStatusUtils.canPublish(banner.status)
 }
 
 const canOffline = (banner: Banner) => {
-  return banner.status === 'published'
+  return bannerStatusUtils.canOffline(banner.status)
 }
+
+const canEdit = (banner: Banner) => {
+  return bannerStatusUtils.canEdit(banner.status)
+}
+
+const canDelete = (banner: Banner) => {
+  return bannerStatusUtils.canDelete(banner.status)
+}
+
+// 转换为统一工作流组件所需的数据格式
+const currentWorkflowData = computed((): WorkflowData => {
+  if (!workflowSteps.value.length) {
+    return { steps: [] }
+  }
+
+  const steps = workflowSteps.value.map(step => ({
+    id: step.id,
+    name: step.name,
+    status: step.status as 'pending' | 'processing' | 'approved' | 'rejected',
+    approvers: step.approver ? [step.approver] : [],
+    processTime: step.processTime,
+    comment: step.comment,
+    duration: step.duration
+  }))
+
+  // 模拟操作历史数据
+  const operationHistory = steps
+    .filter(step => step.status !== 'pending')
+    .map(step => ({
+      time: step.processTime || '',
+      operator: step.approvers[0] || '系统',
+      action: step.status === 'approved' ? 'approve' as const : 
+              step.status === 'rejected' ? 'reject' as const : 'submit' as const,
+      comment: step.comment,
+      node: step.name,
+      duration: step.duration
+    }))
+
+  return {
+    steps,
+    operationHistory
+  }
+})
+
+const currentBannerInfo = computed((): BannerInfo | undefined => {
+  if (!currentBanner.value) return undefined
+
+  return {
+    id: currentBanner.value.id,
+    title: currentBanner.value.title,
+    imageUrl: currentBanner.value.imageUrl,
+    linkUrl: currentBanner.value.linkUrl,
+    startTime: currentBanner.value.startTime,
+    endTime: currentBanner.value.endTime,
+    status: currentBanner.value.status,
+    description: currentBanner.value.description,
+    creator: currentBanner.value.creator,
+    createTime: currentBanner.value.createTime
+  }
+})
 
 const createBanner = () => {
   dialogTitle.value = '创建Banner'
@@ -249,8 +347,17 @@ const createBanner = () => {
     title: '',
     imageUrl: '',
     linkUrl: '',
+    startTime: '',
+    endTime: '',
     timeRange: [],
-    description: ''
+    description: '',
+    auditOptions: {
+      submitForAuditImmediately: false,
+      priority: 'normal' as 'high' | 'normal' | 'low',
+      metadata: {},
+      approvalConfig: null,
+      approvalReady: false
+    }
   })
   dialogVisible.value = true
 }
@@ -262,14 +369,27 @@ const editBanner = (banner: Banner) => {
     title: banner.title,
     imageUrl: banner.imageUrl,
     linkUrl: banner.linkUrl,
+    startTime: banner.startTime,
+    endTime: banner.endTime,
     timeRange: [banner.startTime, banner.endTime],
-    description: banner.description || ''
+    description: banner.description || '',
+    auditOptions: {
+      submitForAuditImmediately: false,
+      priority: 'normal' as 'high' | 'normal' | 'low',
+      metadata: {},
+      approvalConfig: null,
+      approvalReady: false
+    }
   })
   dialogVisible.value = true
 }
 
 const handleUploadSuccess: UploadProps['onSuccess'] = (response) => {
-  bannerForm.imageUrl = response.data.url
+  if (response.data && response.data.url) {
+    bannerForm.imageUrl = response.data.url
+  } else if (response.url) {
+    bannerForm.imageUrl = response.url
+  }
 }
 
 const beforeUpload: UploadProps['beforeUpload'] = (file) => {
@@ -288,39 +408,209 @@ const beforeUpload: UploadProps['beforeUpload'] = (file) => {
 const saveBanner = async () => {
   if (!bannerFormRef.value) return
   
-  await bannerFormRef.value.validate((valid) => {
+  await bannerFormRef.value.validate(async (valid) => {
     if (valid) {
-      const data = {
-        ...bannerForm,
-        startTime: bannerForm.timeRange[0],
-        endTime: bannerForm.timeRange[1]
+      // 如果选择了立即提交审核但审批配置未就绪
+      if (bannerForm.auditOptions.submitForAuditImmediately && !bannerForm.auditOptions.approvalReady) {
+        ElMessage.warning('请完成审批流程配置后再保存')
+        return
       }
-      
-      console.log('保存Banner数据:', data)
-      ElMessage.success('Banner保存成功')
-      dialogVisible.value = false
-      fetchBannerList()
+
+      try {
+        loading.value = true
+        
+        const data: BannerForm = {
+          title: bannerForm.title,
+          imageUrl: bannerForm.imageUrl,
+          linkUrl: bannerForm.linkUrl,
+          startTime: bannerForm.timeRange[0],
+          endTime: bannerForm.timeRange[1],
+          description: bannerForm.description,
+          auditOptions: bannerForm.auditOptions
+        }
+        
+        if (bannerForm.id) {
+          // 更新Banner
+          await bannerApi.updateBanner(bannerForm.id, data)
+          ElMessage.success('Banner更新成功')
+        } else {
+          // 创建Banner
+          await bannerApi.createBanner(data, authStore.user?.id || 0, authStore.user?.name || '')
+          if (data.auditOptions?.submitForAuditImmediately) {
+            const configMode = bannerForm.auditOptions.approvalConfig?.mode || '默认'
+            const stepsCount = bannerForm.auditOptions.approvalConfig?.preview?.length || 0
+            ElMessage.success(`Banner创建成功，已提交审核（${configMode}模式，${stepsCount}个审批节点）`)
+          } else {
+            ElMessage.success('Banner创建成功')
+          }
+        }
+        
+        dialogVisible.value = false
+        fetchBannerList()
+      } catch (error) {
+        console.error('保存Banner失败:', error)
+        ElMessage.error('保存Banner失败')
+      } finally {
+        loading.value = false
+      }
     }
   })
 }
 
-const viewWorkflow = (banner: Banner) => {
-  console.log('查看审批流程:', banner)
+const viewWorkflow = async (banner: Banner) => {
+  currentBanner.value = banner
+  workflowDialogVisible.value = true
+  workflowLoading.value = true
+  
+  try {
+    // 模拟API调用获取工作流数据
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    // 根据Banner状态生成相应的工作流步骤
+    const steps: WorkflowStep[] = []
+    
+    if (banner.status === 'draft') {
+      steps.push({
+        id: 1,
+        name: '提交审核',
+        status: 'pending'
+      })
+    } else if (banner.status === 'pending') {
+      steps.push({
+        id: 1,
+        name: '提交审核',
+        status: 'approved',
+        approver: banner.creator,
+        processTime: banner.createTime,
+        comment: '已提交审核'
+      })
+      steps.push({
+        id: 2,
+        name: '初审',
+        status: 'processing',
+        processTime: new Date().toLocaleString()
+      })
+    } else if (banner.status === 'reviewing') {
+      steps.push({
+        id: 1,
+        name: '提交审核',
+        status: 'approved',
+        approver: banner.creator,
+        processTime: banner.createTime,
+        comment: '已提交审核'
+      })
+      steps.push({
+        id: 2,
+        name: '初审',
+        status: 'processing',
+        approver: '部门主管',
+        processTime: new Date().toLocaleString()
+      })
+    } else if (banner.status === 'approved') {
+      steps.push({
+        id: 1,
+        name: '提交审核',
+        status: 'approved',
+        approver: banner.creator,
+        processTime: banner.createTime,
+        comment: '已提交审核'
+      })
+      steps.push({
+        id: 2,
+        name: '初审',
+        status: 'approved',
+        approver: '部门主管',
+        processTime: '2024-01-20 10:30:00',
+        comment: '内容合规，通过审核'
+      })
+      steps.push({
+        id: 3,
+        name: '终审',
+        status: 'approved',
+        approver: '运营总监',
+        processTime: '2024-01-20 14:15:00',
+        comment: '审核通过，可以发布'
+      })
+    } else if (banner.status === 'rejected') {
+      steps.push({
+        id: 1,
+        name: '提交审核',
+        status: 'approved',
+        approver: banner.creator,
+        processTime: banner.createTime,
+        comment: '已提交审核'
+      })
+      steps.push({
+        id: 2,
+        name: '初审',
+        status: 'rejected',
+        approver: '部门主管',
+        processTime: '2024-01-20 10:30:00',
+        comment: '图片质量不符合要求，请重新制作'
+      })
+    } else if (banner.status === 'published') {
+      steps.push({
+        id: 1,
+        name: '提交审核',
+        status: 'approved',
+        approver: banner.creator,
+        processTime: banner.createTime,
+        comment: '已提交审核'
+      })
+      steps.push({
+        id: 2,
+        name: '初审',
+        status: 'approved',
+        approver: '部门主管',
+        processTime: '2024-01-20 10:30:00',
+        comment: '内容合规，通过审核'
+      })
+      steps.push({
+        id: 3,
+        name: '终审',
+        status: 'approved',
+        approver: '运营总监',
+        processTime: '2024-01-20 14:15:00',
+        comment: '审核通过，可以发布'
+      })
+      steps.push({
+        id: 4,
+        name: '发布上线',
+        status: 'approved',
+        approver: '系统',
+        processTime: '2024-01-20 15:00:00',
+        comment: '已发布上线'
+      })
+    }
+    
+    workflowSteps.value = steps
+  } catch (error) {
+    console.error('获取工作流数据失败:', error)
+    ElMessage.error('获取工作流数据失败')
+  } finally {
+    workflowLoading.value = false
+  }
 }
 
 const submitApproval = async (banner: Banner) => {
   try {
-    await ElMessageBox.confirm('确定要提交审批吗？', '提示', {
+    await ElMessageBox.confirm('确定要提交审核吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
     
-    console.log('提交审批:', banner)
-    ElMessage.success('提交审批成功')
+    loading.value = true
+    await bannerApi.submitForAudit(banner.id, authStore.user?.id || 0, authStore.user?.name || '')
+    ElMessage.success('提交审核成功')
     fetchBannerList()
-  } catch {
-    
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('提交审核失败:', error)
+      ElMessage.error('提交审核失败')
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -332,11 +622,17 @@ const publishBanner = async (banner: Banner) => {
       type: 'warning'
     })
     
-    console.log('发布Banner:', banner)
+    loading.value = true
+    await bannerApi.publishBanner(banner.id)
     ElMessage.success('Banner发布成功')
     fetchBannerList()
-  } catch {
-    
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('发布Banner失败:', error)
+      ElMessage.error('发布Banner失败')
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -348,11 +644,39 @@ const offlineBanner = async (banner: Banner) => {
       type: 'warning'
     })
     
-    console.log('下线Banner:', banner)
+    loading.value = true
+    await bannerApi.offlineBanner(banner.id)
     ElMessage.success('Banner下线成功')
     fetchBannerList()
-  } catch {
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('下线Banner失败:', error)
+      ElMessage.error('下线Banner失败')
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const deleteBanner = async (banner: Banner) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这个Banner吗？删除后无法恢复！', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
     
+    loading.value = true
+    await bannerApi.deleteBanner(banner.id)
+    ElMessage.success('Banner删除成功')
+    fetchBannerList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除Banner失败:', error)
+      ElMessage.error('删除Banner失败')
+    }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -379,12 +703,24 @@ const handleCurrentChange = (page: number) => {
   fetchBannerList()
 }
 
+
 const fetchBannerList = async () => {
   loading.value = true
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 500))
+    const queryParams: BannerQueryParams = {
+      ...searchForm,
+      page: pagination.currentPage,
+      size: pagination.pageSize
+    }
     
+    const response = await bannerApi.getBanners(queryParams)
+    bannerList.value = response.data.data.list
+    pagination.total = response.data.data.total
+  } catch (error) {
+    console.error('获取Banner列表失败:', error)
+    ElMessage.error('获取Banner列表失败')
+    
+    // 如果API调用失败，使用模拟数据作为降级
     const mockData: Banner[] = [
       {
         id: 1,
@@ -426,11 +762,21 @@ const fetchBannerList = async () => {
     
     bannerList.value = mockData
     pagination.total = mockData.length
-  } catch (error) {
-    ElMessage.error('获取Banner列表失败')
   } finally {
     loading.value = false
   }
+}
+
+// 处理审批配置变化
+const handleApprovalConfigChange = (config: any) => {
+  bannerForm.auditOptions.approvalConfig = config
+  console.log('审批配置已更新:', config)
+}
+
+// 处理审批配置就绪状态
+const handleApprovalConfigReady = (isReady: boolean) => {
+  bannerForm.auditOptions.approvalReady = isReady
+  console.log('审批配置就绪状态:', isReady)
 }
 
 onMounted(() => {
@@ -490,5 +836,20 @@ onMounted(() => {
 .banner-upload-icon:hover {
   border-color: #409eff;
   color: #409eff;
+}
+
+.audit-info {
+  margin-top: 10px;
+}
+
+.audit-info p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+/* 统一工作流容器样式 */
+.unified-workflow-container {
+  min-height: 300px;
+  padding: 4px;
 }
 </style>
