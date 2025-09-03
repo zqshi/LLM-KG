@@ -85,6 +85,17 @@ feedbackStore.trackUserAction('app_started', {
   url: window.location.href
 })
 
+// 初始化审核节点系统
+import { AuditNodeFactory } from './api/auditNodeFactory'
+console.log('=== 开始初始化审核节点系统 ===')
+
+AuditNodeFactory.initializeAllNodes().then(() => {
+  console.log('=== 审核节点系统初始化完成 ===')
+}).catch(error => {
+  console.error('=== 审核节点系统初始化失败 ===', error)
+  // 审核节点初始化失败不应该阻止应用启动
+})
+
 // 设置路由守卫
 setupRouterGuards(router)
 

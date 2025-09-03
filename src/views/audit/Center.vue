@@ -1,262 +1,588 @@
 <template>
   <div class="audit-center">
+    <!-- 页面头部 -->
     <div class="page-header">
-      <h1 class="page-title">统一审核中心</h1>
-      <p class="page-description">集中处理所有业务模块的内容审核任务</p>
+      <div class="header-left">
+        <h1 class="page-title">统一审核中心</h1>
+        <p class="page-description">集中处理全平台内容审核任务，提升审核效率与质量</p>
+      </div>
+      <div class="header-right">
+        <el-button type="primary" @click="refreshData">
+          <el-icon>
+            <Refresh />
+          </el-icon>
+          刷新数据
+        </el-button>
+        <el-button @click="showSettings">
+          <el-icon>
+            <Setting />
+          </el-icon>
+          审核设置
+        </el-button>
+        <el-button @click="showPerformanceMonitor">
+          <el-icon>
+            <Monitor />
+          </el-icon>
+          性能监控
+        </el-button>
+      </div>
     </div>
 
-    <!-- 统计概览 -->
-    <el-row :gutter="16" class="stats-row">
+    <!-- 数据看板 -->
+    <el-row :gutter="16" class="dashboard-row">
       <el-col :span="6">
-        <el-card class="stats-card">
-          <div class="stats-content">
-            <div class="stats-icon pending">
-              <el-icon><Clock /></el-icon>
+        <el-card class="metric-card pending">
+          <div class="metric-content">
+            <div class="metric-icon">
+              <el-icon>
+                <Clock />
+              </el-icon>
             </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ auditStats.pending }}</div>
-              <div class="stats-label">待审核</div>
+            <div class="metric-info">
+              <div class="metric-value">{{ dashboardStats.pendingTotal }}</div>
+              <div class="metric-label">待审核总量</div>
+              <div class="metric-trend">
+                <span class="trend-up">+{{ dashboardStats.todayNew }}</span>
+                <span class="trend-text">今日新增</span>
+              </div>
             </div>
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
-        <el-card class="stats-card">
-          <div class="stats-content">
-            <div class="stats-icon approved">
-              <el-icon><Check /></el-icon>
+        <el-card class="metric-card processed">
+          <div class="metric-content">
+            <div class="metric-icon">
+              <el-icon>
+                <Check />
+              </el-icon>
             </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ auditStats.approved }}</div>
-              <div class="stats-label">已通过</div>
+            <div class="metric-info">
+              <div class="metric-value">{{ dashboardStats.todayProcessed }}</div>
+              <div class="metric-label">今日已处理</div>
+              <div class="metric-trend">
+                <span class="trend-up">{{ dashboardStats.avgProcessTime }}分钟</span>
+                <span class="trend-text">平均处理时长</span>
+              </div>
             </div>
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
-        <el-card class="stats-card">
-          <div class="stats-content">
-            <div class="stats-icon rejected">
-              <el-icon><Close /></el-icon>
+        <el-card class="metric-card approved">
+          <div class="metric-content">
+            <div class="metric-icon">
+              <el-icon>
+                <CircleCheck />
+              </el-icon>
             </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ auditStats.rejected }}</div>
-              <div class="stats-label">已拒绝</div>
+            <div class="metric-info">
+              <div class="metric-value">{{ dashboardStats.approvalRate }}%</div>
+              <div class="metric-label">审核通过率</div>
+              <div class="metric-trend">
+                <span class="trend-up">{{ dashboardStats.todayApproved }}</span>
+                <span class="trend-text">今日通过</span>
+              </div>
             </div>
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
-        <el-card class="stats-card">
-          <div class="stats-content">
-            <div class="stats-icon efficiency">
-              <el-icon><TrendCharts /></el-icon>
+        <el-card class="metric-card rejected">
+          <div class="metric-content">
+            <div class="metric-icon">
+              <el-icon>
+                <Close />
+              </el-icon>
             </div>
-            <div class="stats-info">
-              <div class="stats-value">{{ auditStats.efficiency }}%</div>
-              <div class="stats-label">审核效率</div>
+            <div class="metric-info">
+              <div class="metric-value">{{ dashboardStats.todayRejected }}</div>
+              <div class="metric-label">今日拒绝</div>
+              <div class="metric-trend">
+                <span class="trend-down">{{ dashboardStats.rejectionRate }}%</span>
+                <span class="trend-text">拒绝率</span>
+              </div>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 智能任务分配面板 -->
+    <SmartTaskAssignmentPanel :selected-tasks="selectedTasks" />
+
+    <!-- 批量操作面板 -->
+    <BatchOperationPanel 
+      :selected-tasks="selectedTasks" 
+      @selection-change="handleSelectionChange"
+      @operation-complete="handleOperationComplete"
+    />
 
     <!-- 主要内容区域 -->
-    <el-row :gutter="16">
-      <!-- 待审核面板 -->
+    <el-row :gutter="16" class="main-content">
+      <!-- 左侧：任务列表 -->
       <el-col :span="12">
-        <PendingAuditPanel 
-          :tasks="pendingTasks"
-          @audit="handleAudit"
-          @assign="handleAssign"
-          @view-detail="handleViewDetail"
-        />
+        <el-card class="task-list-card">
+          <template #header>
+            <div class="card-header">
+              <span class="card-title">待审核任务</span>
+              <div class="header-actions">
+                <el-button type="primary" size="small" @click="handleBatchApprove"
+                  :disabled="selectedTasks.length === 0">
+                  批量通过 ({{ selectedTasks.length }})
+                </el-button>
+                <el-button type="danger" size="small" @click="handleBatchReject" :disabled="selectedTasks.length === 0">
+                  批量拒绝
+                </el-button>
+              </div>
+            </div>
+          </template>
+
+          <!-- 筛选器 -->
+          <div class="filter-section">
+            <el-row :gutter="16">
+              <el-col :span="6">
+                <el-select v-model="filters.bizType" placeholder="业务类型" clearable
+                  @change="() => auditStore.loadTasks()">
+                  <el-option label="全部" value="" />
+                  <el-option label="论坛帖子" value="forum_post" />
+                  <el-option label="跳蚤市场" value="flea_goods" />
+                  <el-option label="资讯文章" value="news" />
+                  <el-option label="Banner广告" value="banner" />
+                  <el-option label="名言警句" value="quotation" />
+                </el-select>
+              </el-col>
+              <el-col :span="6">
+                <el-select v-model="filters.priority" placeholder="优先级" clearable
+                  @change="() => auditStore.loadTasks()">
+                  <el-option label="全部" value="" />
+                  <el-option label="高优先级" value="high" />
+                  <el-option label="普通优先级" value="normal" />
+                  <el-option label="低优先级" value="low" />
+                </el-select>
+              </el-col>
+              <el-col :span="6">
+                <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至"
+                  start-placeholder="开始日期" end-placeholder="结束日期" @change="() => auditStore.loadTasks()" />
+              </el-col>
+              <el-col :span="6">
+                <el-input v-model="filters.keyword" placeholder="搜索标题或内容" clearable @input="handleSearch">
+                  <template #prefix>
+                    <el-icon>
+                      <Search />
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-col>
+            </el-row>
+          </div>
+
+          <!-- 任务列表 -->
+          <div class="task-list">
+            <el-table :data="taskList" v-loading="loading" @selection-change="handleSelectionChange" class="task-table">
+              <el-table-column type="selection" width="55" />
+              <el-table-column prop="taskId" label="任务ID" width="120" />
+              <el-table-column label="内容类型" width="100">
+                <template #default="{ row }">
+                  <el-tag :type="getBizTypeTag(row.bizType)">
+                    {{ getBizTypeLabel(row.bizType) }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="title" label="标题/摘要" min-width="200">
+                <template #default="{ row }">
+                  <div class="content-title" @click="viewContentDetail(row)">
+                    {{ row.title || row.content.substring(0, 50) + '...' }}
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column prop="submitterName" label="提交人" width="100" />
+              <el-table-column prop="createTime" label="提交时间" width="160">
+                <template #default="{ row }">
+                  {{ formatTime(row.createTime) }}
+                </template>
+              </el-table-column>
+              <el-table-column label="优先级" width="80">
+                <template #default="{ row }">
+                  <el-tag :type="getPriorityTag(row.priority)" size="small">
+                    {{ getPriorityLabel(row.priority) }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="200" fixed="right">
+                <template #default="{ row }">
+                  <el-button type="success" size="small" @click="handleApprove(row)">
+                    通过
+                  </el-button>
+                  <el-button type="danger" size="small" @click="handleReject(row)">
+                    拒绝
+                  </el-button>
+                  <el-button type="info" size="small" @click="handleTransfer(row)">
+                    转交
+                  </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+
+            <!-- 分页 -->
+            <div class="pagination-wrapper">
+              <el-pagination v-model:current-page="pagination.current" v-model:page-size="pagination.size"
+                :total="pagination.total" :page-sizes="[10, 20, 50, 100]"
+                layout="total, sizes, prev, pager, next, jumper" @size-change="() => auditStore.loadTasks()"
+                @current-change="() => auditStore.loadTasks()" />
+            </div>
+          </div>
+        </el-card>
       </el-col>
-      
-      <!-- 已通过内容面板 -->
+
+      <!-- 右侧：增强任务详情 -->
       <el-col :span="12">
-        <ApprovedContentPanel 
-          :content="approvedContent"
-          @publish="handlePublish"
-          @schedule="handleSchedulePublish"
+        <EnhancedTaskDetailPanel 
+          :selected-task="selectedTask"
+          @approve="handleApprove"
+          @reject="handleReject"
+          @transfer="handleTransfer"
         />
       </el-col>
     </el-row>
-
-    <!-- 发布监控面板 -->
-    <el-row>
-      <el-col :span="24">
-        <PublishMonitorPanel 
-          :publications="publications"
-          @view-stats="handleViewPublishStats"
-        />
-      </el-col>
-    </el-row>
-
-    <!-- 内容详情弹窗 -->
-    <ContentDetailsDialog 
-      v-model="detailDialogVisible"
-      :content="selectedContent"
-      @audit="handleAudit"
-    />
-
-    <!-- 内容预览弹窗 -->
-    <ContentPreviewDialog 
-      v-model="previewDialogVisible"
-      :content="previewContent"
-    />
 
     <!-- 拒绝原因弹窗 -->
-    <RejectReasonDialog 
-      v-model="rejectDialogVisible"
-      @confirm="handleRejectConfirm"
-    />
+    <el-dialog v-model="rejectDialogVisible" title="拒绝原因" width="500px">
+      <el-form :model="rejectForm" label-width="80px">
+        <el-form-item label="拒绝原因">
+          <el-select v-model="rejectForm.reason" placeholder="请选择拒绝原因">
+            <el-option label="包含广告内容" value="advertisement" />
+            <el-option label="内容违规" value="violation" />
+            <el-option label="信息不实" value="false_info" />
+            <el-option label="重复内容" value="duplicate" />
+            <el-option label="其他" value="other" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="详细说明" v-if="rejectForm.reason === 'other'">
+          <el-input v-model="rejectForm.detail" type="textarea" rows="3" placeholder="请详细说明拒绝原因" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="rejectDialogVisible = false">取消</el-button>
+        <el-button type="danger" @click="confirmReject">确认拒绝</el-button>
+      </template>
+    </el-dialog>
 
-    <!-- 任务分配弹窗 -->
-    <TaskAssignDialog 
-      v-model="assignDialogVisible"
-      :task="assignTask"
-      :auditors="auditors"
-      @confirm="handleAssignConfirm"
-    />
+    <!-- 转交任务弹窗 -->
+    <el-dialog v-model="transferDialogVisible" title="转交任务" width="500px">
+      <el-form :model="transferForm" label-width="80px">
+        <el-form-item label="转交给">
+          <el-select v-model="transferForm.assigneeId" placeholder="请选择审核员">
+            <el-option v-for="auditor in auditors" :key="auditor.id" :label="auditor.name" :value="auditor.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="转交原因">
+          <el-input v-model="transferForm.reason" type="textarea" rows="3" placeholder="请说明转交原因" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="transferDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmTransfer">确认转交</el-button>
+      </template>
+    </el-dialog>
 
-    <!-- 定时发布弹窗 -->
-    <SchedulePublishDialog 
-      v-model="scheduleDialogVisible"
-      :content="scheduleContent"
-      @confirm="handleScheduleConfirm"
-    />
+    <!-- 审核设置弹窗 -->
+    <el-dialog v-model="settingsDialogVisible" title="审核设置" width="800px">
+      <el-tabs v-model="settingsActiveTab">
+        <el-tab-pane label="审核策略" name="policy">
+          <AuditPolicySettings />
+        </el-tab-pane>
+        <el-tab-pane label="敏感词管理" name="sensitive">
+          <SensitiveWordsSettings />
+        </el-tab-pane>
+        <el-tab-pane label="审核员管理" name="auditors">
+          <AuditorManagement />
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
+    <!-- 性能监控对话框 -->
+    <el-dialog 
+      title="性能监控中心" 
+      v-model="performanceMonitorVisible"
+      width="90%"
+      :before-close="() => performanceMonitorVisible = false"
+    >
+      <PerformanceMonitor />
+      <template #footer>
+        <el-button @click="performanceMonitorVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Clock, Check, Close, TrendCharts } from '@element-plus/icons-vue'
-import PendingAuditPanel from './components/PendingAuditPanel.vue'
-import ApprovedContentPanel from './components/ApprovedContentPanel.vue'
-import PublishMonitorPanel from './components/PublishMonitorPanel.vue'
-import ContentDetailsDialog from './components/ContentDetailsDialog.vue'
-import ContentPreviewDialog from './components/ContentPreviewDialog.vue'
-import RejectReasonDialog from './components/RejectReasonDialog.vue'
-import TaskAssignDialog from './components/TaskAssignDialog.vue'
-import SchedulePublishDialog from './components/SchedulePublishDialog.vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Refresh,
+  Setting,
+  Clock,
+  Check,
+  CircleCheck,
+  Close,
+  Search,
+  Share,
+  Monitor
+} from '@element-plus/icons-vue'
+import { useAuditStore } from '@/stores/audit'
+import AuditPolicySettings from './components/AuditPolicySettings.vue'
+import SensitiveWordsSettings from './components/SensitiveWordsSettings.vue'
+import AuditorManagement from './components/AuditorManagement.vue'
+import SmartTaskAssignmentPanel from './components/SmartTaskAssignmentPanel.vue'
+import EnhancedTaskDetailPanel from './components/EnhancedTaskDetailPanel.vue'
+import BatchOperationPanel from './components/BatchOperationPanel.vue'
+import PerformanceMonitor from './components/PerformanceMonitor.vue'
 
-// 审核统计数据
-const auditStats = reactive({
-  pending: 0,
-  approved: 0,
-  rejected: 0,
-  efficiency: 0
-})
+// Store
+const auditStore = useAuditStore()
 
-// 弹窗控制
-const detailDialogVisible = ref(false)
-const previewDialogVisible = ref(false)
-const rejectDialogVisible = ref(false)
-const assignDialogVisible = ref(false)
-const scheduleDialogVisible = ref(false)
-
-// 数据
-const pendingTasks = ref([])
-const approvedContent = ref([])
-const publications = ref([])
-const selectedContent = ref(null)
-const previewContent = ref(null)
-const assignTask = ref(null)
-const scheduleContent = ref(null)
+// 响应式数据
+const selectedTask = ref(null)
 const auditors = ref([])
 
-// 审核操作
-const handleAudit = async (taskId: string, action: 'approve' | 'reject', reason?: string) => {
+// 弹窗控制
+const rejectDialogVisible = ref(false)
+const transferDialogVisible = ref(false)
+const settingsDialogVisible = ref(false)
+const settingsActiveTab = ref('policy')
+const performanceMonitorVisible = ref(false)
+
+// 表单数据
+const rejectForm = reactive({
+  reason: '',
+  detail: ''
+})
+
+const transferForm = reactive({
+  assigneeId: null,
+  reason: ''
+})
+
+// 从store获取数据 - 使用storeToRefs保持响应式
+const {
+  loading,
+  taskList,
+  selectedTasks,
+  dashboardStats,
+  pagination,
+  filters
+} = storeToRefs(auditStore)
+
+// 计算属性
+const selectedTaskIds = computed(() => {
+  return selectedTasks.value.map(task => task.taskId)
+})
+
+// 方法
+const refreshData = () => {
+  auditStore.loadDashboardStats()
+  auditStore.loadTasks()
+}
+
+const showSettings = () => {
+  settingsDialogVisible.value = true
+}
+
+const showPerformanceMonitor = () => {
+  performanceMonitorVisible.value = true
+}
+
+const handleSelectionChange = (selection: any[]) => {
+  auditStore.setSelectedTasks(selection)
+}
+
+const handleSearch = () => {
+  pagination.current = 1
+  auditStore.loadTasks()
+}
+
+const viewContentDetail = (task: any) => {
+  selectedTask.value = task
+}
+
+const handleApprove = async (task: any) => {
   try {
-    // TODO: 调用审核API
-    ElMessage.success(`审核${action === 'approve' ? '通过' : '拒绝'}成功`)
-    await loadData()
+    await ElMessageBox.confirm('确认通过此内容？', '确认操作', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    await auditStore.approveTask(task.taskId)
   } catch (error) {
-    ElMessage.error('审核操作失败')
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
   }
 }
 
-// 任务分配
-const handleAssign = (task: any) => {
-  assignTask.value = task
-  assignDialogVisible.value = true
+const handleReject = (task: any) => {
+  selectedTask.value = task
+  rejectForm.reason = ''
+  rejectForm.detail = ''
+  rejectDialogVisible.value = true
 }
 
-// 查看详情
-const handleViewDetail = (content: any) => {
-  selectedContent.value = content
-  detailDialogVisible.value = true
+const handleTransfer = (task: any) => {
+  selectedTask.value = task
+  transferForm.assigneeId = null
+  transferForm.reason = ''
+  transferDialogVisible.value = true
 }
 
-// 发布内容
-const handlePublish = async (contentId: string) => {
+const handleBatchApprove = async () => {
   try {
-    // TODO: 调用发布API
-    ElMessage.success('发布成功')
-    await loadData()
+    await ElMessageBox.confirm(
+      `确认批量通过选中的 ${selectedTasks.value.length} 个任务？`,
+      '确认操作',
+      {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await auditStore.batchAudit(selectedTaskIds.value, 'approve')
   } catch (error) {
-    ElMessage.error('发布失败')
+    if (error !== 'cancel') {
+      ElMessage.error('操作失败')
+    }
   }
 }
 
-// 定时发布
-const handleSchedulePublish = (content: any) => {
-  scheduleContent.value = content
-  scheduleDialogVisible.value = true
+const handleBatchReject = () => {
+  rejectForm.reason = ''
+  rejectForm.detail = ''
+  rejectDialogVisible.value = true
 }
 
-// 拒绝确认
-const handleRejectConfirm = (reason: string) => {
-  // TODO: 处理拒绝逻辑
-  rejectDialogVisible.value = false
-}
+const confirmReject = async () => {
+  if (!rejectForm.reason) {
+    ElMessage.warning('请选择拒绝原因')
+    return
+  }
 
-// 分配确认
-const handleAssignConfirm = (assigneeId: number) => {
-  // TODO: 处理分配逻辑
-  assignDialogVisible.value = false
-}
-
-// 定时发布确认
-const handleScheduleConfirm = (scheduleData: any) => {
-  // TODO: 处理定时发布逻辑
-  scheduleDialogVisible.value = false
-}
-
-// 查看发布统计
-const handleViewPublishStats = (publicationId: string) => {
-  // TODO: 处理查看发布统计逻辑
-}
-
-// 加载数据
-const loadData = async () => {
   try {
-    // TODO: 加载审核数据
-    auditStats.pending = 23
-    auditStats.approved = 156
-    auditStats.rejected = 12
-    auditStats.efficiency = 87
+    await auditStore.rejectTask(selectedTask.value.taskId, rejectForm.reason, rejectForm.detail)
+    rejectDialogVisible.value = false
   } catch (error) {
-    console.error('加载数据失败:', error)
+    ElMessage.error('操作失败')
   }
 }
 
-onMounted(() => {
-  loadData()
+const confirmTransfer = async () => {
+  if (!transferForm.assigneeId) {
+    ElMessage.warning('请选择转交对象')
+    return
+  }
+
+  if (!transferForm.reason) {
+    ElMessage.warning('请填写转交原因')
+    return
+  }
+
+  try {
+    await auditStore.transferTask(selectedTask.value.taskId, transferForm.assigneeId, transferForm.reason)
+    transferDialogVisible.value = false
+  } catch (error) {
+    ElMessage.error('操作失败')
+  }
+}
+
+// 工具方法
+const getBizTypeLabel = (bizType: string) => {
+  const labels = {
+    forum_post: '论坛帖子',
+    flea_goods: '跳蚤市场',
+    news: '资讯文章',
+    banner: 'Banner广告',
+    quotation: '名言警句'
+  }
+  return labels[bizType] || bizType
+}
+
+const getBizTypeTag = (bizType: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' | undefined => {
+  const tags: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
+    forum_post: 'primary',
+    flea_goods: 'success',
+    news: 'warning',
+    banner: 'info',
+    quotation: 'danger'
+  }
+  return tags[bizType] || undefined
+}
+
+const getPriorityLabel = (priority: string) => {
+  const labels = {
+    high: '高',
+    normal: '普通',
+    low: '低'
+  }
+  return labels[priority] || priority
+}
+
+const getPriorityTag = (priority: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' | undefined => {
+  const tags: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
+    high: 'danger',
+    normal: 'warning',
+    low: 'info'
+  }
+  return tags[priority] || undefined
+}
+
+
+const handleOperationComplete = async (operation: any) => {
+  // 处理批量操作完成后的逻辑
+  console.log('批量操作完成:', operation)
+  
+  // 刷新任务列表和统计数据
+  await refreshData()
+  
+  // 清空选择
+  auditStore.setSelectedTasks([])
+}
+
+const formatTime = (time: string) => {
+  return new Date(time).toLocaleString('zh-CN')
+}
+
+// 生命周期
+onMounted(async () => {
+  try {
+    await auditStore.initialize()
+  } catch (error) {
+    console.error('初始化审核中心失败:', error)
+    ElMessage({
+      message: '无法连接到后端服务，请确保后端服务已启动（运行: npm run mock）',
+      type: 'error',
+      duration: 0,
+      showClose: true
+    })
+  }
 })
 </script>
 
 <style scoped>
 .audit-center {
   padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
@@ -273,63 +599,224 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.stats-row {
+.dashboard-row {
   margin-bottom: 20px;
 }
 
-.stats-card {
-  height: 80px;
+.metric-card {
+  height: 120px;
   transition: all 0.3s ease;
 }
 
-.stats-card:hover {
+.metric-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.stats-content {
+.metric-content {
   display: flex;
   align-items: center;
   height: 100%;
 }
 
-.stats-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+.metric-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 16px;
   color: #fff;
+  font-size: 24px;
 }
 
-.stats-icon.pending {
+.metric-card.pending .metric-icon {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.stats-icon.approved {
+.metric-card.processed .metric-icon {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-.stats-icon.rejected {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.stats-icon.efficiency {
+.metric-card.approved .metric-icon {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
-.stats-value {
-  font-size: 24px;
+.metric-card.rejected .metric-icon {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.metric-value {
+  font-size: 28px;
   font-weight: 600;
   color: #303133;
   line-height: 1;
 }
 
-.stats-label {
+.metric-label {
   color: #909399;
   font-size: 14px;
   margin-top: 4px;
+}
+
+.metric-trend {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.trend-up {
+  color: #67c23a;
+  font-weight: 500;
+}
+
+.trend-down {
+  color: #f56c6c;
+  font-weight: 500;
+}
+
+.trend-text {
+  color: #909399;
+  margin-left: 4px;
+}
+
+.main-content {
+  margin-bottom: 20px;
+}
+
+.task-list-card {
+  min-height: 600px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-section {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.task-table {
+  margin-bottom: 16px;
+}
+
+.content-title {
+  color: #409eff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.content-title:hover {
+  color: #66b1ff;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.detail-card {
+  min-height: 600px;
+}
+
+.content-detail {
+  padding: 16px 0;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  border-bottom: 1px solid #ebeef5;
+  padding-bottom: 8px;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.detail-item .label {
+  width: 80px;
+  color: #909399;
+  font-size: 14px;
+}
+
+.detail-item .value {
+  color: #303133;
+  font-size: 14px;
+}
+
+.content-preview {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.content-preview .content-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #303133;
+  text-decoration: none;
+}
+
+.content-preview .content-body {
+  color: #606266;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.content-images {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.content-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  border: 1px solid #ebeef5;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 80px;
+}
+
+.empty-detail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
 }
 </style>

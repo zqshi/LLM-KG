@@ -1,130 +1,85 @@
 <template>
-  <el-card class="chart-card activity-chart">
-    <template #header>
-      <div class="chart-header">
-        <div class="chart-title-section">
-          <h3 class="chart-title">用户活跃度趋势</h3>
-          <el-text size="small" type="info" class="chart-subtitle">
-            展示最近{{ timeRangeText }}{{ categoryText }}的用户活跃情况和内容增长趋势
-          </el-text>
-          <el-text size="small" type="warning" class="chart-time-note">
-            数据范围：{{ getDataRangeText() }}
-          </el-text>
+  <div class="chart-container-enhanced activity-chart">
+    <div class="chart-header-modern">
+      <div class="chart-title-section">
+        <h3 class="chart-title-modern">用户活跃度趋势</h3>
+        <div class="chart-subtitle-modern">
+          展示最近{{ timeRangeText }}{{ categoryText }}的用户活跃情况和内容增长趋势
         </div>
-        <div class="chart-actions">
-          <!-- 板块筛选器 -->
-          <el-select
-            :model-value="activeCategory"
-            @update:model-value="handleCategoryChange"
-            placeholder="选择板块"
-            size="small"
-            style="width: 120px;"
-            :disabled="loading"
-          >
-            <el-option
-              v-for="category in categories"
-              :key="category.value"
-              :label="category.label"
-              :value="category.value"
-            />
-          </el-select>
-          
-          <el-button-group size="small">
-            <el-button 
-              v-for="range in timeRanges"
-              :key="range.value"
-              :type="activeTimeRange === range.value ? 'primary' : ''"
-              @click="handleTimeRangeChange(range.value)"
-              :loading="loading && activeTimeRange === range.value"
-            >
-              {{ range.label }}
-            </el-button>
-          </el-button-group>
-          
-          <el-tooltip content="刷新数据" placement="top">
-            <el-button 
-              size="small" 
-              :icon="Refresh" 
-              circle
-              @click="handleRefresh"
-              :loading="loading"
-            />
-          </el-tooltip>
+        <div class="chart-time-note">
+          数据范围：{{ getDataRangeText() }}
         </div>
       </div>
-    </template>
+      <div class="chart-actions modern-button-group">
+        <!-- 板块筛选器 -->
+        <el-select :model-value="activeCategory" @update:model-value="handleCategoryChange" placeholder="选择板块"
+          size="small" style="width: 120px;" :disabled="loading">
+          <el-option v-for="category in categories" :key="category.value" :label="category.label"
+            :value="category.value" />
+        </el-select>
 
-    <div class="chart-container">
-      <!-- 加载状态 -->
-      <div v-if="loading" class="chart-loading">
-        <el-skeleton animated>
-          <template #template>
-            <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
-              <el-skeleton-item variant="text" style="width: 100%; height: 200px;" />
-            </div>
-          </template>
-        </el-skeleton>
+        <el-button-group size="small">
+          <el-button v-for="range in timeRanges" :key="range.value"
+            :type="activeTimeRange === range.value ? 'primary' : ''" @click="handleTimeRangeChange(range.value)"
+            :loading="loading && activeTimeRange === range.value">
+            {{ range.label }}
+          </el-button>
+        </el-button-group>
+
+        <el-tooltip content="刷新数据" placement="top">
+          <el-button size="small" :icon="Refresh" circle @click="handleRefresh" :loading="loading" />
+        </el-tooltip>
       </div>
+    </div>
 
-      <!-- 错误状态 -->
-      <div v-else-if="error" class="chart-error">
-        <el-result
-          icon="error"
-          title="数据加载失败"
-          :sub-title="error"
-          class="chart-error-result"
-        >
-          <template #extra>
-            <el-button type="primary" @click="handleRefresh">
-              重新加载
-            </el-button>
-          </template>
-        </el-result>
-      </div>
+    <div class="chart-content-container">
+    <!-- 加载状态 -->
+    <div v-if="loading" class="chart-loading">
+      <el-skeleton animated>
+        <template #template>
+          <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+            <el-skeleton-item variant="text" style="width: 100%; height: 200px;" />
+          </div>
+        </template>
+      </el-skeleton>
+    </div>
 
-      <!-- 空数据状态 -->
-      <div v-else-if="!activityData || activityData.length === 0" class="chart-empty">
-        <el-empty description="暂无数据" />
-      </div>
+    <!-- 错误状态 -->
+    <div v-else-if="error" class="chart-error">
+      <el-result icon="error" title="数据加载失败" :sub-title="error" class="chart-error-result">
+        <template #extra>
+          <el-button type="primary" @click="handleRefresh">
+            重新加载
+          </el-button>
+        </template>
+      </el-result>
+    </div>
 
-      <!-- 图表内容 -->
-      <div v-else class="chart-content">
-        <VChart
-          :option="chartOption"
-          :style="{ height: chartHeight }"
-          :autoresize="true"
-          :loading="loading"
-          @click="handleChartClick"
-        />
-        
-        <!-- 图表统计信息 -->
-        <div class="chart-stats">
-          <div class="stat-item">
-            <el-statistic 
-              title="平均活跃用户" 
-              :value="averageActiveUsers" 
-              suffix="人"
-            />
-          </div>
-          <div class="stat-item">
-            <el-statistic 
-              title="总新增内容" 
-              :value="totalNewContent" 
-              suffix="篇"
-            />
-          </div>
-          <div class="stat-item">
-            <el-statistic 
-              title="内容增长率" 
-              :value="contentGrowthRate" 
-              suffix="%"
-              :precision="1"
-            />
-          </div>
+    <!-- 空数据状态 -->
+    <div v-else-if="!activityData || activityData.length === 0" class="chart-empty">
+      <el-empty description="暂无数据" />
+    </div>
+
+    <!-- 图表内容 -->
+    <div v-else class="chart-content">
+      <VChart :option="chartOption" :style="{ height: chartHeight }" :autoresize="true" :loading="loading"
+        @click="handleChartClick" />
+
+      <!-- 图表统计信息 -->
+      <div class="chart-stats">
+        <div class="stat-item">
+          <el-statistic title="平均活跃用户" :value="averageActiveUsers" suffix="人" />
+        </div>
+        <div class="stat-item">
+          <el-statistic title="总新增内容" :value="totalNewContent" suffix="篇" />
+        </div>
+        <div class="stat-item">
+          <el-statistic title="内容增长率" :value="contentGrowthRate" suffix="%" :precision="1" />
         </div>
       </div>
     </div>
-  </el-card>
+  </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -164,7 +119,7 @@ const emit = defineEmits<Emits>()
 // 时间范围选项
 const timeRanges = [
   { value: '7d', label: '7天' },
-  { value: '30d', label: '30天' }, 
+  { value: '30d', label: '30天' },
   { value: '90d', label: '90天' }
 ]
 
@@ -201,14 +156,14 @@ const totalNewContent = computed(() => {
 
 const contentGrowthRate = computed(() => {
   if (!props.activityData || props.activityData.length < 2) return 0
-  
+
   const data = props.activityData
   const firstPeriod = data.slice(0, Math.floor(data.length / 2))
   const secondPeriod = data.slice(Math.floor(data.length / 2))
-  
+
   const firstAvg = firstPeriod.reduce((sum, item) => sum + item.newContent, 0) / firstPeriod.length
   const secondAvg = secondPeriod.reduce((sum, item) => sum + item.newContent, 0) / secondPeriod.length
-  
+
   return ((secondAvg - firstAvg) / firstAvg * 100)
 })
 
@@ -230,7 +185,7 @@ const chartOption = computed(() => ({
       const activeUsers = params[0].value
       const newContent = params[1].value
       const auditedContent = params[2]?.value || 0
-      
+
       return `
         <div style="font-weight: 600; margin-bottom: 8px;">${date}</div>
         <div style="margin-bottom: 4px;">
@@ -267,9 +222,9 @@ const chartOption = computed(() => ({
     type: 'category',
     data: props.activityData.map(item => {
       const date = new Date(item.date)
-      return date.toLocaleDateString('zh-CN', { 
-        month: '2-digit', 
-        day: '2-digit' 
+      return date.toLocaleDateString('zh-CN', {
+        month: '2-digit',
+        day: '2-digit'
       })
     }),
     axisTick: { show: false },
@@ -299,7 +254,7 @@ const chartOption = computed(() => ({
         }
       },
       splitLine: {
-        lineStyle: { 
+        lineStyle: {
           color: '#f0f0f0',
           type: 'dashed'
         }
@@ -415,12 +370,12 @@ const getDataRangeText = () => {
   if (!props.activityData || props.activityData.length === 0) {
     return '暂无数据'
   }
-  
+
   const firstDate = props.activityData[0]?.date
   const lastDate = props.activityData[props.activityData.length - 1]?.date
-  
+
   if (!firstDate || !lastDate) return '暂无数据'
-  
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
     return date.toLocaleDateString('zh-CN', {
@@ -428,7 +383,7 @@ const getDataRangeText = () => {
       day: '2-digit'
     })
   }
-  
+
   return `${formatDate(firstDate)} ~ ${formatDate(lastDate)}`
 }
 
@@ -449,58 +404,17 @@ watch(
   margin-bottom: var(--spacing-xl);
 }
 
-.chart-card {
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-light);
-  transition: all var(--transition-medium);
-  overflow: hidden;
-}
+/* 使用全局 chart-container-enhanced 样式 */
 
-.chart-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-2px);
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-  gap: var(--spacing-lg);
-}
-
-.chart-title-section {
-  flex: 1;
-  min-width: 0;
-}
-
-.chart-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-xs) 0;
-}
-
-.chart-subtitle {
-  display: block;
-  line-height: 1.4;
-}
+/* 使用全局样式 chart-header-modern, chart-title-modern */
 
 .chart-time-note {
-  display: block;
-  line-height: 1.4;
-  margin-top: var(--spacing-xs);
+  color: var(--color-warning);
   font-weight: 500;
-  color: var(--color-warning) !important;
+  margin-top: var(--spacing-xs);
 }
 
-.chart-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  flex-shrink: 0;
-}
+/* chart-actions 使用全局 modern-button-group */
 
 .chart-actions .el-button-group .el-button {
   font-size: 12px;
@@ -509,9 +423,10 @@ watch(
   transition: all var(--transition-fast);
 }
 
-.chart-container {
+.chart-content-container {
   position: relative;
   min-height: 350px;
+  padding: var(--spacing-lg);
 }
 
 .chart-loading {
@@ -587,30 +502,30 @@ watch(
     align-items: flex-start;
     gap: var(--spacing-md);
   }
-  
+
   .chart-actions {
     width: 100%;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: var(--spacing-sm);
   }
-  
+
   .chart-actions .el-select {
     width: 100% !important;
     margin-bottom: var(--spacing-sm);
   }
-  
+
   .chart-stats {
     flex-direction: column;
     gap: var(--spacing-md);
   }
-  
+
   .stat-item {
     width: 100%;
     padding: var(--spacing-sm) 0;
     border-bottom: 1px solid var(--color-border-light);
   }
-  
+
   .stat-item:last-child {
     border-bottom: none;
   }
@@ -626,6 +541,7 @@ watch(
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

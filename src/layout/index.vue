@@ -4,59 +4,52 @@
       <el-aside width="250px" role="navigation" aria-label="主导航菜单" id="main-navigation">
         <div class="logo-container">
           <div class="logo-icon">
-            <el-icon size="24"><DataBoard /></el-icon>
+            <el-icon size="24">
+              <DataBoard />
+            </el-icon>
           </div>
           <div class="logo-text">
             <h2>知识聚合平台</h2>
             <span>管理端</span>
           </div>
         </div>
-        <el-menu
-          :default-active="activeMenu"
-          class="el-menu-vertical"
-          @select="handleMenuSelect"
-          :collapse="isCollapse"
-          background-color="#304156"
-          text-color="#bfcbd9"
-          active-text-color="#409EFF"
-          role="menu"
-          aria-label="主导航菜单"
-        >
+        <el-menu :default-active="activeMenu" class="el-menu-vertical" @select="handleMenuSelect" :collapse="isCollapse"
+          background-color="#304156" text-color="#bfcbd9" active-text-color="#409EFF" role="menu" aria-label="主导航菜单">
           <template v-for="item in menuList" :key="item.path">
             <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
               <template #title>
-                <el-icon><component :is="item.icon || 'Menu'" /></el-icon>
+                <el-icon>
+                  <component :is="item.icon || 'Menu'" />
+                </el-icon>
                 <span>{{ item.name }}</span>
               </template>
-              <el-menu-item
-                v-for="child in item.children"
-                :key="child.path"
-                :index="child.path"
-              >
-                <el-icon><component :is="child.icon || 'Document'" /></el-icon>
+              <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path">
+                <el-icon>
+                  <component :is="child.icon || 'Document'" />
+                </el-icon>
                 <template #title>{{ child.name }}</template>
               </el-menu-item>
             </el-sub-menu>
             <el-menu-item v-else :index="item.path">
-              <el-icon><component :is="item.icon || 'Menu'" /></el-icon>
+              <el-icon>
+                <component :is="item.icon || 'Menu'" />
+              </el-icon>
               <template #title>{{ item.name }}</template>
             </el-menu-item>
           </template>
         </el-menu>
       </el-aside>
-      
+
       <el-container>
         <el-header height="60px" role="banner">
           <div class="header-container">
             <div class="header-left">
-              <el-button
-                type="text"
-                @click="toggleCollapse"
-                class="collapse-btn"
-                :aria-label="isCollapse ? '展开侧边菜单' : '收起侧边菜单'"
-                :aria-expanded="!isCollapse"
-              >
-                <el-icon><Fold v-if="!isCollapse" /><Expand v-else /></el-icon>
+              <el-button type="text" @click="toggleCollapse" class="collapse-btn"
+                :aria-label="isCollapse ? '展开侧边菜单' : '收起侧边菜单'" :aria-expanded="!isCollapse">
+                <el-icon>
+                  <Fold v-if="!isCollapse" />
+                  <Expand v-else />
+                </el-icon>
               </el-button>
               <el-breadcrumb separator="/" class="breadcrumb-container">
                 <el-breadcrumb-item v-for="item in breadcrumbList" :key="item.path">
@@ -64,38 +57,29 @@
                 </el-breadcrumb-item>
               </el-breadcrumb>
             </div>
-            
+
             <div class="header-right">
-              <el-button 
-                class="badge-item"
-                circle
-                :aria-label="`通知中心，${pendingCount}条未读通知`"
-                @click="handleNotificationClick"
-              >
+              <el-button class="badge-item" circle :aria-label="`通知中心，${pendingCount}条未读通知`"
+                @click="handleNotificationClick">
                 <el-badge :value="pendingCount" class="notification-badge">
-                  <el-icon size="18"><Bell /></el-icon>
+                  <el-icon size="18">
+                    <Bell />
+                  </el-icon>
                 </el-badge>
               </el-button>
-              
+
               <!-- 主题切换按钮 -->
               <el-dropdown @command="handleThemeChange">
-                <el-button 
-                  class="theme-toggle-btn" 
-                  circle
-                  :aria-label="`当前主题：${themeStore.getThemeDisplayName(themeStore.currentTheme)}，点击切换主题`"
-                >
+                <el-button class="theme-toggle-btn" circle
+                  :aria-label="`当前主题：${themeStore.getThemeDisplayName(themeStore.currentTheme)}，点击切换主题`">
                   <el-icon size="16">
                     <component :is="currentThemeIcon" />
                   </el-icon>
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item 
-                      v-for="theme in themeOptions" 
-                      :key="theme.value"
-                      :command="theme.value"
-                      :class="{ 'is-active': themeStore.currentTheme === theme.value }"
-                    >
+                    <el-dropdown-item v-for="theme in themeOptions" :key="theme.value" :command="theme.value"
+                      :class="{ 'is-active': themeStore.currentTheme === theme.value }">
                       <el-icon style="margin-right: 8px;">
                         <component :is="theme.icon" />
                       </el-icon>
@@ -104,7 +88,7 @@
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-              
+
               <el-dropdown>
                 <span class="el-dropdown-link">
                   <el-avatar :size="32">
@@ -114,7 +98,9 @@
                     <span class="username">{{ userInfo.name || '未登录' }}</span>
                     <span class="user-role">{{ getRoleDisplayName(getUserRole) }}</span>
                   </div>
-                  <el-icon><ArrowDown /></el-icon>
+                  <el-icon>
+                    <ArrowDown />
+                  </el-icon>
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu>
@@ -127,13 +113,13 @@
             </div>
           </div>
         </el-header>
-        
+
         <el-main role="main" aria-label="主要内容区域" id="main-content">
           <router-view />
         </el-main>
       </el-container>
     </el-container>
-    
+
     <!-- 反馈收集组件 -->
     <FeedbackWidget />
   </div>
@@ -209,7 +195,7 @@ const menuList = computed(() => {
     console.log('用户权限数量:', authStore.permissions.length)
     console.log('用户角色:', getUserRole.value)
     console.log('角色显示名称:', getRoleDisplayName(getUserRole.value))
-    
+
     // 使用基于角色过滤后的菜单
     const menus = filteredMenus.value
     console.log('过滤后的菜单数量:', menus.length)
@@ -220,7 +206,7 @@ const menuList = computed(() => {
       childrenCount: m.children?.length || 0,
       children: m.children?.map(c => ({ name: c.name, path: c.path })) || []
     })))
-    
+
     return menus
   } catch (error) {
     console.error('菜单数据解析错误:', error)
@@ -247,17 +233,17 @@ const toggleCollapse = () => {
 const handleMenuSelect = (index: string) => {
   if (route.path !== index) {
     router.push(index)
-    
+
     // 为屏幕阅读器用户宣布导航变化
-    const menuItem = menuList.value.find(item => 
-      item.path === index || 
+    const menuItem = menuList.value.find(item =>
+      item.path === index ||
       (item.children && item.children.find(child => child.path === index))
     )
     if (menuItem) {
-      const selectedItem = menuItem.path === index 
-        ? menuItem 
+      const selectedItem = menuItem.path === index
+        ? menuItem
         : menuItem.children?.find(child => child.path === index)
-      
+
       if (selectedItem) {
         announce(`正在导航到${selectedItem.name}页面`)
       }
@@ -289,21 +275,39 @@ const handleLogout = () => {
   align-items: center;
   justify-content: center;
   gap: var(--spacing-md);
-  background: linear-gradient(135deg, #2b2f3a 0%, #1a1d24 100%);
+  background: var(--gradient-sidebar);
   color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0 var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
 }
 
 .logo-icon {
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--color-primary) 0%, #722ed1 100%);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  box-shadow: var(--shadow-floating);
+  transition: all var(--transition-medium);
+}
+
+.logo-icon:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(76, 154, 255, 0.4);
 }
 
 .logo-text {
@@ -332,7 +336,7 @@ const handleLogout = () => {
   max-height: calc(100vh - 80px);
   overflow-y: auto;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #304156 0%, #283347 100%);
+  background: var(--gradient-sidebar);
   /* 优化滚动条样式 */
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
@@ -367,9 +371,21 @@ const handleLogout = () => {
   align-items: center;
   height: 100%;
   padding: 0 var(--spacing-xl);
-  background: linear-gradient(90deg, var(--color-bg-card) 0%, #f8f9fa 100%);
-  box-shadow: var(--shadow-dropdown);
+  background: var(--gradient-card);
+  box-shadow: var(--shadow-card);
   border-bottom: 1px solid var(--color-border-lighter);
+  position: relative;
+}
+
+.header-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-primary);
+  opacity: 0.3;
 }
 
 .header-left {
@@ -385,13 +401,30 @@ const handleLogout = () => {
   border: none;
   background: none;
   padding: var(--spacing-sm);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.collapse-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary-soft);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
 }
 
 .collapse-btn:hover {
-  background: var(--color-primary-light);
   color: var(--color-primary);
   transform: scale(1.1);
+}
+
+.collapse-btn:hover::before {
+  opacity: 1;
 }
 
 .breadcrumb-container {
@@ -465,19 +498,37 @@ const handleLogout = () => {
 
 /* 主题切换按钮样式 */
 .theme-toggle-btn {
-  background: var(--color-bg-card);
+  background: var(--gradient-card);
   border: 1px solid var(--color-border-light);
   color: var(--color-text-secondary);
   transition: all var(--transition-medium);
   width: 36px;
   height: 36px;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary-soft);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
 }
 
 .theme-toggle-btn:hover {
-  background: var(--color-primary-light);
   border-color: var(--color-primary);
   color: var(--color-primary);
   transform: scale(1.05);
+  box-shadow: var(--shadow-card);
+}
+
+.theme-toggle-btn:hover::before {
+  opacity: 1;
 }
 
 .theme-toggle-btn:active {

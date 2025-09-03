@@ -1,10 +1,11 @@
 :root {
-  /* 主色调系统 */
-  --color-primary: #1890ff;
-  --color-primary-hover: #40a9ff;
-  --color-primary-active: #096dd9;
-  --color-primary-light: #e6f7ff;
-  
+  /* 主色调系统 - 参考BlueTrade风格 */
+  --color-primary: #4c9aff;
+  --color-primary-hover: #6bb3ff;
+  --color-primary-active: #0074d9;
+  --color-primary-light: #e8f4ff;
+  --color-primary-dark: #2563eb;
+
   /* 功能色彩 */
   --color-success: #52c41a;
   --color-success-hover: #73d13d;
@@ -16,14 +17,14 @@
   --color-danger-hover: #ff7875;
   --color-danger-light: #fff2f0;
   --color-info: #1890ff;
-  
+
   /* 文本颜色层次 */
   --color-text-primary: #262626;
   --color-text-secondary: #595959;
   --color-text-tertiary: #8c8c8c;
   --color-text-disabled: #bfbfbf;
   --color-text-placeholder: #d9d9d9;
-  
+
   /* 边框和背景 */
   --color-border-primary: #d9d9d9;
   --color-border-light: #f0f0f0;
@@ -31,19 +32,28 @@
   --color-bg-page: #fafafa;
   --color-bg-card: #ffffff;
   --color-bg-section: #f8f9fa;
-  
-  /* 阴影系统 */
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-modal: 0 6px 24px rgba(0, 0, 0, 0.15);
-  --shadow-dropdown: 0 3px 12px rgba(0, 0, 0, 0.08);
-  
-  /* 渐变色 */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-success: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
-  --gradient-warning: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
-  --gradient-danger: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
-  
+
+  /* 阴影系统 - 增强层次感 */
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 8px 32px rgba(76, 154, 255, 0.15);
+  --shadow-modal: 0 12px 48px rgba(0, 0, 0, 0.18);
+  --shadow-dropdown: 0 6px 24px rgba(0, 0, 0, 0.12);
+  --shadow-floating: 0 20px 64px rgba(76, 154, 255, 0.1);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  /* 渐变色 - BlueTrade风格 */
+  --gradient-primary: linear-gradient(135deg, #4c9aff 0%, #2563eb 100%);
+  --gradient-primary-soft: linear-gradient(
+    135deg,
+    rgba(76, 154, 255, 0.1) 0%,
+    rgba(37, 99, 235, 0.05) 100%
+  );
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-sidebar: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+
   /* 间距系统 */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -51,13 +61,16 @@
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
-  
-  /* 圆角系统 */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  
+
+  /* 圆角系统 - 现代化设计 */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+
   /* 动画系统 */
   --transition-fast: 0.15s ease-out;
   --transition-medium: 0.2s ease-out;
@@ -65,13 +78,13 @@
 }
 
 /* 深色主题 */
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   /* 主色调系统 */
   --color-primary: #4c9aff;
   --color-primary-hover: #6bb3ff;
   --color-primary-active: #0074d9;
   --color-primary-light: #1a2332;
-  
+
   /* 功能色彩 */
   --color-success: #67c23a;
   --color-success-hover: #85ce61;
@@ -83,14 +96,14 @@
   --color-danger-hover: #f78989;
   --color-danger-light: #2d1616;
   --color-info: #4c9aff;
-  
+
   /* 文本颜色层次 */
   --color-text-primary: #e5e5e5;
   --color-text-secondary: #b3b3b3;
   --color-text-tertiary: #8a8a8a;
   --color-text-disabled: #5c5c5c;
   --color-text-placeholder: #4d4d4d;
-  
+
   /* 边框和背景 */
   --color-border-primary: #404040;
   --color-border-light: #2d2d2d;
@@ -98,13 +111,13 @@
   --color-bg-page: #0d1117;
   --color-bg-card: #161b22;
   --color-bg-section: #1c2128;
-  
+
   /* 阴影系统 */
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
   --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-modal: 0 6px 24px rgba(0, 0, 0, 0.5);
   --shadow-dropdown: 0 3px 12px rgba(0, 0, 0, 0.3);
-  
+
   /* 渐变色 - 深色主题调整 */
   --gradient-primary: linear-gradient(135deg, #4c9aff 0%, #6366f1 100%);
   --gradient-success: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
@@ -119,7 +132,9 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: var(--color-text-primary);
@@ -257,19 +272,71 @@ body {
   background: linear-gradient(90deg, #fafbfc 0%, #f8f9fa 100%);
 }
 
-/* 统计卡片 */
+/* 统计卡片 - BlueTrade风格 */
 .stats-card {
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-border-light);
   box-shadow: var(--shadow-card);
   transition: all var(--transition-medium);
   overflow: hidden;
+  background: var(--gradient-card);
+  position: relative;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
 }
 
 .stats-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   box-shadow: var(--shadow-card-hover);
   border-color: var(--color-primary);
+}
+
+.stats-card:hover::before {
+  opacity: 1;
+}
+
+/* 现代化数据卡片 */
+.modern-card {
+  background: var(--gradient-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-medium);
+  overflow: hidden;
+  position: relative;
+}
+
+.modern-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-primary-soft);
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+  pointer-events: none;
+}
+
+.modern-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-floating);
+  border-color: var(--color-primary);
+}
+
+.modern-card:hover::after {
+  opacity: 1;
 }
 
 .stats-content {
@@ -284,8 +351,12 @@ body {
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* 空状态设计 */
@@ -319,26 +390,94 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-/* 按钮增强样式 */
+/* 按钮增强样式 - BlueTrade风格 */
 .btn-gradient {
   background: var(--gradient-primary);
   border: none;
   color: white;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  letter-spacing: 0.5px;
   transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
 .btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-floating);
+}
+
+.btn-gradient:hover::before {
+  left: 100%;
+}
+
+.btn-gradient:active {
+  transform: translateY(0);
+}
+
+/* 现代化按钮组 */
+.modern-button-group {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.modern-button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  transition: all var(--transition-medium);
+  cursor: pointer;
+}
+
+.modern-button:hover {
+  background: var(--gradient-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.modern-button.active {
+  background: var(--gradient-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-card);
 }
 
 /* 无障碍设计 */
@@ -406,7 +545,9 @@ body {
 .keyboard-navigation button:focus-visible,
 .keyboard-navigation .el-button:focus-visible {
   transform: scale(1.02);
-  box-shadow: var(--shadow-card-hover), 0 0 0 3px rgba(24, 144, 255, 0.3);
+  box-shadow:
+    var(--shadow-card-hover),
+    0 0 0 3px rgba(24, 144, 255, 0.3);
 }
 
 .keyboard-navigation .el-menu-item:focus-visible {
@@ -450,29 +591,29 @@ body {
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
   }
-  
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-md);
   }
-  
+
   .page-actions {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .search-form {
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-md);
   }
-  
+
   .table-operations {
     flex-direction: column;
     gap: var(--spacing-md);
     align-items: flex-start;
   }
-  
+
   .table-operations-left,
   .table-operations-right {
     width: 100%;
@@ -484,12 +625,12 @@ body {
   .page-title {
     font-size: 20px;
   }
-  
+
   .main-content {
     margin: var(--spacing-xs);
     padding: var(--spacing-md);
   }
-  
+
   .search-form {
     padding: var(--spacing-md);
   }
@@ -576,8 +717,12 @@ body {
 }
 
 @keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* 表格优化 */
@@ -627,5 +772,257 @@ body {
       border-color: var(--color-primary);
       box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
     }
+  }
+}
+
+/* ==================== BlueTrade 风格组件 ==================== */
+
+/* 数据展示卡片 */
+.data-display-card {
+  background: var(--gradient-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-medium);
+  overflow: hidden;
+  position: relative;
+}
+
+.data-display-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-medium);
+}
+
+.data-display-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-floating);
+}
+
+.data-display-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* 数据值样式 */
+.data-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: var(--spacing-xs);
+}
+
+.data-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+}
+
+.data-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.data-trend.positive {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.data-trend.negative {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* 现代化表格样式 */
+.modern-table {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-light);
+}
+
+.modern-table .el-table__header-wrapper {
+  background: var(--gradient-primary-soft);
+}
+
+.modern-table .el-table__header th {
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.modern-table .el-table__row {
+  transition: all var(--transition-fast);
+}
+
+.modern-table .el-table__row:hover {
+  background: var(--gradient-primary-soft);
+}
+
+.modern-table .el-table__cell {
+  border-bottom: 1px solid var(--color-border-lighter);
+  padding: var(--spacing-md);
+}
+
+/* 图表容器增强 */
+.chart-container-enhanced {
+  background: var(--gradient-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.chart-container-enhanced:hover {
+  box-shadow: var(--shadow-floating);
+  transform: translateY(-2px);
+}
+
+.chart-header-modern {
+  background: var(--gradient-primary-soft);
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.chart-title-modern {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.chart-subtitle-modern {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-xs);
+}
+
+/* 状态指示器 */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse-indicator 2s infinite;
+}
+
+.status-indicator.online {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-indicator.offline {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.status-indicator.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.status-indicator.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+@keyframes pulse-indicator {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 浮动操作按钮 */
+.fab-container {
+  position: fixed;
+  bottom: var(--spacing-xl);
+  right: var(--spacing-xl);
+  z-index: 1000;
+}
+
+.fab-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  box-shadow: var(--shadow-floating);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 40px rgba(76, 154, 255, 0.3);
+}
+
+/* 加载状态优化 */
+.modern-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  background: var(--gradient-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-light);
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

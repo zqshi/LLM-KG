@@ -3,7 +3,9 @@
     <div class="page-header">
       <h1 class="page-title">版块管理</h1>
       <el-button type="primary" @click="handleAdd">
-        <el-icon><Plus /></el-icon>
+        <el-icon>
+          <Plus />
+        </el-icon>
         新增版块
       </el-button>
     </div>
@@ -14,7 +16,9 @@
         <el-card class="stats-card">
           <div class="stats-content">
             <div class="stats-icon total">
-              <el-icon><FolderOpened /></el-icon>
+              <el-icon>
+                <FolderOpened />
+              </el-icon>
             </div>
             <div class="stats-info">
               <div class="stats-value">{{ categoryStats.total }}</div>
@@ -23,7 +27,7 @@
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
         <el-card class="stats-card">
           <div class="stats-content">
@@ -37,12 +41,14 @@
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
         <el-card class="stats-card">
           <div class="stats-content">
             <div class="stats-icon posts">
-              <el-icon><Document /></el-icon>
+              <el-icon>
+                <Document />
+              </el-icon>
             </div>
             <div class="stats-info">
               <div class="stats-value">{{ categoryStats.totalPosts }}</div>
@@ -51,12 +57,14 @@
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="6">
         <el-card class="stats-card">
           <div class="stats-content">
             <div class="stats-icon moderators">
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </div>
             <div class="stats-info">
               <div class="stats-value">{{ categoryStats.moderators }}</div>
@@ -69,24 +77,23 @@
 
     <!-- 版块列表 -->
     <div class="categories-grid">
-      <draggable
-        v-model="categoryList"
-        @end="handleSort"
-        class="drag-container"
-        item-key="id"
-      >
+      <draggable v-model="categoryList" @end="handleSort" class="drag-container" item-key="id">
         <template #item="{ element: category }">
           <el-card class="category-card" :class="{ disabled: !category.isActive }">
             <template #header>
               <div class="card-header">
                 <div class="header-left">
-                  <el-icon class="drag-handle"><Rank /></el-icon>
+                  <el-icon class="drag-handle">
+                    <Rank />
+                  </el-icon>
                   <span class="category-name">{{ category.name }}</span>
                   <el-tag v-if="!category.isActive" type="danger" size="small">已禁用</el-tag>
                 </div>
                 <el-dropdown @command="(command) => handleAction(command, category)">
                   <el-button text>
-                    <el-icon><MoreFilled /></el-icon>
+                    <el-icon>
+                      <MoreFilled />
+                    </el-icon>
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
@@ -107,7 +114,7 @@
               <div class="category-description">
                 {{ category.description || '暂无描述' }}
               </div>
-              
+
               <div class="category-stats">
                 <div class="stat-item">
                   <span class="stat-number">{{ category.postCount }}</span>
@@ -126,13 +133,8 @@
               <div class="category-moderators" v-if="category.moderators?.length">
                 <div class="moderators-label">版主：</div>
                 <div class="moderators-list">
-                  <el-avatar
-                    v-for="moderator in category.moderators.slice(0, 3)"
-                    :key="moderator.id"
-                    :size="24"
-                    :src="moderator.avatar"
-                    class="moderator-avatar"
-                  >
+                  <el-avatar v-for="moderator in category.moderators.slice(0, 3)" :key="moderator.id" :size="24"
+                    :src="moderator.avatar" class="moderator-avatar">
                     {{ moderator.nickname.charAt(0) }}
                   </el-avatar>
                   <span v-if="category.moderators.length > 3" class="more-count">
@@ -166,60 +168,39 @@
     </div>
 
     <!-- 版块编辑对话框 -->
-    <el-dialog
-      v-model="categoryDialogVisible"
-      :title="isEdit ? '编辑版块' : '新增版块'"
-      width="600px"
-      @close="handleDialogClose"
-    >
-      <el-form
-        ref="categoryFormRef"
-        :model="categoryForm"
-        :rules="categoryFormRules"
-        label-width="100px"
-      >
+    <el-dialog v-model="categoryDialogVisible" :title="isEdit ? '编辑版块' : '新增版块'" width="600px"
+      @close="handleDialogClose">
+      <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryFormRules" label-width="100px">
         <el-form-item label="版块名称" prop="name">
           <el-input v-model="categoryForm.name" placeholder="请输入版块名称" />
         </el-form-item>
-        
+
         <el-form-item label="版块标识" prop="code">
-          <el-input 
-            v-model="categoryForm.code" 
-            placeholder="请输入版块标识（英文）"
-            :disabled="isEdit"
-          />
+          <el-input v-model="categoryForm.code" placeholder="请输入版块标识（英文）" :disabled="isEdit" />
         </el-form-item>
-        
+
         <el-form-item label="版块描述" prop="description">
-          <el-input
-            v-model="categoryForm.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入版块描述"
-          />
+          <el-input v-model="categoryForm.description" type="textarea" :rows="3" placeholder="请输入版块描述" />
         </el-form-item>
-        
+
         <el-form-item label="版块图标" prop="icon">
           <el-input v-model="categoryForm.icon" placeholder="请输入图标名称">
             <template #prepend>
               <el-icon v-if="categoryForm.icon">
                 <component :is="categoryForm.icon" />
               </el-icon>
-              <el-icon v-else><Picture /></el-icon>
+              <el-icon v-else>
+                <Picture />
+              </el-icon>
             </template>
           </el-input>
         </el-form-item>
-        
+
         <el-form-item label="排序权重" prop="sortOrder">
-          <el-input-number
-            v-model="categoryForm.sortOrder"
-            :min="0"
-            :max="9999"
-            placeholder="数字越小排序越靠前"
-            style="width: 100%"
-          />
+          <el-input-number v-model="categoryForm.sortOrder" :min="0" :max="9999" placeholder="数字越小排序越靠前"
+            style="width: 100%" />
         </el-form-item>
-        
+
         <el-form-item label="版块权限" prop="isPublic">
           <el-radio-group v-model="categoryForm.isPublic">
             <el-radio :value="true">公开版块</el-radio>
@@ -227,7 +208,7 @@
           </el-radio-group>
           <div class="form-help">私有版块需要特定权限才能访问</div>
         </el-form-item>
-        
+
         <el-form-item label="审核模式" prop="auditMode">
           <el-radio-group v-model="categoryForm.auditMode">
             <el-radio value="none">无需审核</el-radio>
@@ -236,15 +217,11 @@
             <el-radio value="sample">抽样审核</el-radio>
           </el-radio-group>
         </el-form-item>
-        
+
         <el-form-item label="版块状态" prop="isActive">
-          <el-switch
-            v-model="categoryForm.isActive"
-            active-text="启用"
-            inactive-text="禁用"
-          />
+          <el-switch v-model="categoryForm.isActive" active-text="启用" inactive-text="禁用" />
         </el-form-item>
-        
+
         <el-form-item label="发帖权限">
           <el-checkbox-group v-model="categoryForm.postPermissions">
             <el-checkbox value="all">所有用户</el-checkbox>
@@ -254,7 +231,7 @@
           </el-checkbox-group>
         </el-form-item>
       </el-form>
-      
+
       <template #footer>
         <el-button @click="categoryDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleCategorySave" :loading="saveLoading">
@@ -269,11 +246,7 @@
         <div class="current-moderators">
           <h4>当前版主</h4>
           <div class="moderator-list">
-            <div
-              v-for="moderator in currentModerators"
-              :key="moderator.id"
-              class="moderator-item"
-            >
+            <div v-for="moderator in currentModerators" :key="moderator.id" class="moderator-item">
               <el-avatar :size="32" :src="moderator.avatar">
                 {{ moderator.nickname.charAt(0) }}
               </el-avatar>
@@ -281,36 +254,23 @@
                 <div class="moderator-name">{{ moderator.nickname }}</div>
                 <div class="moderator-dept">{{ moderator.department }}</div>
               </div>
-              <el-button
-                type="danger"
-                size="small"
-                @click="removeModerator(moderator)"
-              >
+              <el-button type="danger" size="small" @click="removeModerator(moderator)">
                 移除
               </el-button>
             </div>
           </div>
         </div>
-        
+
         <div class="add-moderator">
           <h4>添加版主</h4>
-          <el-select
-            v-model="selectedUserId"
-            placeholder="请选择用户"
-            filterable
-            style="width: 200px; margin-right: 10px"
-          >
-            <el-option
-              v-for="user in availableUsers"
-              :key="user.id"
-              :label="`${user.nickname} (${user.department})`"
-              :value="user.id"
-            />
+          <el-select v-model="selectedUserId" placeholder="请选择用户" filterable style="width: 200px; margin-right: 10px">
+            <el-option v-for="user in availableUsers" :key="user.id" :label="`${user.nickname} (${user.department})`"
+              :value="user.id" />
           </el-select>
           <el-button type="primary" @click="addModerator">添加</el-button>
         </div>
       </div>
-      
+
       <template #footer>
         <el-button @click="moderatorDialogVisible = false">关闭</el-button>
       </template>
@@ -507,13 +467,13 @@ const handleAdd = () => {
     if (key === 'sortOrder') {
       categoryForm[key] = categoryList.value.length + 1
     } else if (key === 'isPublic' || key === 'isActive') {
-      ;(categoryForm as any)[key] = true
+      ; (categoryForm as any)[key] = true
     } else if (key === 'auditMode') {
       categoryForm[key] = 'none'
     } else if (key === 'postPermissions') {
       categoryForm[key] = ['all']
     } else {
-      ;(categoryForm as any)[key] = ''
+      ; (categoryForm as any)[key] = ''
     }
   })
   categoryForm.icon = 'FolderOpened'
@@ -522,36 +482,36 @@ const handleAdd = () => {
 
 const handleAction = (command: string, category: Category) => {
   currentCategory.value = category
-  
+
   switch (command) {
     case 'edit':
       isEdit.value = true
       Object.keys(categoryForm).forEach(key => {
-        ;(categoryForm as any)[key] = (category as any)[key] || (key === 'postPermissions' ? [] : '')
+        ; (categoryForm as any)[key] = (category as any)[key] || (key === 'postPermissions' ? [] : '')
       })
       categoryDialogVisible.value = true
       break
-      
+
     case 'moderators':
       currentModerators.value = [...category.moderators]
       moderatorDialogVisible.value = true
       break
-      
+
     case 'settings':
       ElMessage.info('版块设置功能开发中...')
       break
-      
+
     case 'toggle':
       category.isActive = !category.isActive
       ElMessage.success(category.isActive ? '版块已启用' : '版块已禁用')
       break
-      
+
     case 'delete':
       if (category.postCount > 0) {
         ElMessage.warning(`该版块下还有 ${category.postCount} 篇内容，无法删除`)
         return
       }
-      
+
       ElMessageBox.confirm(
         `确定要删除版块 "${category.name}" 吗？`,
         '删除版块',
@@ -578,7 +538,7 @@ const handleDialogClose = () => {
 
 const handleCategorySave = () => {
   if (!categoryFormRef.value) return
-  
+
   categoryFormRef.value.validate((valid) => {
     if (valid) {
       saveLoading.value = true
@@ -597,7 +557,7 @@ const addModerator = () => {
     ElMessage.warning('请选择用户')
     return
   }
-  
+
   const user = availableUsers.value.find(u => u.id === selectedUserId.value)
   if (user && !currentModerators.value.find(m => m.id === user.id)) {
     currentModerators.value.push(user)
@@ -630,13 +590,13 @@ onMounted(() => {
 }
 
 .stats-card {
-  height: 80px;
+  min-height: 80px;
 }
 
 .stats-content {
   display: flex;
   align-items: center;
-  height: 100%;
+  min-height: 80px;
 }
 
 .stats-icon {
@@ -679,9 +639,35 @@ onMounted(() => {
   margin-top: 4px;
 }
 
+/* 统计卡片响应式：中屏两列，小屏一列，避免挤压导致内容裁切 */
+@media (max-width: 992px) {
+  .stats-row .el-col {
+    width: 50% !important;
+    max-width: 50% !important;
+    flex: 0 0 50% !important;
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-row .el-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  .stats-content {
+    min-height: 64px;
+  }
+
+  .stats-value {
+    font-size: 20px;
+  }
+}
+
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
 
@@ -706,12 +692,15 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 1;
 }
 
 .drag-handle {
@@ -723,6 +712,10 @@ onMounted(() => {
   font-size: 16px;
   font-weight: 600;
   color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .category-content {
@@ -735,6 +728,8 @@ onMounted(() => {
   line-height: 1.6;
   margin-bottom: 16px;
   min-height: 44px;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .category-stats {
@@ -796,6 +791,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .setting-item {

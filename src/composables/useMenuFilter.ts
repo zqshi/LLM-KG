@@ -4,40 +4,45 @@ import type { MenuNode } from '@/types'
 
 // 定义角色枚举
 export enum UserRole {
-  SUPER_ADMIN = 'super_admin',       // 超级管理员：全权限
-  ADMIN = 'admin',                   // 管理员：除系统配置外的所有权限
+  SUPER_ADMIN = 'super_admin', // 超级管理员：全权限
+  ADMIN = 'admin', // 管理员：除系统配置外的所有权限
   CONTENT_MANAGER = 'content_manager', // 内容管理员：内容相关功能
-  AUDIT_MANAGER = 'audit_manager',   // 审核管理员：审核相关功能
+  AUDIT_MANAGER = 'audit_manager', // 审核管理员：审核相关功能
   OPERATION_MANAGER = 'operation_manager', // 运营管理员：运营推荐功能
-  EDITOR = 'editor',                 // 编辑：基础内容编辑权限
-  VIEWER = 'viewer'                  // 查看者：只读权限
+  EDITOR = 'editor', // 编辑：基础内容编辑权限
+  VIEWER = 'viewer' // 查看者：只读权限
 }
 
 // 角色权限映射表
 const ROLE_MENU_ACCESS: Record<UserRole, string[]> = {
   [UserRole.SUPER_ADMIN]: [
-    'dashboard', 'rbac', 'content', 'news', 'banner', 
-    'flea-market', 'quotation', 'operation', 'system'
+    'dashboard',
+    'rbac',
+    'content',
+    'news',
+    'banner',
+    'flea-market',
+    'quotation',
+    'audit',
+    'operation',
+    'system'
   ],
   [UserRole.ADMIN]: [
-    'dashboard', 'rbac', 'content', 'news', 'banner', 
-    'flea-market', 'quotation', 'operation'
+    'dashboard',
+    'rbac',
+    'content',
+    'news',
+    'banner',
+    'flea-market',
+    'quotation',
+    'audit',
+    'operation'
   ],
-  [UserRole.CONTENT_MANAGER]: [
-    'dashboard', 'content', 'news', 'banner', 'quotation'
-  ],
-  [UserRole.AUDIT_MANAGER]: [
-    'dashboard', 'content', 'news', 'banner', 'flea-market'
-  ],
-  [UserRole.OPERATION_MANAGER]: [
-    'dashboard', 'content', 'operation', 'banner'
-  ],
-  [UserRole.EDITOR]: [
-    'dashboard', 'content', 'news'
-  ],
-  [UserRole.VIEWER]: [
-    'dashboard'
-  ]
+  [UserRole.CONTENT_MANAGER]: ['dashboard', 'content', 'news', 'banner', 'quotation'],
+  [UserRole.AUDIT_MANAGER]: ['dashboard', 'content', 'news', 'banner', 'flea-market', 'audit'],
+  [UserRole.OPERATION_MANAGER]: ['dashboard', 'content', 'operation', 'banner'],
+  [UserRole.EDITOR]: ['dashboard', 'content', 'news'],
+  [UserRole.VIEWER]: ['dashboard']
 }
 
 /**
@@ -51,11 +56,12 @@ export function useMenuFilter() {
   const isAdminUser = computed(() => {
     const u = authStore.currentUser
     const roles = (u?.roles || []).map(r => r.code)
-    return !!u && (
-      u.username === 'admin' ||
-      roles.includes('system_admin') ||
-      roles.includes('super_admin') ||
-      roles.includes('admin')
+    return (
+      !!u &&
+      (u.username === 'admin' ||
+        roles.includes('system_admin') ||
+        roles.includes('super_admin') ||
+        roles.includes('admin'))
     )
   })
 
@@ -93,10 +99,10 @@ export function useMenuFilter() {
    */
   const isMenuAccessible = (menuPath: string, userRole: UserRole): boolean => {
     const accessibleMenus = ROLE_MENU_ACCESS[userRole] || []
-    
+
     // 提取菜单的顶级路径
     const topLevelPath = menuPath.split('/')[1] || menuPath.replace('/', '')
-    
+
     return accessibleMenus.includes(topLevelPath)
   }
 
@@ -108,9 +114,7 @@ export function useMenuFilter() {
       .filter(menu => isMenuAccessible(menu.path, userRole))
       .map(menu => ({
         ...menu,
-        children: menu.children 
-          ? filterMenuItems(menu.children, userRole)
-          : undefined
+        children: menu.children ? filterMenuItems(menu.children, userRole) : undefined
       }))
       .filter(menu => {
         // 如果菜单有子项，确保过滤后至少有一个可见的子项
@@ -127,7 +131,7 @@ export function useMenuFilter() {
   const filteredMenus = computed(() => {
     const allMenus = authStore.menus
     const currentRole = getUserRole.value
-    
+
     // 管理员返回全部菜单，不做过滤
     if (isAdminUser.value) {
       return allMenus
@@ -137,12 +141,15 @@ export function useMenuFilter() {
     console.log('当前用户角色:', currentRole)
     console.log('原始菜单数量:', allMenus.length)
     console.log('角色可访问的顶级菜单:', ROLE_MENU_ACCESS[currentRole])
-    
+
     const filtered = filterMenuItems(allMenus, currentRole)
-    
+
     console.log('过滤后菜单数量:', filtered.length)
-    console.log('过滤后菜单:', filtered.map(m => ({ name: m.name, path: m.path })))
-    
+    console.log(
+      '过滤后菜单:',
+      filtered.map(m => ({ name: m.name, path: m.path }))
+    )
+
     return filtered
   })
 

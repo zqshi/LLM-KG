@@ -29,6 +29,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '个人资料', icon: 'User' }
       },
       {
+        path: 'demo',
+        name: 'Demo',
+        component: () => import('@/views/demo/VisualDemo.vue'),
+        meta: { title: 'BlueTrade风格演示', icon: 'DataLine' }
+      },
+      {
         path: 'rbac',
         name: 'RBAC',
         redirect: '/rbac/organizations',
@@ -69,7 +75,7 @@ const routes: RouteRecordRaw[] = [
             name: 'RBACSyncConfig',
             component: () => import('@/views/rbac/SyncConfig.vue'),
             meta: { title: '数据同步配置', icon: 'Refresh', permission: 'rbac:sync:config' }
-          },
+          }
         ]
       },
       {
@@ -82,7 +88,7 @@ const routes: RouteRecordRaw[] = [
             path: 'categories',
             name: 'ContentCategories',
             component: () => import('@/views/content/Categories.vue'),
-            meta: { title: '板块管理', icon: 'FolderOpened', permission: 'content:category:view' }
+            meta: { title: '版块管理', icon: 'FolderOpened', permission: 'content:category:view' }
           },
           {
             path: 'list',
@@ -223,6 +229,20 @@ const routes: RouteRecordRaw[] = [
             name: 'QuotationDisplay',
             component: () => import('@/views/quotation/Display.vue'),
             meta: { title: '展示配置', icon: 'Setting' }
+          }
+        ]
+      },
+      {
+        path: 'audit',
+        name: 'Audit',
+        redirect: '/audit/center',
+        meta: { title: '统一审核中心', icon: 'Check', permission: 'audit:view' },
+        children: [
+          {
+            path: 'center',
+            name: 'AuditCenter',
+            component: () => import('@/views/audit/Center.vue'),
+            meta: { title: '审核中心', icon: 'Check', permission: 'audit:view' }
           }
         ]
       },

@@ -2,35 +2,32 @@
   <el-row :gutter="24" class="metrics-cards animate-fade-in">
     <!-- 今日活跃用户 -->
     <el-col :span="6" :xs="12" :sm="12" :md="6">
-      <el-card 
-        class="metrics-card metrics-card-primary" 
-        shadow="hover"
-        @click="handleCardClick('users')"
-      >
+      <div class="data-display-card metrics-card-enhanced" @click="handleCardClick('users')">
         <div class="metrics-content">
           <div class="metrics-icon-container">
             <div class="metrics-icon primary">
-              <el-icon size="32"><User /></el-icon>
+              <el-icon size="32">
+                <User />
+              </el-icon>
             </div>
-            <div 
-              class="metrics-trend"
-              :class="getTrendClass(metrics?.todayActiveUsersTrend || 0)"
-            >
-              <el-icon size="12"><TrendCharts /></el-icon>
+            <div class="data-trend" :class="getTrendClass(metrics?.todayActiveUsersTrend || 0)">
+              <el-icon size="12">
+                <TrendCharts />
+              </el-icon>
               <span>{{ formatTrend(metrics?.todayActiveUsersTrend || 0) }}</span>
             </div>
           </div>
           <div class="metrics-info">
-            <div class="metrics-value">
+            <div class="data-value">
               {{ formatNumber(metrics?.todayActiveUsers || 0) }}
             </div>
-            <div class="metrics-label">今日活跃用户</div>
+            <div class="data-label">今日活跃用户</div>
             <div class="metrics-change">
               较昨日{{ getTrendText(metrics?.todayActiveUsersTrend || 0) }}
             </div>
           </div>
         </div>
-        
+
         <!-- Loading 状态 -->
         <div v-if="loading" class="metrics-loading">
           <el-skeleton animated>
@@ -40,40 +37,37 @@
             </template>
           </el-skeleton>
         </div>
-      </el-card>
+      </div>
     </el-col>
-    
+
     <!-- 今日新增内容 -->
     <el-col :span="6" :xs="12" :sm="12" :md="6">
-      <el-card 
-        class="metrics-card metrics-card-success" 
-        shadow="hover"
-        @click="handleCardClick('content')"
-      >
+      <div class="data-display-card metrics-card-enhanced" @click="handleCardClick('content')">
         <div class="metrics-content">
           <div class="metrics-icon-container">
             <div class="metrics-icon success">
-              <el-icon size="32"><Document /></el-icon>
+              <el-icon size="32">
+                <Document />
+              </el-icon>
             </div>
-            <div 
-              class="metrics-trend"
-              :class="getTrendClass(metrics?.todayNewContentTrend || 0)"
-            >
-              <el-icon size="12"><TrendCharts /></el-icon>
+            <div class="data-trend" :class="getTrendClass(metrics?.todayNewContentTrend || 0)">
+              <el-icon size="12">
+                <TrendCharts />
+              </el-icon>
               <span>{{ formatTrend(metrics?.todayNewContentTrend || 0) }}</span>
             </div>
           </div>
           <div class="metrics-info">
-            <div class="metrics-value">
+            <div class="data-value">
               {{ metrics?.todayNewContent || 0 }}
             </div>
-            <div class="metrics-label">今日新增内容</div>
+            <div class="data-label">今日新增内容</div>
             <div class="metrics-change">
               较昨日{{ getTrendText(metrics?.todayNewContentTrend || 0) }}
             </div>
           </div>
         </div>
-        
+
         <div v-if="loading" class="metrics-loading">
           <el-skeleton animated>
             <template #template>
@@ -82,33 +76,28 @@
             </template>
           </el-skeleton>
         </div>
-      </el-card>
+      </div>
     </el-col>
-    
+
     <!-- 待审核内容 -->
     <el-col :span="6" :xs="12" :sm="12" :md="6">
-      <el-card 
-        class="metrics-card metrics-card-warning" 
-        shadow="hover"
-        @click="handleCardClick('audit')"
-      >
+      <div class="data-display-card metrics-card-enhanced" @click="handleCardClick('audit')">
         <div class="metrics-content">
           <div class="metrics-icon-container">
             <div class="metrics-icon warning">
-              <el-icon size="32"><View /></el-icon>
+              <el-icon size="32">
+                <View />
+              </el-icon>
             </div>
-            <div 
-              class="metrics-badge"
-              :class="{ 'urgent': (metrics?.pendingAuditCount || 0) > 10 }"
-            >
+            <div class="metrics-badge" :class="{ 'urgent': (metrics?.pendingAuditCount || 0) > 10 }">
               <span>{{ (metrics?.pendingAuditCount || 0) > 10 ? '紧急' : '正常' }}</span>
             </div>
           </div>
           <div class="metrics-info">
-            <div class="metrics-value">
+            <div class="data-value">
               {{ metrics?.pendingAuditCount || 0 }}
             </div>
-            <div class="metrics-label">待审核内容</div>
+            <div class="data-label">待审核内容</div>
             <div class="metrics-change">
               {{ (metrics?.pendingAuditCount || 0) > 0 ? '需要及时处理' : '暂无待审' }}
             </div>
@@ -123,29 +112,26 @@
             </template>
           </el-skeleton>
         </div>
-      </el-card>
+      </div>
     </el-col>
-    
+
     <!-- 系统健康状态 -->
     <el-col :span="6" :xs="12" :sm="12" :md="6">
-      <el-card 
-        class="metrics-card" 
-        :class="`metrics-card-${systemHealthClass}`" 
-        shadow="hover"
-        @click="handleCardClick('system')"
-      >
+      <div class="data-display-card metrics-card-enhanced" @click="handleCardClick('system')">
         <div class="metrics-content">
           <div class="metrics-icon-container">
             <div class="metrics-icon" :class="systemHealthClass">
-              <el-icon size="32"><Monitor /></el-icon>
+              <el-icon size="32">
+                <Monitor />
+              </el-icon>
             </div>
-            <div class="metrics-indicator" :class="systemHealthClass">
-              <div class="indicator-dot"></div>
+            <div class="status-indicator" :class="systemHealthClass">
+              {{ systemHealthText }}
             </div>
           </div>
           <div class="metrics-info">
-            <div class="metrics-value">{{ systemHealthText }}</div>
-            <div class="metrics-label">系统健康状态</div>
+            <div class="data-value">{{ systemHealthText }}</div>
+            <div class="data-label">系统健康状态</div>
             <div class="metrics-change">
               {{ getSystemStatusText() }}
             </div>
@@ -160,14 +146,16 @@
             </template>
           </el-skeleton>
         </div>
-      </el-card>
+      </div>
     </el-col>
   </el-row>
-  
+
   <!-- 数据更新时间提示 -->
   <div class="update-time-hint">
     <el-text size="small" type="info">
-      <el-icon><Clock /></el-icon>
+      <el-icon>
+        <Clock />
+      </el-icon>
       数据更新时间：{{ updateTimeText }}
     </el-text>
   </div>
@@ -243,27 +231,27 @@ const getTrendText = (trend: number): string => {
 
 const getSystemStatusText = (): string => {
   if (!props.metrics) return '数据加载中...'
-  
+
   const { systemCpuUsage, systemMemoryUsage, systemDiskUsage } = props.metrics
-  
+
   if (systemCpuUsage > 80 || systemMemoryUsage > 85 || systemDiskUsage > 90) {
     return '需要关注资源使用'
   }
-  
+
   return '运行稳定'
 }
 
 const handleCardClick = (type: string) => {
   emit('card-click', type)
-  
+
   // 根据卡片类型跳转到相应页面
   const routeMap: Record<string, string> = {
     users: '/rbac/users',
-    content: '/content/list', 
+    content: '/content/list',
     audit: '/audit/center',
     system: '/system/settings'
   }
-  
+
   const path = routeMap[type]
   if (path) {
     router.push(path)
@@ -276,52 +264,14 @@ const handleCardClick = (type: string) => {
   margin-bottom: var(--spacing-xl);
 }
 
-.metrics-card {
+.metrics-card-enhanced {
   height: 140px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-light);
+  cursor: pointer;
   transition: all var(--transition-medium);
   position: relative;
-  overflow: hidden;
-  cursor: pointer;
 }
 
-.metrics-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--gradient-primary);
-  opacity: 0;
-  transition: opacity var(--transition-medium);
-}
-
-.metrics-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
-}
-
-.metrics-card:hover::before {
-  opacity: 1;
-}
-
-.metrics-card-primary::before {
-  background: var(--gradient-primary);
-}
-
-.metrics-card-success::before {
-  background: var(--gradient-success);
-}
-
-.metrics-card-warning::before {
-  background: var(--gradient-warning);
-}
-
-.metrics-card-danger::before {
-  background: var(--gradient-danger);
-}
+/* 使用全局的 data-display-card 样式 */
 
 .metrics-content {
   display: flex;
@@ -381,25 +331,7 @@ const handleCardClick = (type: string) => {
   background: var(--gradient-danger);
 }
 
-.metrics-trend {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  font-size: 12px;
-  font-weight: 600;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-}
-
-.metrics-trend.positive {
-  color: var(--color-success);
-  background: var(--color-success-light);
-}
-
-.metrics-trend.negative {
-  color: var(--color-danger);
-  background: var(--color-danger-light);
-}
+/* 趋势样式使用全局 data-trend */
 
 .metrics-badge {
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -451,13 +383,27 @@ const handleCardClick = (type: string) => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .metrics-info {
@@ -467,21 +413,7 @@ const handleCardClick = (type: string) => {
   justify-content: center;
 }
 
-.metrics-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  line-height: 1;
-  margin-bottom: var(--spacing-xs);
-  letter-spacing: -0.5px;
-}
-
-.metrics-label {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  font-weight: 500;
-  margin-bottom: var(--spacing-xs);
-}
+/* 使用全局 data-value 和 data-label 样式 */
 
 .metrics-change {
   font-size: 12px;
@@ -507,16 +439,16 @@ const handleCardClick = (type: string) => {
   .metrics-card {
     margin-bottom: var(--spacing-md);
   }
-  
+
   .metrics-value {
     font-size: 24px;
   }
-  
+
   .metrics-icon {
     width: 48px;
     height: 48px;
   }
-  
+
   .metrics-icon .el-icon {
     font-size: 24px !important;
   }
@@ -532,6 +464,7 @@ const handleCardClick = (type: string) => {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

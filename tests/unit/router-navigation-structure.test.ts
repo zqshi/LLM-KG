@@ -8,7 +8,7 @@ import type { RouteRecordNormalized } from 'vue-router'
  */
 describe('导航结构测试', () => {
   const routes = router.getRoutes()
-  
+
   // 测试所有路由是否包含必需的路径
   describe('路由路径验证', () => {
     it('应该包含全局仪表盘路由', () => {
@@ -20,13 +20,13 @@ describe('导航结构测试', () => {
     it('应该包含认证与权限管理子路由', () => {
       const expectedPaths = [
         '/rbac/organizations',
-        '/rbac/users', 
+        '/rbac/users',
         '/rbac/roles',
         '/rbac/permissions',
         '/rbac/user-roles',
         '/rbac/sync-config'
       ]
-      
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -34,12 +34,8 @@ describe('导航结构测试', () => {
     })
 
     it('应该包含内容管理子路由', () => {
-      const expectedPaths = [
-        '/content/categories',
-        '/content/list',
-        '/content/dashboard'
-      ]
-      
+      const expectedPaths = ['/content/categories', '/content/list', '/content/dashboard']
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -53,7 +49,7 @@ describe('导航结构测试', () => {
         '/banner/my-done',
         '/banner/status-tracking'
       ]
-      
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -67,7 +63,7 @@ describe('导航结构测试', () => {
         '/flea-market/reports',
         '/flea-market/dashboard'
       ]
-      
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -75,11 +71,8 @@ describe('导航结构测试', () => {
     })
 
     it('应该包含领导名言管理子路由', () => {
-      const expectedPaths = [
-        '/quotation/list',
-        '/quotation/display'
-      ]
-      
+      const expectedPaths = ['/quotation/list', '/quotation/display']
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -93,7 +86,7 @@ describe('导航结构测试', () => {
         '/operation/rankings',
         '/operation/dashboard'
       ]
-      
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -101,12 +94,8 @@ describe('导航结构测试', () => {
     })
 
     it('应该包含配置与审计子路由', () => {
-      const expectedPaths = [
-        '/system/settings',
-        '/system/logs',
-        '/system/alerts'
-      ]
-      
+      const expectedPaths = ['/system/settings', '/system/logs', '/system/alerts']
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -114,12 +103,8 @@ describe('导航结构测试', () => {
     })
 
     it('应该包含资讯聚合管理子路由', () => {
-      const expectedPaths = [
-        '/news/sources',
-        '/news/content-pool',
-        '/news/task-monitor'
-      ]
-      
+      const expectedPaths = ['/news/sources', '/news/content-pool', '/news/task-monitor']
+
       expectedPaths.forEach(path => {
         const route = routes.find(r => r.path === path)
         expect(route).toBeDefined()
@@ -130,7 +115,7 @@ describe('导航结构测试', () => {
   describe('路由标题验证', () => {
     it('内容管理子路由应该有正确的标题顺序', () => {
       const expectedTitles = [
-        { path: '/content/categories', title: '板块管理' },
+        { path: '/content/categories', title: '版块管理' },
         { path: '/content/list', title: '内容列表' },
         { path: '/content/dashboard', title: '数据看板' }
       ]
@@ -185,12 +170,7 @@ describe('导航结构测试', () => {
 
   describe('路由权限验证', () => {
     it('关键路由应该有权限控制', () => {
-      const criticalRoutes = [
-        '/dashboard',
-        '/rbac/users',
-        '/rbac/roles',
-        '/system/logs'
-      ]
+      const criticalRoutes = ['/dashboard', '/rbac/users', '/rbac/roles', '/system/logs']
 
       criticalRoutes.forEach(path => {
         const route = routes.find(r => r.path === path)
@@ -250,12 +230,7 @@ describe('导航结构测试', () => {
     })
 
     it('隐藏路由应该标记为hideInMenu', () => {
-      const hiddenRoutes = [
-        '/login',
-        '/content/detail/:id',
-        '/content/edit/:id',
-        '/content/create'
-      ]
+      const hiddenRoutes = ['/login', '/content/detail/:id', '/content/edit/:id', '/content/create']
 
       hiddenRoutes.forEach(path => {
         const route = routes.find(r => r.path === path)
@@ -268,19 +243,16 @@ describe('导航结构测试', () => {
 
   describe('路由命名验证', () => {
     it('所有路由都应该有合理的name', () => {
-      const routesWithoutName = routes.filter(r => 
-        !r.name && 
-        !r.redirect && 
-        !r.path.includes(':') && 
-        r.path !== '/'
+      const routesWithoutName = routes.filter(
+        r => !r.name && !r.redirect && !r.path.includes(':') && r.path !== '/'
       )
-      
+
       expect(routesWithoutName).toHaveLength(0)
     })
 
     it('路由名称应该符合命名规范', () => {
       const namedRoutes = routes.filter(r => r.name && typeof r.name === 'string')
-      
+
       namedRoutes.forEach(route => {
         // 路由名称应该是PascalCase或包含模块前缀
         const namePattern = /^[A-Z][a-zA-Z]*$|^[A-Z][A-Z]+[A-Z][a-zA-Z]*$/
@@ -291,9 +263,8 @@ describe('导航结构测试', () => {
 
   describe('Banner管理特定验证', () => {
     it('不应该包含审批流配置路由', () => {
-      const workflowRoute = routes.find(r => 
-        r.path.includes('/banner/workflow') || 
-        r.meta?.title === '审批流配置'
+      const workflowRoute = routes.find(
+        r => r.path.includes('/banner/workflow') || r.meta?.title === '审批流配置'
       )
       expect(workflowRoute).toBeUndefined()
     })

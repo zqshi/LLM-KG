@@ -52,7 +52,9 @@ export default defineConfig({
       'tests/**/*.test.{js,ts}',
       'tests/**/*.spec.{js,ts}',
       'src/**/__tests__/**/*.{js,ts}',
-      'src/**/*.test.{js,ts}'
+      'src/**/*.test.{js,ts}',
+      'src/api/__tests__/**/*.{js,ts}',
+      'src/views/audit/components/__tests__/**/*.{js,ts}'
     ],
     exclude: [
       'node_modules/',

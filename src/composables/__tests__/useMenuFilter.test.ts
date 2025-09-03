@@ -16,7 +16,7 @@ vi.mock('@/stores/auth', () => ({
 describe('useMenuFilter', () => {
   let mockAuthStore: any
   let mockMenus: MenuNode[]
-  
+
   beforeEach(() => {
     // 创建模拟菜单数据
     mockMenus = [
@@ -42,7 +42,7 @@ describe('useMenuFilter', () => {
         path: '/content',
         icon: 'Document',
         children: [
-          { id: 31, name: '板块管理', path: '/content/categories', icon: 'FolderOpened' },
+          { id: 31, name: '版块管理', path: '/content/categories', icon: 'FolderOpened' },
           { id: 32, name: '内容列表', path: '/content/list', icon: 'Document' }
         ]
       },
@@ -51,9 +51,7 @@ describe('useMenuFilter', () => {
         name: '系统配置',
         path: '/system',
         icon: 'Tools',
-        children: [
-          { id: 41, name: '系统设置', path: '/system/settings', icon: 'Setting' }
-        ]
+        children: [{ id: 41, name: '系统设置', path: '/system/settings', icon: 'Setting' }]
       }
     ]
 
@@ -74,34 +72,34 @@ describe('useMenuFilter', () => {
     })
 
     it('应该返回VIEWER角色当用户没有角色时', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [] 
+        roles: []
       } as User
-      
+
       const { getUserRole } = useMenuFilter()
       expect(getUserRole.value).toBe(UserRole.VIEWER)
     })
 
     it('应该返回SUPER_ADMIN角色当用户是超级管理员时', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN] 
+        roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN]
       } as User
-      
+
       const { getUserRole } = useMenuFilter()
       expect(getUserRole.value).toBe(UserRole.SUPER_ADMIN)
     })
 
     it('应该返回最高权限角色', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.EDITOR, UserRole.CONTENT_MANAGER, UserRole.VIEWER] 
+        roles: [UserRole.EDITOR, UserRole.CONTENT_MANAGER, UserRole.VIEWER]
       } as User
-      
+
       const { getUserRole } = useMenuFilter()
       expect(getUserRole.value).toBe(UserRole.CONTENT_MANAGER)
     })
@@ -109,28 +107,28 @@ describe('useMenuFilter', () => {
 
   describe('filteredMenus', () => {
     it('VIEWER角色应该只能看到仪表盘', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.VIEWER] 
+        roles: [UserRole.VIEWER]
       } as User
-      
+
       const { filteredMenus } = useMenuFilter()
-      
+
       expect(filteredMenus.value).toHaveLength(1)
       expect(filteredMenus.value[0].name).toBe('全局仪表盘')
       expect(filteredMenus.value[0].path).toBe('/dashboard')
     })
 
     it('CONTENT_MANAGER角色应该能看到仪表盘和内容管理', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.CONTENT_MANAGER] 
+        roles: [UserRole.CONTENT_MANAGER]
       } as User
-      
+
       const { filteredMenus } = useMenuFilter()
-      
+
       const menuNames = filteredMenus.value.map(m => m.name)
       expect(menuNames).toContain('全局仪表盘')
       expect(menuNames).toContain('内容管理')
@@ -139,16 +137,16 @@ describe('useMenuFilter', () => {
     })
 
     it('SUPER_ADMIN角色应该能看到所有菜单', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.SUPER_ADMIN] 
+        roles: [UserRole.SUPER_ADMIN]
       } as User
-      
+
       const { filteredMenus } = useMenuFilter()
-      
+
       expect(filteredMenus.value).toHaveLength(4)
-      
+
       const menuNames = filteredMenus.value.map(m => m.name)
       expect(menuNames).toContain('全局仪表盘')
       expect(menuNames).toContain('认证与权限管理')
@@ -157,14 +155,14 @@ describe('useMenuFilter', () => {
     })
 
     it('应该保持子菜单结构完整', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.ADMIN] 
+        roles: [UserRole.ADMIN]
       } as User
-      
+
       const { filteredMenus } = useMenuFilter()
-      
+
       const rbacMenu = filteredMenus.value.find(m => m.name === '认证与权限管理')
       expect(rbacMenu).toBeDefined()
       expect(rbacMenu?.children).toHaveLength(2)
@@ -180,19 +178,19 @@ describe('useMenuFilter', () => {
           name: '系统配置',
           path: '/system',
           icon: 'Tools',
-          children: []  // 没有子菜单
+          children: [] // 没有子菜单
         }
       ]
-      
+
       mockAuthStore.menus = restrictedMenus
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.VIEWER] 
+        roles: [UserRole.VIEWER]
       } as User
-      
+
       const { filteredMenus } = useMenuFilter()
-      
+
       // VIEWER角色不应该看到系统配置
       const systemMenu = filteredMenus.value.find(m => m.name === '系统配置')
       expect(systemMenu).toBeUndefined()
@@ -201,14 +199,14 @@ describe('useMenuFilter', () => {
 
   describe('hasFeatureAccess', () => {
     it('SUPER_ADMIN应该拥有所有功能访问权限', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.SUPER_ADMIN] 
+        roles: [UserRole.SUPER_ADMIN]
       } as User
-      
+
       const { hasFeatureAccess } = useMenuFilter()
-      
+
       expect(hasFeatureAccess('dashboard')).toBe(true)
       expect(hasFeatureAccess('rbac')).toBe(true)
       expect(hasFeatureAccess('content')).toBe(true)
@@ -216,14 +214,14 @@ describe('useMenuFilter', () => {
     })
 
     it('VIEWER应该只有仪表盘访问权限', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.VIEWER] 
+        roles: [UserRole.VIEWER]
       } as User
-      
+
       const { hasFeatureAccess } = useMenuFilter()
-      
+
       expect(hasFeatureAccess('dashboard')).toBe(true)
       expect(hasFeatureAccess('rbac')).toBe(false)
       expect(hasFeatureAccess('content')).toBe(false)
@@ -231,14 +229,14 @@ describe('useMenuFilter', () => {
     })
 
     it('CONTENT_MANAGER应该有内容相关功能访问权限', () => {
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.CONTENT_MANAGER] 
+        roles: [UserRole.CONTENT_MANAGER]
       } as User
-      
+
       const { hasFeatureAccess } = useMenuFilter()
-      
+
       expect(hasFeatureAccess('dashboard')).toBe(true)
       expect(hasFeatureAccess('content')).toBe(true)
       expect(hasFeatureAccess('news')).toBe(true)
@@ -252,7 +250,7 @@ describe('useMenuFilter', () => {
   describe('getRoleDisplayName', () => {
     it('应该返回正确的角色显示名称', () => {
       const { getRoleDisplayName } = useMenuFilter()
-      
+
       expect(getRoleDisplayName(UserRole.SUPER_ADMIN)).toBe('超级管理员')
       expect(getRoleDisplayName(UserRole.ADMIN)).toBe('管理员')
       expect(getRoleDisplayName(UserRole.CONTENT_MANAGER)).toBe('内容管理员')
@@ -264,7 +262,7 @@ describe('useMenuFilter', () => {
 
     it('应该为未知角色返回默认名称', () => {
       const { getRoleDisplayName } = useMenuFilter()
-      
+
       expect(getRoleDisplayName('unknown_role' as UserRole)).toBe('未知角色')
     })
   })
@@ -272,17 +270,17 @@ describe('useMenuFilter', () => {
   describe('isMenuAccessible', () => {
     it('应该正确判断菜单访问权限', () => {
       const { isMenuAccessible } = useMenuFilter()
-      
+
       // SUPER_ADMIN可以访问所有菜单
       expect(isMenuAccessible('/dashboard', UserRole.SUPER_ADMIN)).toBe(true)
       expect(isMenuAccessible('/rbac/users', UserRole.SUPER_ADMIN)).toBe(true)
       expect(isMenuAccessible('/system/settings', UserRole.SUPER_ADMIN)).toBe(true)
-      
+
       // VIEWER只能访问仪表盘
       expect(isMenuAccessible('/dashboard', UserRole.VIEWER)).toBe(true)
       expect(isMenuAccessible('/rbac/users', UserRole.VIEWER)).toBe(false)
       expect(isMenuAccessible('/content/list', UserRole.VIEWER)).toBe(false)
-      
+
       // CONTENT_MANAGER可以访问内容相关功能
       expect(isMenuAccessible('/content/list', UserRole.CONTENT_MANAGER)).toBe(true)
       expect(isMenuAccessible('/news/sources', UserRole.CONTENT_MANAGER)).toBe(true)
@@ -291,7 +289,7 @@ describe('useMenuFilter', () => {
 
     it('应该处理根路径和深层路径', () => {
       const { isMenuAccessible } = useMenuFilter()
-      
+
       expect(isMenuAccessible('/content', UserRole.CONTENT_MANAGER)).toBe(true)
       expect(isMenuAccessible('/content/categories', UserRole.CONTENT_MANAGER)).toBe(true)
       expect(isMenuAccessible('/content/categories/edit/1', UserRole.CONTENT_MANAGER)).toBe(true)
@@ -301,14 +299,14 @@ describe('useMenuFilter', () => {
   describe('错误处理', () => {
     it('应该处理空菜单数据', () => {
       mockAuthStore.menus = []
-      mockAuthStore.currentUser = { 
-        id: 1, 
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.ADMIN] 
+        roles: [UserRole.ADMIN]
       } as User
-      
+
       const { filteredMenus } = useMenuFilter()
-      
+
       expect(filteredMenus.value).toEqual([])
     })
 
@@ -319,15 +317,15 @@ describe('useMenuFilter', () => {
         { id: 1, name: '', path: '' }, // 无效菜单项
         { id: 2, name: '有效菜单', path: '/dashboard' } // 有效菜单项，使用dashboard路径确保SUPER_ADMIN能访问
       ].filter(Boolean) as MenuNode[]
-      
-      mockAuthStore.currentUser = { 
-        id: 1, 
+
+      mockAuthStore.currentUser = {
+        id: 1,
         name: '测试用户',
-        roles: [UserRole.SUPER_ADMIN] 
+        roles: [UserRole.SUPER_ADMIN]
       } as User
-      
+
       const { filteredMenus } = useMenuFilter()
-      
+
       // 应该只显示有效且可访问的菜单项
       expect(filteredMenus.value).toHaveLength(1)
       expect(filteredMenus.value[0].name).toBe('有效菜单')

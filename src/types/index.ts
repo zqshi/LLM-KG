@@ -887,3 +887,288 @@ export interface UserGoodsStats {
   totalViews: number
   totalLikes: number
 }
+
+// ======================== 统一审核中心模块类型定义 ========================
+
+// 审核任务状态枚举
+export type AuditTaskStatus = 'pending' | 'approved' | 'rejected' | 'auto_approved' | 'auto_rejected'
+
+// 业务类型枚举
+export type BizType = 'forum_post' | 'flea_goods' | 'news' | 'banner' | 'quotation'
+
+// 优先级枚举
+export type Priority = 'high' | 'normal' | 'low'
+
+// 审核模式枚举
+export type AuditMode = 'pre' | 'post' | 'sample'
+
+// 分配规则枚举
+export type AssignRule = 'auto' | 'manual' | 'role'
+
+// 敏感词处理动作枚举
+export type SensitiveWordAction = 'forbidden' | 'review' | 'replace'
+
+// 审核员角色枚举
+export type AuditorRole = 'content_auditor' | 'senior_auditor' | 'audit_manager'
+
+// 审核任务接口
+export interface AuditTask {
+  id: number
+  taskId: string
+  bizType: BizType
+  bizId: string
+  title?: string
+  content: string
+  images?: string[]
+  contentSnapshot: any
+  submitterId: number
+  submitterName: string
+  status: AuditTaskStatus
+  priority: Priority
+  auditPolicyId?: number
+  assigneeId?: number
+  assigneeName?: string
+  createTime: string
+  updateTime?: string
+  approveTime?: string
+  rejectTime?: string
+  rejectReason?: string
+  rejectDetail?: string
+}
+
+// 审核策略接口
+export interface AuditPolicy {
+  id: number
+  bizType: BizType
+  name: string
+  mode: AuditMode
+  sampleRate?: number
+  priority: Priority
+  assignRule: AssignRule
+  assigneeId?: number
+  roleId?: number
+  ruleConfig?: any
+  isActive: boolean
+  createTime: string
+  updateTime?: string
+}
+
+// 敏感词接口
+export interface SensitiveWord {
+  id: number
+  word: string
+  isRegex: boolean
+  action: SensitiveWordAction
+  replaceWith?: string
+  category: string
+  hitCount: number
+  remark?: string
+  creator: string
+  createTime: string
+  updateTime?: string
+}
+
+// 审核员接口
+export interface Auditor {
+  id: number
+  name: string
+  username: string
+  role: AuditorRole
+  department: string
+  email: string
+  phone: string
+  permissions: BizType[]
+  status: boolean
+  pendingCount: number
+  todayProcessed: number
+  approvalRate: number
+  remark?: string
+  createTime: string
+  updateTime?: string
+}
+
+// 审核统计数据接口
+export interface AuditStats {
+  pendingTotal: number
+  todayNew: number
+  todayProcessed: number
+  avgProcessTime: number
+  approvalRate: number
+  todayApproved: number
+  todayRejected: number
+  rejectionRate: number
+}
+
+// 任务筛选参数
+export interface TaskFilters {
+  bizType?: BizType
+  priority?: Priority
+  dateRange?: [string, string]
+  keyword?: string
+  page?: number
+  size?: number
+}
+
+// 策略表单接口
+export interface PolicyForm {
+  id?: number
+  name: string
+  bizType: BizType
+  mode: AuditMode
+  sampleRate?: number
+  priority: Priority
+  assignRule: AssignRule
+  assigneeId?: number
+  roleId?: number
+  ruleConfig?: string
+  isActive: boolean
+}
+
+// 敏感词表单接口
+export interface WordForm {
+  id?: number
+  word: string
+  isRegex: boolean
+  action: SensitiveWordAction
+  replaceWith?: string
+  category: string
+  remark?: string
+}
+
+// 审核员表单接口
+export interface AuditorForm {
+  id?: number
+  name: string
+  username: string
+  password?: string
+  role: AuditorRole
+  department: string
+  email: string
+  phone: string
+  permissions: BizType[]
+  status: boolean
+  remark?: string
+}
+
+// 任务分配表单接口
+export interface AssignForm {
+  auditorId: number
+  taskCount: number
+  bizTypes: BizType[]
+  priority: Priority
+}
+
+// 审核员统计数据接口
+export interface AuditorStats {
+  totalProcessed: number
+  approvalRate: number
+  avgProcessTime: number
+  qualityScore: number
+  dailyStats?: {
+    date: string
+    processed: number
+    approved: number
+    rejected: number
+  }[]
+}
+
+// 批量审核操作接口
+export interface BatchAuditOperation {
+  taskIds: string[]
+  action: 'approve' | 'reject'
+  reason?: string
+  detail?: string
+}
+
+// 任务转交接口
+export interface TaskTransfer {
+  taskId: string
+  assigneeId: number
+  reason: string
+}
+
+// 敏感词检查结果接口
+export interface SensitiveWordCheckResult {
+  hits: Array<{
+    word: string
+    action: SensitiveWordAction
+    replaceWith?: string
+    category: string
+  }>
+  processedContent?: string
+}
+
+// 审核日志接口
+export interface AuditLog {
+  id: number
+  taskId: string
+  auditorId: number
+  auditorName: string
+  action: 'approve' | 'reject' | 'transfer'
+  reason?: string
+  detail?: string
+  createTime: string
+}
+
+// ======================== 审核节点相关类型定义 ========================
+
+// 审核节点配置接口
+export interface AuditNodeConfig {
+  bizType: BizType
+  nodeId: string
+  nodeName: string
+  endpoint: string
+  enabled: boolean
+  retryCount?: number
+  timeout?: number
+  ruleConfig?: Record<string, any>
+}
+
+// 审核任务提交数据
+export interface AuditTaskSubmission {
+  bizType: BizType
+  bizId: string
+  content: any
+  submitterId: number
+  submitterName: string
+  metadata?: Record<string, any>
+}
+
+// 审核结果回调数据
+export interface AuditCallbackData {
+  taskId: string
+  status: 'approved' | 'rejected' | 'auto_approved' | 'auto_rejected'
+  reason?: string
+  detail?: string
+  auditorId?: number
+  processTime: number
+}
+
+// 审核节点检查结果
+export interface AuditCheckResult {
+  needAudit: boolean
+  policy?: AuditPolicy
+  priority: 'high' | 'normal' | 'low'
+  skipReason?: string
+}
+
+// 审核节点健康状态
+export interface AuditNodeHealth {
+  nodeId: string
+  nodeName: string
+  status: 'healthy' | 'warning' | 'error'
+  lastCheckTime: string
+  avgResponseTime?: number
+  errorCount?: number
+  uptime?: number
+}
+
+// 审核节点性能统计
+export interface AuditNodePerformance {
+  nodeId: string
+  avgResponseTime: number
+  successRate: number
+  dailyTasks: number
+  errorRate: number
+  throughput: number
+}

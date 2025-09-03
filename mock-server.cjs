@@ -6,6 +6,513 @@ const port = 3007
 app.use(cors())
 app.use(express.json())
 
+// 审核中心 Mock数据
+const mockAuditData = {
+  // 审核任务列表 - 待审核任务模块的10条数据
+  tasks: [
+    {
+      taskId: 'audit-001',
+      bizType: 'forum_post',
+      bizId: 'post-001',
+      title: '关于新产品发布的讨论帖',
+      content: '我们公司即将发布一款新产品，大家有什么建议吗？期待大家的讨论和反馈。这款产品融合了最新的AI技术，相信会给用户带来全新的体验。',
+      submitterId: 1001,
+      submitterName: '张三',
+      createTime: '2024-03-01 14:30:00',
+      status: 'pending',
+      priority: 'high',
+      images: ['https://example.com/img1.jpg'],
+      riskLevel: 'low',
+      contentLength: 156,
+      estimatedProcessTime: 5
+    },
+    {
+      taskId: 'audit-002',
+      bizType: 'flea_goods',
+      bizId: 'goods-002',
+      title: '二手笔记本电脑转让',
+      content: '9成新ThinkPad X1 Carbon，配置高端，原价12000，现价7500。因为工作变动，急需转让，支持验机。',
+      submitterId: 1002,
+      submitterName: '李四',
+      createTime: '2024-03-01 13:45:00',
+      status: 'pending',
+      priority: 'normal',
+      images: ['https://example.com/thinkpad1.jpg', 'https://example.com/thinkpad2.jpg'],
+      riskLevel: 'medium',
+      contentLength: 89,
+      estimatedProcessTime: 8
+    },
+    {
+      taskId: 'audit-003',
+      bizType: 'news',
+      bizId: 'news-003',
+      title: '行业最新动态报告',
+      content: '本月行业发展趋势分析，包含市场数据和专家观点。重点关注新兴技术对传统行业的冲击和机遇。',
+      submitterId: 1003,
+      submitterName: '王五',
+      createTime: '2024-03-01 12:20:00',
+      status: 'pending',
+      priority: 'low',
+      images: [],
+      riskLevel: 'low',
+      contentLength: 95,
+      estimatedProcessTime: 3
+    },
+    {
+      taskId: 'audit-004',
+      bizType: 'banner',
+      bizId: 'banner-004',
+      title: '春季促销活动广告',
+      content: '春暖花开，优惠不断！全场商品8折起，更有满减福利等你来拿。活动时间有限，抓紧时间参与！',
+      submitterId: 1004,
+      submitterName: '赵六',
+      createTime: '2024-03-01 11:15:00',
+      status: 'pending',
+      priority: 'high',
+      images: ['https://example.com/banner-spring.jpg'],
+      riskLevel: 'medium',
+      contentLength: 78,
+      estimatedProcessTime: 6
+    },
+    {
+      taskId: 'audit-005',
+      bizType: 'quotation',
+      bizId: 'quote-005',
+      title: '励志名言征集',
+      content: '成功不是终点，失败也不是末日，继续前进的勇气才最可贵。——温斯顿·丘吉尔',
+      submitterId: 1005,
+      submitterName: '孙七',
+      createTime: '2024-03-01 10:30:00',
+      status: 'pending',
+      priority: 'normal',
+      images: [],
+      riskLevel: 'low',
+      contentLength: 65,
+      estimatedProcessTime: 2
+    },
+    {
+      taskId: 'audit-006',
+      bizType: 'forum_post',
+      bizId: 'post-006',
+      title: '技术交流：前端框架选择指南',
+      content: '最近在做项目技术选型，想了解一下大家对Vue3、React18、Angular的使用体验。希望能分享一些实际项目中的踩坑经验和最佳实践。',
+      submitterId: 1006,
+      submitterName: '周八',
+      createTime: '2024-03-01 09:45:00',
+      status: 'pending',
+      priority: 'normal',
+      images: [],
+      riskLevel: 'low',
+      contentLength: 112,
+      estimatedProcessTime: 4
+    },
+    {
+      taskId: 'audit-007',
+      bizType: 'flea_goods',
+      bizId: 'goods-007',
+      title: 'iPhone 14 Pro Max 深空黑 256G',
+      content: '个人自用，成色95新，无拆无修，原装配件齐全。因为换了新机型所以出售，支持当面验机交易。',
+      submitterId: 1007,
+      submitterName: '吴九',
+      createTime: '2024-03-01 08:20:00',
+      status: 'pending',
+      priority: 'high',
+      images: ['https://example.com/iphone1.jpg', 'https://example.com/iphone2.jpg', 'https://example.com/iphone3.jpg'],
+      riskLevel: 'medium',
+      contentLength: 87,
+      estimatedProcessTime: 7
+    },
+    {
+      taskId: 'audit-008',
+      bizType: 'news',
+      bizId: 'news-008',
+      title: '2024年人工智能发展趋势预测',
+      content: '随着ChatGPT等大语言模型的快速发展，人工智能技术正在重塑各个行业。本文深度分析了AI技术的最新进展和未来发展方向。',
+      submitterId: 1008,
+      submitterName: '郑十',
+      createTime: '2024-03-01 07:50:00',
+      status: 'pending',
+      priority: 'high',
+      images: ['https://example.com/ai-trend.jpg'],
+      riskLevel: 'low',
+      contentLength: 134,
+      estimatedProcessTime: 6
+    },
+    {
+      taskId: 'audit-009',
+      bizType: 'banner',
+      bizId: 'banner-009',
+      title: '新用户专享优惠券',
+      content: '欢迎新用户！注册即送100元优惠券，首次购物还能享受额外8折优惠。机会难得，不要错过！',
+      submitterId: 1009,
+      submitterName: '钱十一',
+      createTime: '2024-03-01 16:40:00',
+      status: 'pending',
+      priority: 'normal',
+      images: ['https://example.com/coupon-banner.jpg'],
+      riskLevel: 'medium',
+      contentLength: 73,
+      estimatedProcessTime: 5
+    },
+    {
+      taskId: 'audit-010',
+      bizType: 'quotation',
+      bizId: 'quote-010',
+      title: '人生哲理名言',
+      content: '生活就像一盒巧克力，你永远不知道下一颗是什么味道。重要的是保持好奇心和勇气去尝试。——改编自《阿甘正传》',
+      submitterId: 1010,
+      submitterName: '陈十二',
+      createTime: '2024-03-01 15:25:00',
+      status: 'pending',
+      priority: 'low',
+      images: [],
+      riskLevel: 'low',
+      contentLength: 89,
+      estimatedProcessTime: 3
+    }
+  ],
+  
+  // 批量操作模块的数据
+  batchOperations: [
+    {
+      operationId: 'batch-op-001',
+      operationType: 'batch_approve',
+      taskIds: ['audit-001', 'audit-003', 'audit-005'],
+      operatorId: 2001,
+      operatorName: '审核主管',
+      createTime: '2024-03-01 16:30:00',
+      status: 'completed',
+      reason: '内容质量良好，符合发布标准',
+      processedCount: 3,
+      successCount: 3,
+      failedCount: 0,
+      duration: 45000,
+      aiRecommendation: {
+        confidence: 92,
+        riskAssessment: {
+          lowRisk: 100,
+          mediumRisk: 0,
+          highRisk: 0
+        }
+      }
+    },
+    {
+      operationId: 'batch-op-002',
+      operationType: 'batch_reject',
+      taskIds: ['audit-004', 'audit-007'],
+      operatorId: 2002,
+      operatorName: '高级审核员',
+      createTime: '2024-03-01 15:45:00',
+      status: 'completed',
+      reason: '内容存在违规风险',
+      processedCount: 2,
+      successCount: 2,
+      failedCount: 0,
+      duration: 32000,
+      aiRecommendation: {
+        confidence: 78,
+        riskAssessment: {
+          lowRisk: 0,
+          mediumRisk: 50,
+          highRisk: 50
+        }
+      }
+    },
+    {
+      operationId: 'batch-op-003',
+      operationType: 'batch_transfer',
+      taskIds: ['audit-002', 'audit-006', 'audit-008'],
+      operatorId: 2003,
+      operatorName: '初级审核员',
+      createTime: '2024-03-01 14:20:00',
+      status: 'processing',
+      reason: '需要专业领域审核员处理',
+      processedCount: 1,
+      successCount: 1,
+      failedCount: 0,
+      duration: null,
+      targetAssigneeId: 2004,
+      targetAssigneeName: '技术专家',
+      aiRecommendation: {
+        confidence: 65,
+        riskAssessment: {
+          lowRisk: 33,
+          mediumRisk: 67,
+          highRisk: 0
+        }
+      }
+    },
+    {
+      operationId: 'batch-op-004',
+      operationType: 'batch_priority_modify',
+      taskIds: ['audit-009', 'audit-010'],
+      operatorId: 2001,
+      operatorName: '审核主管',
+      createTime: '2024-03-01 13:15:00',
+      status: 'completed',
+      reason: '根据业务需求调整优先级',
+      processedCount: 2,
+      successCount: 2,
+      failedCount: 0,
+      duration: 15000,
+      originalPriority: 'normal',
+      newPriority: 'high',
+      aiRecommendation: {
+        confidence: 85,
+        riskAssessment: {
+          lowRisk: 100,
+          mediumRisk: 0,
+          highRisk: 0
+        }
+      }
+    },
+    {
+      operationId: 'batch-op-005',
+      operationType: 'batch_tag_add',
+      taskIds: ['audit-001', 'audit-006', 'audit-008'],
+      operatorId: 2002,
+      operatorName: '高级审核员',
+      createTime: '2024-03-01 12:30:00',
+      status: 'completed',
+      reason: '为技术类内容添加标签',
+      processedCount: 3,
+      successCount: 3,
+      failedCount: 0,
+      duration: 28000,
+      addedTags: ['技术', '前端', 'AI'],
+      aiRecommendation: {
+        confidence: 90,
+        riskAssessment: {
+          lowRisk: 100,
+          mediumRisk: 0,
+          highRisk: 0
+        }
+      }
+    },
+    {
+      operationId: 'batch-op-006',
+      operationType: 'batch_schedule_approve',
+      taskIds: ['audit-004', 'audit-009'],
+      operatorId: 2003,
+      operatorName: '初级审核员',
+      createTime: '2024-03-01 11:45:00',
+      status: 'scheduled',
+      reason: '营销内容定时发布',
+      processedCount: 0,
+      successCount: 0,
+      failedCount: 0,
+      duration: null,
+      scheduledTime: '2024-03-02 09:00:00',
+      aiRecommendation: {
+        confidence: 75,
+        riskAssessment: {
+          lowRisk: 50,
+          mediumRisk: 50,
+          highRisk: 0
+        }
+      }
+    },
+    {
+      operationId: 'batch-op-007',
+      operationType: 'batch_export',
+      taskIds: ['audit-001', 'audit-002', 'audit-003', 'audit-004', 'audit-005'],
+      operatorId: 2004,
+      operatorName: '技术专家',
+      createTime: '2024-03-01 10:20:00',
+      status: 'completed',
+      reason: '数据分析需要',
+      processedCount: 5,
+      successCount: 5,
+      failedCount: 0,
+      duration: 18000,
+      exportFormat: 'json',
+      fileSize: '2.5MB'
+    },
+    {
+      operationId: 'batch-op-008',
+      operationType: 'batch_ai_analyze',
+      taskIds: ['audit-006', 'audit-007', 'audit-008', 'audit-009'],
+      operatorId: 2001,
+      operatorName: '审核主管',
+      createTime: '2024-03-01 09:10:00',
+      status: 'completed',
+      reason: 'AI智能风险评估',
+      processedCount: 4,
+      successCount: 4,
+      failedCount: 0,
+      duration: 65000,
+      aiRecommendation: {
+        confidence: 88,
+        riskAssessment: {
+          lowRisk: 25,
+          mediumRisk: 50,
+          highRisk: 25
+        },
+        recommendations: [
+          {
+            taskId: 'audit-006',
+            action: 'approve',
+            confidence: 92
+          },
+          {
+            taskId: 'audit-007',
+            action: 'review',
+            confidence: 78
+          },
+          {
+            taskId: 'audit-008',
+            action: 'approve',
+            confidence: 95
+          },
+          {
+            taskId: 'audit-009',
+            action: 'reject',
+            confidence: 85
+          }
+        ]
+      }
+    },
+    {
+      operationId: 'batch-op-009',
+      operationType: 'batch_collaborative_review',
+      taskIds: ['audit-007', 'audit-002'],
+      operatorId: 2002,
+      operatorName: '高级审核员',
+      createTime: '2024-03-01 08:35:00',
+      status: 'pending',
+      reason: '高价值商品需要多人审核',
+      processedCount: 0,
+      successCount: 0,
+      failedCount: 0,
+      duration: null,
+      collaborators: [
+        { id: 2003, name: '初级审核员', status: 'pending' },
+        { id: 2004, name: '技术专家', status: 'pending' }
+      ],
+      aiRecommendation: {
+        confidence: 70,
+        riskAssessment: {
+          lowRisk: 0,
+          mediumRisk: 100,
+          highRisk: 0
+        }
+      }
+    },
+    {
+      operationId: 'batch-op-010',
+      operationType: 'batch_emergency_process',
+      taskIds: ['audit-001', 'audit-008'],
+      operatorId: 2001,
+      operatorName: '审核主管',
+      createTime: '2024-03-01 07:20:00',
+      status: 'completed',
+      reason: '紧急内容快速处理',
+      processedCount: 2,
+      successCount: 2,
+      failedCount: 0,
+      duration: 12000,
+      emergencyLevel: 'urgent',
+      autoNotifySubmitter: true,
+      aiRecommendation: {
+        confidence: 98,
+        riskAssessment: {
+          lowRisk: 100,
+          mediumRisk: 0,
+          highRisk: 0
+        }
+      }
+    }
+  ],
+  
+  // 统计数据
+  stats: {
+    pendingTotal: 25,
+    todayNew: 8,
+    todayProcessed: 32,
+    avgProcessTime: 15,
+    approvalRate: 85,
+    todayApproved: 28,
+    todayRejected: 4,
+    rejectionRate: 12
+  },
+  
+  // 审核策略
+  policies: [
+    {
+      id: 1,
+      name: '内容安全策略',
+      bizType: 'forum_post',
+      description: '检查论坛帖子内容是否包含敏感信息',
+      isActive: true,
+      priority: 1,
+      rules: [
+        { type: 'sensitive_words', action: 'block' },
+        { type: 'spam_detection', action: 'review' }
+      ]
+    }
+  ],
+  
+  // 敏感词列表
+  sensitiveWords: [
+    {
+      id: 1,
+      word: '违规词汇',
+      action: 'block',
+      category: '违法违规',
+      createTime: '2024-02-01 10:00:00'
+    }
+  ],
+  
+  // 审核员列表
+  auditors: [
+    {
+      id: 1,
+      name: '审核员A',
+      email: 'auditor-a@company.com',
+      role: 'content_auditor',
+      status: 'active',
+      createTime: '2024-01-01 00:00:00',
+      workload: 8
+    },
+    {
+      id: 2001,
+      name: '审核主管',
+      email: 'supervisor@company.com',
+      role: 'audit_supervisor',
+      status: 'active',
+      createTime: '2024-01-01 00:00:00',
+      workload: 12
+    },
+    {
+      id: 2002,
+      name: '高级审核员',
+      email: 'senior-auditor@company.com',
+      role: 'senior_auditor',
+      status: 'active',
+      createTime: '2024-01-01 00:00:00',
+      workload: 15
+    },
+    {
+      id: 2003,
+      name: '初级审核员',
+      email: 'junior-auditor@company.com',
+      role: 'junior_auditor',
+      status: 'active',
+      createTime: '2024-01-01 00:00:00',
+      workload: 6
+    },
+    {
+      id: 2004,
+      name: '技术专家',
+      email: 'tech-expert@company.com',
+      role: 'tech_specialist',
+      status: 'active',
+      createTime: '2024-01-01 00:00:00',
+      workload: 3
+    }
+  ]
+}
+
 // 资讯聚合管理 Mock数据
 const mockNewsData = {
   // 资讯源
@@ -974,6 +1481,499 @@ const mockFleaMarketData = {
   ]
 }
 
+// ========================
+// 统一审核中心 API 接口
+// ========================
+
+// 获取审核统计数据
+app.get('/api/audit/stats', (req, res) => {
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: mockAuditData.stats
+  })
+})
+
+// 获取审核任务列表
+app.get('/api/audit/tasks', (req, res) => {
+  const { 
+    page = 1, 
+    size = 20, 
+    bizType, 
+    priority, 
+    keyword = '' 
+  } = req.query
+  
+  let filteredTasks = [...mockAuditData.tasks]
+  
+  // 按业务类型筛选
+  if (bizType) {
+    filteredTasks = filteredTasks.filter(task => task.bizType === bizType)
+  }
+  
+  // 按优先级筛选
+  if (priority) {
+    filteredTasks = filteredTasks.filter(task => task.priority === priority)
+  }
+  
+  // 按关键词搜索
+  if (keyword) {
+    filteredTasks = filteredTasks.filter(task => 
+      task.title.includes(keyword) || task.content.includes(keyword)
+    )
+  }
+  
+  const total = filteredTasks.length
+  const start = (page - 1) * size
+  const end = start + parseInt(size)
+  const list = filteredTasks.slice(start, end)
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: {
+      list,
+      total,
+      page: parseInt(page),
+      size: parseInt(size)
+    }
+  })
+})
+
+// 获取单个审核任务
+app.get('/api/audit/tasks/:taskId', (req, res) => {
+  const { taskId } = req.params
+  const task = mockAuditData.tasks.find(t => t.taskId === taskId)
+  
+  if (task) {
+    res.json({
+      code: 200,
+      message: '获取成功',
+      data: task
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '任务不存在'
+    })
+  }
+})
+
+// 审核通过
+app.post('/api/audit/tasks/:taskId/approve', (req, res) => {
+  const { taskId } = req.params
+  const { remark } = req.body
+  
+  const taskIndex = mockAuditData.tasks.findIndex(t => t.taskId === taskId)
+  if (taskIndex !== -1) {
+    mockAuditData.tasks[taskIndex].status = 'approved'
+    mockAuditData.tasks[taskIndex].auditTime = new Date().toISOString()
+    mockAuditData.tasks[taskIndex].remark = remark
+    
+    // 更新统计数据
+    mockAuditData.stats.todayApproved++
+    mockAuditData.stats.todayProcessed++
+    
+    res.json({
+      code: 200,
+      message: '审核通过成功'
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '任务不存在'
+    })
+  }
+})
+
+// 审核拒绝
+app.post('/api/audit/tasks/:taskId/reject', (req, res) => {
+  const { taskId } = req.params
+  const { reason, detail } = req.body
+  
+  const taskIndex = mockAuditData.tasks.findIndex(t => t.taskId === taskId)
+  if (taskIndex !== -1) {
+    mockAuditData.tasks[taskIndex].status = 'rejected'
+    mockAuditData.tasks[taskIndex].auditTime = new Date().toISOString()
+    mockAuditData.tasks[taskIndex].rejectReason = reason
+    mockAuditData.tasks[taskIndex].rejectDetail = detail
+    
+    // 更新统计数据
+    mockAuditData.stats.todayRejected++
+    mockAuditData.stats.todayProcessed++
+    
+    res.json({
+      code: 200,
+      message: '审核拒绝成功'
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '任务不存在'
+    })
+  }
+})
+
+// 批量审核
+app.post('/api/audit/tasks/batch', (req, res) => {
+  const { taskIds, action, reason } = req.body
+  
+  let processedCount = 0
+  taskIds.forEach(taskId => {
+    const taskIndex = mockAuditData.tasks.findIndex(t => t.taskId === taskId)
+    if (taskIndex !== -1) {
+      if (action === 'approve') {
+        mockAuditData.tasks[taskIndex].status = 'approved'
+        mockAuditData.stats.todayApproved++
+      } else if (action === 'reject') {
+        mockAuditData.tasks[taskIndex].status = 'rejected'
+        mockAuditData.tasks[taskIndex].rejectReason = reason
+        mockAuditData.stats.todayRejected++
+      }
+      mockAuditData.tasks[taskIndex].auditTime = new Date().toISOString()
+      mockAuditData.stats.todayProcessed++
+      processedCount++
+    }
+  })
+  
+  res.json({
+    code: 200,
+    message: `批量审核成功，处理了${processedCount}个任务`
+  })
+})
+
+// 转交任务
+app.post('/api/audit/tasks/:taskId/transfer', (req, res) => {
+  const { taskId } = req.params
+  const { assigneeId, reason } = req.body
+  
+  const taskIndex = mockAuditData.tasks.findIndex(t => t.taskId === taskId)
+  if (taskIndex !== -1) {
+    const assignee = mockAuditData.auditors.find(a => a.id === assigneeId)
+    if (assignee) {
+      mockAuditData.tasks[taskIndex].assigneeId = assigneeId
+      mockAuditData.tasks[taskIndex].assigneeName = assignee.name
+      mockAuditData.tasks[taskIndex].transferReason = reason
+      mockAuditData.tasks[taskIndex].transferTime = new Date().toISOString()
+      
+      res.json({
+        code: 200,
+        message: '任务转交成功'
+      })
+    } else {
+      res.status(404).json({
+        code: 404,
+        message: '指定的审核员不存在'
+      })
+    }
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '任务不存在'
+    })
+  }
+})
+
+// 获取审核策略列表
+app.get('/api/audit/policies', (req, res) => {
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: mockAuditData.policies
+  })
+})
+
+// 获取审核员列表
+app.get('/api/audit/auditors', (req, res) => {
+  const { keyword, role, page = 1, size = 20 } = req.query
+  
+  let filteredAuditors = [...mockAuditData.auditors]
+  
+  if (keyword) {
+    filteredAuditors = filteredAuditors.filter(a => 
+      a.name.includes(keyword) || a.username.includes(keyword)
+    )
+  }
+  
+  if (role) {
+    filteredAuditors = filteredAuditors.filter(a => a.role === role)
+  }
+  
+  const total = filteredAuditors.length
+  const start = (page - 1) * size
+  const end = start + parseInt(size)
+  const list = filteredAuditors.slice(start, end)
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: {
+      list,
+      total,
+      page: parseInt(page),
+      size: parseInt(size)
+    }
+  })
+})
+
+// 获取敏感词列表
+app.get('/api/audit/sensitive-words', (req, res) => {
+  const { keyword, action, page = 1, size = 20 } = req.query
+  
+  let filteredWords = [...mockAuditData.sensitiveWords]
+  
+  if (keyword) {
+    filteredWords = filteredWords.filter(w => w.word.includes(keyword))
+  }
+  
+  if (action) {
+    filteredWords = filteredWords.filter(w => w.action === action)
+  }
+  
+  const total = filteredWords.length
+  const start = (page - 1) * size
+  const end = start + parseInt(size)
+  const list = filteredWords.slice(start, end)
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: {
+      list,
+      total,
+      page: parseInt(page),
+      size: parseInt(size)
+    }
+  })
+})
+
+// ========================
+// 批量操作模块 API 接口
+// ========================
+
+// 获取批量操作历史记录
+app.get('/api/audit/batch-operations', (req, res) => {
+  const { page = 1, size = 20, operationType, status, operatorId } = req.query
+  
+  let filteredOperations = [...mockAuditData.batchOperations]
+  
+  // 按操作类型筛选
+  if (operationType) {
+    filteredOperations = filteredOperations.filter(op => op.operationType === operationType)
+  }
+  
+  // 按状态筛选
+  if (status) {
+    filteredOperations = filteredOperations.filter(op => op.status === status)
+  }
+  
+  // 按操作员筛选
+  if (operatorId) {
+    filteredOperations = filteredOperations.filter(op => op.operatorId == operatorId)
+  }
+  
+  // 按时间倒序排列
+  filteredOperations.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
+  
+  const total = filteredOperations.length
+  const start = (page - 1) * size
+  const end = start + parseInt(size)
+  const list = filteredOperations.slice(start, end)
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: {
+      list,
+      total,
+      page: parseInt(page),
+      size: parseInt(size)
+    }
+  })
+})
+
+// 获取批量操作统计数据
+app.get('/api/audit/batch-operations/stats', (req, res) => {
+  const operations = mockAuditData.batchOperations
+  
+  const stats = {
+    totalOperations: operations.length,
+    completedOperations: operations.filter(op => op.status === 'completed').length,
+    processingOperations: operations.filter(op => op.status === 'processing').length,
+    scheduledOperations: operations.filter(op => op.status === 'scheduled').length,
+    failedOperations: operations.filter(op => op.status === 'failed').length,
+    todayOperations: operations.filter(op => {
+      const opDate = new Date(op.createTime).toDateString()
+      const today = new Date().toDateString()
+      return opDate === today
+    }).length,
+    totalProcessedTasks: operations.reduce((sum, op) => sum + op.processedCount, 0),
+    avgProcessingTime: Math.round(
+      operations
+        .filter(op => op.duration)
+        .reduce((sum, op) => sum + op.duration, 0) / 
+      operations.filter(op => op.duration).length / 1000
+    ), // 转换为秒
+    operationTypeDistribution: [
+      { type: 'batch_approve', count: operations.filter(op => op.operationType === 'batch_approve').length },
+      { type: 'batch_reject', count: operations.filter(op => op.operationType === 'batch_reject').length },
+      { type: 'batch_transfer', count: operations.filter(op => op.operationType === 'batch_transfer').length },
+      { type: 'batch_priority_modify', count: operations.filter(op => op.operationType === 'batch_priority_modify').length },
+      { type: 'batch_tag_add', count: operations.filter(op => op.operationType === 'batch_tag_add').length },
+      { type: 'batch_export', count: operations.filter(op => op.operationType === 'batch_export').length },
+      { type: 'batch_ai_analyze', count: operations.filter(op => op.operationType === 'batch_ai_analyze').length },
+      { type: 'other', count: operations.filter(op => !['batch_approve', 'batch_reject', 'batch_transfer', 'batch_priority_modify', 'batch_tag_add', 'batch_export', 'batch_ai_analyze'].includes(op.operationType)).length }
+    ]
+  }
+  
+  res.json({
+    code: 200,
+    message: '获取成功',
+    data: stats
+  })
+})
+
+// 创建新的批量操作
+app.post('/api/audit/batch-operations', (req, res) => {
+  const { 
+    operationType, 
+    taskIds, 
+    reason, 
+    scheduledTime,
+    additionalParams 
+  } = req.body
+  
+  const newOperation = {
+    operationId: 'batch-op-' + (Date.now().toString().slice(-6)),
+    operationType,
+    taskIds,
+    operatorId: 2001, // 模拟当前用户
+    operatorName: '当前用户',
+    createTime: new Date().toLocaleString('zh-CN'),
+    status: scheduledTime ? 'scheduled' : 'processing',
+    reason,
+    processedCount: 0,
+    successCount: 0,
+    failedCount: 0,
+    duration: null,
+    scheduledTime: scheduledTime || null,
+    ...additionalParams
+  }
+  
+  mockAuditData.batchOperations.push(newOperation)
+  
+  // 模拟异步处理
+  if (!scheduledTime) {
+    setTimeout(() => {
+      const operation = mockAuditData.batchOperations.find(op => op.operationId === newOperation.operationId)
+      if (operation) {
+        operation.status = 'completed'
+        operation.processedCount = taskIds.length
+        operation.successCount = taskIds.length
+        operation.duration = Math.floor(Math.random() * 30000) + 5000
+      }
+    }, 2000)
+  }
+  
+  res.json({
+    code: 200,
+    message: '批量操作已创建',
+    data: newOperation
+  })
+})
+
+// 获取单个批量操作详情
+app.get('/api/audit/batch-operations/:operationId', (req, res) => {
+  const { operationId } = req.params
+  const operation = mockAuditData.batchOperations.find(op => op.operationId === operationId)
+  
+  if (operation) {
+    res.json({
+      code: 200,
+      message: '获取成功',
+      data: operation
+    })
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '批量操作不存在'
+    })
+  }
+})
+
+// 取消批量操作
+app.post('/api/audit/batch-operations/:operationId/cancel', (req, res) => {
+  const { operationId } = req.params
+  const operation = mockAuditData.batchOperations.find(op => op.operationId === operationId)
+  
+  if (operation) {
+    if (operation.status === 'processing' || operation.status === 'scheduled') {
+      operation.status = 'cancelled'
+      operation.cancelTime = new Date().toLocaleString('zh-CN')
+      
+      res.json({
+        code: 200,
+        message: '批量操作已取消'
+      })
+    } else {
+      res.status(400).json({
+        code: 400,
+        message: '当前状态无法取消操作'
+      })
+    }
+  } else {
+    res.status(404).json({
+      code: 404,
+      message: '批量操作不存在'
+    })
+  }
+})
+
+// 获取批量操作AI分析建议
+app.post('/api/audit/batch-operations/ai-analyze', (req, res) => {
+  const { taskIds } = req.body
+  
+  // 模拟AI分析处理时间
+  setTimeout(() => {
+    const analysis = {
+      totalTasks: taskIds.length,
+      riskDistribution: {
+        lowRisk: Math.floor(taskIds.length * 0.7),
+        mediumRisk: Math.floor(taskIds.length * 0.2),
+        highRisk: Math.floor(taskIds.length * 0.1)
+      },
+      recommendations: [
+        {
+          action: 'batch_approve',
+          taskCount: Math.floor(taskIds.length * 0.6),
+          confidence: 88,
+          reason: '内容质量良好，风险较低'
+        },
+        {
+          action: 'batch_review',
+          taskCount: Math.floor(taskIds.length * 0.3),
+          confidence: 75,
+          reason: '存在争议内容，建议人工复审'
+        },
+        {
+          action: 'batch_reject',
+          taskCount: Math.floor(taskIds.length * 0.1),
+          confidence: 92,
+          reason: '明显违规内容，建议直接拒绝'
+        }
+      ],
+      processingTime: Math.floor(Math.random() * 5000) + 2000,
+      aiModelVersion: 'v2.1.0'
+    }
+    
+    res.json({
+      code: 200,
+      message: 'AI分析完成',
+      data: analysis
+    })
+  }, 3000) // 模拟3秒处理时间
+})
+
 // 跳蚤市场API接口
 
 // 获取商品列表
@@ -1528,6 +2528,26 @@ console.log('- GET /api/quotation/statistics - 获取统计数据')
 console.log('- GET /api/quotation/display/configs - 获取展示配置')
 console.log('- DELETE /api/quotation/:id - 删除名言')
 console.log('- POST /api/quotation/batch - 批量操作')
+
+console.log('\n=== 统一审核中心API接口 ===')
+console.log('- GET /api/audit/stats - 获取审核统计数据')
+console.log('- GET /api/audit/tasks - 获取审核任务列表')
+console.log('- GET /api/audit/tasks/:id - 获取单个审核任务')
+console.log('- POST /api/audit/tasks/:id/approve - 审核通过')
+console.log('- POST /api/audit/tasks/:id/reject - 审核拒绝')
+console.log('- POST /api/audit/tasks/batch - 批量审核')
+console.log('- POST /api/audit/tasks/:id/transfer - 转交任务')
+console.log('- GET /api/audit/policies - 获取审核策略')
+console.log('- GET /api/audit/auditors - 获取审核员列表')
+console.log('- GET /api/audit/sensitive-words - 获取敏感词列表')
+
+console.log('\n=== 批量操作模块API接口 ===')
+console.log('- GET /api/audit/batch-operations - 获取批量操作历史记录')
+console.log('- GET /api/audit/batch-operations/stats - 获取批量操作统计数据')
+console.log('- POST /api/audit/batch-operations - 创建新的批量操作')
+console.log('- GET /api/audit/batch-operations/:id - 获取单个批量操作详情')
+console.log('- POST /api/audit/batch-operations/:id/cancel - 取消批量操作')
+console.log('- POST /api/audit/batch-operations/ai-analyze - 获取AI分析建议')
 
 console.log('\n=== 跳蚤市场管理API接口 ===')
 console.log('- GET /api/flea-market/goods - 获取商品列表')
