@@ -92,6 +92,10 @@
                     <span class="category-name">{{ category.name }}</span>
                     <el-tag v-if="!category.isActive" type="danger" size="small">已禁用</el-tag>
                   </div>
+                  <div class="header-actions">
+                    <el-button text type="primary" @click="viewAll(category)">查看全部内容</el-button>
+                    <el-button type="primary" plain size="small" @click="enterCategory(category)">进入版块</el-button>
+                  </div>
                   <el-dropdown @command="(command) => handleAction(command, category)">
                     <el-button text>
                       <el-icon>
@@ -144,6 +148,19 @@
                       +{{ category.moderators.length - 3 }}
                     </span>
                   </div>
+                </div>
+
+                <!-- 最新帖子预览 -->
+                <div class="latest-posts">
+                  <div class="latest-title">最新帖子</div>
+                  <ul class="latest-list">
+                    <li v-for="post in (latestPosts[category.id] || [])" :key="post.id" class="latest-item">
+                      <span class="dot"></span>
+                      <span class="title" @click="goPreviewPost(category, post)">{{ post.title }}</span>
+                      <span class="time">{{ formatTime(post.createdAt) }}</span>
+                    </li>
+                  </ul>
+                  <div v-if="!(latestPosts[category.id]?.length)" class="latest-empty">暂无帖子</div>
                 </div>
 
                 <div class="category-settings">
@@ -284,6 +301,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import type { User } from '@/types'
 import type { FormInstance, FormRules } from 'element-plus'
 import draggable from 'vuedraggable'
@@ -291,6 +309,7 @@ import {
   Plus, FolderOpened, Select, Document, User as UserIcon,
   MoreFilled, Rank, Picture
 } from '@element-plus/icons-vue'
+import { contentApi } from '@/api/content'
 
 interface Category {
   id: number
@@ -332,6 +351,8 @@ const categoryForm = reactive({
 const categoryList = ref<Category[]>([])
 const currentModerators = ref<User[]>([])
 const availableUsers = ref<User[]>([])
+const router = useRouter()
+const latestPosts = ref<Record<number, { id: number; title: string; createdAt: string }[]>>({})
 const currentCategory = ref<Category | null>(null)
 
 const categoryStats = ref({
@@ -447,8 +468,9 @@ const getAuditModeName = (mode: string) => {
   return modeMap[mode] || mode
 }
 
-const getAuditModeColor = (mode: string) => {
-  const colorMap: Record<string, string> = {
+type TagType = 'primary' | 'success' | 'info' | 'warning' | 'danger'
+const getAuditModeColor = (mode: string): TagType => {
+  const colorMap: Record<string, TagType> = {
     none: 'success',
     pre: 'danger',
     post: 'warning',
@@ -578,10 +600,50 @@ const removeModerator = (moderator: User) => {
   }
 }
 
+// 查看全部内容（跳到统一列表并自动筛选）
+const viewAll = (category: Category) => {
+  router.push({
+    name: 'ContentList',
+    query: { module: 'forum', category: category.name, from: 'category' }
+  })
+}
+
+// 进入版块专属页
+const enterCategory = (category: Category) => {
+  router.push({
+    name: 'ContentCategoryHome',
+    params: { code: category.code },
+    query: { name: category.name }
+  })
+}
+
+// 加载某个版块的最新帖子（取3条）
+const loadLatestForCategory = async (category: Category) => {
+  try {
+    const { data } = await contentApi.getList({
+      page: 1, pageSize: 3, module: 'forum', category: category.name
+    } as any)
+    latestPosts.value[category.id] = (data?.list || []).map((it: any) => ({
+      id: it.id, title: it.title, createdAt: it.createdAt
+    }))
+  } catch {
+    latestPosts.value[category.id] = []
+  }
+}
+
+const formatTime = (s: string) => new Date(s).toLocaleString('zh-CN')
+const goPreviewPost = (_category: Category, post: { id: number }) => {
+  router.push({ name: 'ContentDetail', params: { id: post.id } })
+}
+
 
 onMounted(() => {
   loadCategories()
   loadAvailableUsers()
+  // 异步拉取每个版块的最新帖子
+  setTimeout(() => {
+    categoryList.value.forEach(cat => loadLatestForCategory(cat))
+  }, 0)
 })
 </script>
 
@@ -888,4 +950,23 @@ onMounted(() => {
   margin: 0 0 12px 0;
   color: #303133;
 }
+
+/* 头部动作按钮 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 4px;
+}
+
+/* 最新帖子预览样式 */
+.latest-posts { margin: 12px 0 8px; }
+.latest-title { font-size: 13px; color: #606266; margin-bottom: 8px; }
+.latest-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.latest-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #303133; }
+.latest-item .dot { width: 6px; height: 6px; background:#409EFF; border-radius: 50%; display:inline-block; }
+.latest-item .title { cursor: pointer; flex: 1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.latest-item .title:hover { text-decoration: underline; color:#409EFF; }
+.latest-item .time { color:#909399; font-size:12px; }
+.latest-empty { color:#909399; font-size:12px; }
 </style>

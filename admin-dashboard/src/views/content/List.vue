@@ -98,7 +98,7 @@
                 clearable
                 style="width: 120px"
               >
-                <el-option label="全部" :value="undefined" />
+
                 <el-option label="待审核" :value="1" />
                 <el-option label="已发布" :value="2" />
                 <el-option label="已拒绝" :value="3" />
@@ -152,6 +152,7 @@
             >
               {{ filter.label }}: {{ filter.value }}
             </el-tag>
+            <el-tag v-if="fromCategory" type="info" class="filter-tag">来源：版块页面</el-tag>
           </div>
         </div>
       </el-collapse-transition>
@@ -272,6 +273,16 @@
                 <span class="category">{{ row.category }}</span>
               </div>
             </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="所属版块" width="180">
+          <template #default="{ row }">
+            <el-tag :type="getModuleColor(row.module)" size="small">
+              {{ getModuleName(row.module) }}
+            </el-tag>
+            <span class="meta-separator">/</span>
+            <span class="category">{{ row.category }}</span>
           </template>
         </el-table-column>
         
@@ -513,6 +524,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useContentStore } from '@/stores/content'
 import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 import type { Content, ContentPreview, ContentQueryParams } from '@/types'
 import {
   Plus, Download, Search, Refresh, ArrowDown, ArrowUp, View, Star, 
@@ -542,23 +554,22 @@ const moveLoading = ref(false)
 const rejectLoading = ref(false)
 const topLoading = ref(false)
 
-// 计算属性
-const contentList = computed(() => contentStore.contentList)
-const contentStats = computed(() => contentStore.contentStats)
-const categories = computed(() => contentStore.categories)
-const selectedContents = computed(() => contentStore.selectedContents)
-const loading = computed(() => contentStore.loading)
-const pagination = computed(() => contentStore.pagination)
-const queryParams = computed(() => contentStore.queryParams)
+/** 计算属性（Pinia refs 解构，避免 Ref 的 Ref 导致的运行时错误） */
+const { contentList, contentStats, categories, selectedContents, loading, pagination, queryParams } = storeToRefs(contentStore)
 
-const hasSelected = computed(() => selectedContents.value.length > 0)
-const topContentCount = computed(() => 
-  contentList.value.filter(item => item.isTop).length
-)
+const hasSelected = computed(() => {
+  const selected = Array.isArray(selectedContents.value) ? selectedContents.value : []
+  return selected.length > 0
+})
+const topContentCount = computed(() => {
+  const list = Array.isArray(contentList.value) ? contentList.value : []
+  return list.filter(item => item.isTop).length
+})
 
 const filteredCategories = computed(() => {
-  if (!queryParams.value.module) return categories.value
-  return categories.value.filter(cat => cat.module === queryParams.value.module)
+  const all = Array.isArray(categories.value) ? categories.value : []
+  if (!queryParams.value.module) return all
+  return all.filter(cat => cat.module === queryParams.value.module)
 })
 
 const hasActiveFilters = computed(() => {
@@ -582,11 +593,17 @@ const activeFilters = computed(() => {
   return filters
 })
 
+const fromCategory = computed(() => router.currentRoute.value.query.from === 'category')
+
 const selectAll = computed({
-  get: () => selectedContents.value.length === contentList.value.length && contentList.value.length > 0,
+  get: () => {
+    const list = Array.isArray(contentList.value) ? contentList.value : []
+    const selected = Array.isArray(selectedContents.value) ? selectedContents.value : []
+    return selected.length === list.length && list.length > 0
+  },
   set: (val: boolean) => {
     if (val) {
-      contentStore.selectAll(contentList.value)
+      contentStore.selectAll(Array.isArray(contentList.value) ? contentList.value : [])
     } else {
       contentStore.clearSelection()
     }
@@ -594,7 +611,9 @@ const selectAll = computed({
 })
 
 const indeterminate = computed(() => {
-  return selectedContents.value.length > 0 && selectedContents.value.length < contentList.value.length
+  const list = Array.isArray(contentList.value) ? contentList.value : []
+  const selected = Array.isArray(selectedContents.value) ? selectedContents.value : []
+  return selected.length > 0 && selected.length < list.length
 })
 
 // 工具方法
@@ -614,8 +633,10 @@ const getContentTypeName = (type: string) => {
   return typeMap[type] || type
 }
 
-const getContentTypeColor = (type: string) => {
-  const colorMap: Record<string, string> = {
+type TagType = 'primary' | 'success' | 'info' | 'warning' | 'danger'
+
+const getContentTypeColor = (type: string): TagType => {
+  const colorMap: Record<string, TagType> = {
     article: 'primary',
     post: 'success',
     comment: 'info',
@@ -637,8 +658,8 @@ const getModuleName = (module: string) => {
   return moduleMap[module] || module
 }
 
-const getModuleColor = (module: string) => {
-  const colorMap: Record<string, string> = {
+const getModuleColor = (module: string): TagType => {
+  const colorMap: Record<string, TagType> = {
     knowledge: 'primary',
     forum: 'success', 
     news: 'warning',
@@ -658,8 +679,8 @@ const getStatusName = (status: number) => {
   return statusMap[status] || `状态${status}`
 }
 
-const getStatusColor = (status: number) => {
-  const colorMap: Record<number, string> = {
+const getStatusColor = (status: number): TagType => {
+  const colorMap: Record<number, TagType> = {
     1: 'warning',
     2: 'success',
     3: 'danger',
@@ -1037,12 +1058,18 @@ onMounted(async () => {
   if (query.status) {
     queryParams.value.status = parseInt(query.status as string)
   }
-  
-  // 加载数据
+  if (query.module) {
+    queryParams.value.module = String(query.module)
+  }
+  if (query.category) {
+    queryParams.value.category = String(query.category)
+  }
+
+  // 先按模块加载分类，再加载列表与统计
+  await contentStore.loadCategories(queryParams.value.module)
   await Promise.all([
     contentStore.loadContentList(),
-    contentStore.loadStats(),
-    contentStore.loadCategories()
+    contentStore.loadStats()
   ])
 })
 

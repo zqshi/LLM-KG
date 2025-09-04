@@ -100,7 +100,7 @@ const routes: RouteRecordRaw[] = [
             path: 'list',
             name: 'ContentList',
             component: () => import('@/views/content/List.vue'),
-            meta: { title: '内容列表', icon: 'Document', permission: 'content:view' }
+            meta: { title: '内容列表', icon: 'Document', permission: 'content:view', hideInMenu: true }
           },
           {
             path: 'dashboard',
@@ -125,6 +125,12 @@ const routes: RouteRecordRaw[] = [
             name: 'ContentCreate',
             component: () => import('@/views/content/Create.vue'),
             meta: { title: '创建内容', hideInMenu: true, permission: 'content:create' }
+          },
+          {
+            path: 'category/:code',
+            name: 'ContentCategoryHome',
+            component: () => import('@/views/content/Category.vue'),
+            meta: { title: '版块专属页', hideInMenu: true, permission: 'content:view' }
           }
         ]
       },

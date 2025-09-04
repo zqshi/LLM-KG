@@ -90,8 +90,10 @@ export const useContentStore = defineStore('content', () => {
       const mergedParams = { ...queryParams, ...params }
       
       const { data } = await contentApi.getList(mergedParams)
-      contentList.value = data.list
-      pagination.total = data.total
+      const list = Array.isArray((data as any)?.list) ? (data as any).list : []
+      const total = Number((data as any)?.total) || 0
+      contentList.value = list
+      pagination.total = total
       
       // 更新查询参数
       Object.assign(queryParams, mergedParams)
@@ -107,9 +109,10 @@ export const useContentStore = defineStore('content', () => {
   const loadCategories = async (module?: string) => {
     try {
       const { data } = await contentApi.getCategories(module)
-      categories.value = data
+      categories.value = Array.isArray(data) ? data : []
     } catch (error) {
       console.error('加载版块列表失败:', error)
+      categories.value = []
     }
   }
 

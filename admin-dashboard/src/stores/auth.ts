@@ -33,7 +33,7 @@ function generateDefaultMenus(): MenuNode[] {
       children: [
         { id: 21, name: '版块管理', path: '/content/categories', icon: 'FolderOpened' },
         { id: 24, name: '投票管理', path: '/content/polls', icon: 'DataBoard' },
-        { id: 22, name: '内容列表', path: '/content/list', icon: 'Document' },
+
         { id: 23, name: '数据看板', path: '/content/dashboard', icon: 'DataBoard' }
       ]
     },
