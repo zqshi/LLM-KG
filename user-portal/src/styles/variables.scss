@@ -1,0 +1,55 @@
+// 主色彩
+$primary-color: #409eff;
+$primary-light: #79bbff;
+$primary-dark: #337ecc;
+
+// 辅助色彩
+$success-color: #67c23a;
+$warning-color: #e6a23c;
+$danger-color: #f56c6c;
+$info-color: #909399;
+
+// 中性色彩
+$text-primary: #303133;
+$text-regular: #606266;
+$text-secondary: #909399;
+$text-placeholder: #c0c4cc;
+
+// 边框颜色
+$border-light: #ebeef5;
+$border-lighter: #f2f6fc;
+$border-base: #dcdfe6;
+$border-dark: #d4d7de;
+
+// 背景色
+$bg-primary: #ffffff;
+$bg-secondary: #f8f9fa;
+$bg-light: #fafafa;
+
+// 阴影
+$box-shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$box-shadow-base: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+
+// 圆角
+$border-radius-small: 4px;
+$border-radius-base: 6px;
+$border-radius-large: 8px;
+
+// 间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// 字体
+$font-size-xs: 12px;
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 20px;
+
+// 布局
+$header-height: 60px;
+$sidebar-width: 240px;
+$container-max-width: 1200px;

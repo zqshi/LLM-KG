@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业内部门户 - 资讯中心</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#4080FF',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        gray: {
+                            100: '#F2F3F5',
+                            200: '#E5E6EB',
+                            300: '#C9CDD4',
+                            400: '#86909C',
+                            500: '#4E5969',
+                            600: '#272E3B',
+                            700: '#1D2129',
+                        }
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        'hover': '0 4px 16px rgba(0, 0, 0, 0.12)',
+                    }
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .category-tag {
+                @apply text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium;
+            }
+            .status-badge {
+                @apply text-xs px-2 py-1 rounded-full font-medium;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-hover hover:-translate-y-1;
+            }
+            .btn-primary {
+                @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors font-medium;
+            }
+            .btn-secondary {
+                @apply bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors font-medium;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-100 text-gray-700 min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo和主导航 -->
+                <div class="flex items-center space-x-8">
+                    <a href="#" class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                            <i class="fa fa-building text-white"></i>
+                        </div>
+                        <span class="text-lg font-semibold text-gray-700">企业内部门户</span>
+                    </a>
+                    <nav class="hidden md:flex space-x-6">
+                        <a href="#" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">首页</a>
+                        <a href="#" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">论坛</a>
+                        <a href="#" class="text-primary font-medium border-b-2 border-primary h-full flex items-center">资讯中心</a>
+                        <a href="#" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">知识库</a>
+                        <a href="#" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">应用</a>
+                    </nav>
+                </div>
+                
+                <!-- 搜索框 -->
+                <div class="hidden md:flex relative flex-1 max-w-xl mx-8">
+                    <input type="text" placeholder="搜索AI工具、资讯或技术趋势..." 
+                        class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                    <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                
+                <!-- 用户区域 -->
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 text-gray-500 hover:text-primary transition-colors">
+                        <i class="fa fa-bell text-xl"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <img src="https://picsum.photos/id/1005/200" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+                        <span class="hidden md:inline text-sm font-medium">张小明</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="flex-1 container mx-auto px-4 py-6">
+        <!-- 页面标题 -->
+        <div class="mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-700">AI资讯中心</h1>
+            <p class="text-gray-500 mt-1">获取最新AI工具、技术趋势和行业动态，结合企业内部实践</p>
+        </div>
+
+        <!-- 功能切换标签 -->
+        <div class="mb-8 border-b border-gray-200">
+            <div class="flex space-x-8 overflow-x-auto pb-2">
+                <button id="news-list-tab" class="py-3 border-b-2 border-primary text-primary font-medium whitespace-nowrap">资讯列表</button>
+                <button id="news-detail-tab" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-primary whitespace-nowrap">资讯详情</button>
+                <button id="my-news-tab" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-primary whitespace-nowrap">我的资讯</button>
+            </div>
+        </div>
+
+        <!-- 1. 资讯列表页 -->
+        <div id="news-list-section">
+            <!-- 顶部Banner/焦点图 -->
+            <div class="bg-white rounded-xl shadow-card overflow-hidden mb-8">
+                <div class="relative h-64 md:h-80">
+                    <img src="https://picsum.photos/id/1/1200/400" alt="AI技术年度趋势报告发布" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6">
+                        <span class="category-tag mb-2">技术趋势</span>
+                        <h2 class="text-white text-xl md:text-2xl font-bold mb-2">2023年AI技术年度趋势报告发布：生成式AI将重塑企业生产力</h2>
+                        <p class="text-white/80 text-sm md:text-base mb-3 line-clamp-2">最新研究报告指出，生成式AI工具在企业中的应用将在未来12个月内增长300%，彻底改变传统工作流程...</p>
+                        <div class="flex items-center text-white/70 text-sm">
+                            <span>来源：AI研究中心</span>
+                            <span class="mx-2">•</span>
+                            <span>2023-10-28</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 筛选和搜索区 -->
+            <div class="bg-white rounded-xl shadow-card p-4 mb-6">
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <!-- 移动端搜索框 -->
+                    <div class="md:hidden relative">
+                        <input type="text" placeholder="搜索AI工具、资讯..." 
+                            class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                        <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    
+                    <!-- 高级筛选 -->
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button class="btn-secondary flex items-center">
+                            <i class="fa fa-filter mr-2"></i>筛选
+                        </button>
+                        
+                        <!-- 时间范围选择 -->
+                        <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                            <option>全部时间</option>
+                            <option>近7天</option>
+                            <option>近30天</option>
+                            <option>近90天</option>
+                            <option>今年</option>
+                        </select>
+                        
+                        <!-- 来源筛选 -->
+                        <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                            <option>全部来源</option>
+                            <option>AI科技评论</option>
+                            <option>TechCrunch</option>
+                            <option>麻省理工科技评论</option>
+                            <option>行业研究报告</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分类导航 -->
+            <div class="flex overflow-x-auto pb-2 mb-6 gap-2">
+                <button class="category-tag bg-primary text-white whitespace-nowrap px-4">全部</button>
+                <button class="category-tag whitespace-nowrap px-4">AI工具</button>
+                <button class="category-tag whitespace-nowrap px-4">市场评测</button>
+                <button class="category-tag whitespace-nowrap px-4">技术趋势</button>
+                <button class="category-tag whitespace-nowrap px-4">行业动态</button>
+            </div>
+
+            <!-- 资讯列表 -->
+            <div class="space-y-6">
+                <!-- 资讯项 1 -->
+                <div class="bg-white rounded-xl shadow-card overflow-hidden card-hover">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-1/4 h-48 md:h-auto">
+                            <img src="https://picsum.photos/id/180/600/400" alt="GitHub Copilot评测" class="w-full h-full object-cover">
+                        </div>
+                        <div class="md:w-3/4 p-6">
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="category-tag">AI工具</span>
+                                <span class="category-tag">市场评测</span>
+                            </div>
+                            <h3 class="text-lg md:text-xl font-semibold mb-3 hover:text-primary transition-colors">
+                                <a href="#">重磅评测: 十大AI编码助手横向对比 - GitHub Copilot是否值得付费？</a>
+                            </h3>
+                            <p class="text-gray-500 mb-4 line-clamp-2 md:line-clamp-3">
+                                本文对当前市场上主流的10款AI编码助手进行了为期两周的实战测试，从代码质量、学习曲线、集成能力和价格等多个维度进行评分。结果显示GitHub Copilot在综合表现上领先，但其他工具在特定场景下各有优势...
+                            </p>
+                            <div class="flex flex-wrap justify-between items-center">
+                                <div class="flex items-center text-gray-500 text-sm mb-2 md:mb-0">
+                                    <span>来源: AI科技评论</span>
+                                    <span class="mx-2">•</span>
+                                    <span>2023-10-26</span>
+                                </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span class="flex items-center"><i class="fa fa-eye mr-1"></i> 1.2k</span>
+                                    <span class="flex items-center"><i class="fa fa-thumbs-o-up mr-1"></i> 42</span>
+                                    <span class="flex items-center"><i class="fa fa-comment-o mr-1"></i> 8</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 资讯项 2 -->
+                <div class="bg-white rounded-xl shadow-card overflow-hidden card-hover">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-1/4 h-48 md:h-auto">
+                            <img src="https://picsum.photos/id/48/600/400" alt="生成式AI应用案例" class="w-full h-full object-cover">
+                        </div>
+                        <div class="md:w-3/4 p-6">
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="category-tag">行业动态</span>
+                            </div>
+                            <h3 class="text-lg md:text-xl font-semibold mb-3 hover:text-primary transition-colors">
+                                <a href="#">金融行业如何利用生成式AI提升客户服务效率</a>
+                            </h3>
+                            <p class="text-gray-500 mb-4 line-clamp-2 md:line-clamp-3">
+                                多家领先金融机构已开始部署生成式AI客服系统，平均响应时间从原来的45秒缩短至12秒，客户满意度提升37%。本文深入分析了三个成功案例，包括智能问答系统、个性化理财建议生成和合规文档处理...
+                            </p>
+                            <div class="flex flex-wrap justify-between items-center">
+                                <div class="flex items-center text-gray-500 text-sm mb-2 md:mb-0">
+                                    <span>来源: 金融科技日报</span>
+                                    <span class="mx-2">•</span>
+                                    <span>2023-10-25</span>
+                                </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span class="flex items-center"><i class="fa fa-eye mr-1"></i> 867</span>
+                                    <span class="flex items-center"><i class="fa fa-thumbs-o-up mr-1"></i> 29</span>
+                                    <span class="flex items-center"><i class="fa fa-comment-o mr-1"></i> 5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 资讯项 3 -->
+                <div class="bg-white rounded-xl shadow-card overflow-hidden card-hover">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-1/4 h-48 md:h-auto">
+                            <img src="https://picsum.photos/id/160/600/400" alt="AI图像生成工具对比" class="w-full h-full object-cover">
+                        </div>
+                        <div class="md:w-3/4 p-6">
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="category-tag">AI工具</span>
+                                <span class="category-tag">市场评测</span>
+                            </div>
+                            <h3 class="text-lg md:text-xl font-semibold mb-3 hover:text-primary transition-colors">
+                                <a href="#">Midjourney vs DALL-E 3: 哪款AI图像生成工具更适合企业设计团队？</a>
+                            </h3>
+                            <p class="text-gray-500 mb-4 line-clamp-2 md:line-clamp-3">
+                                随着DALL-E 3的发布，AI图像生成领域的竞争愈发激烈。本文从图像质量、风格一致性、文本理解准确度和商业使用许可等方面对比了这两款主流工具，并提供了企业采购决策建议...
+                            </p>
+                            <div class="flex flex-wrap justify-between items-center">
+                                <div class="flex items-center text-gray-500 text-sm mb-2 md:mb-0">
+                                    <span>来源: 设计科技前沿</span>
+                                    <span class="mx-2">•</span>
+                                    <span>2023-10-24</span>
+                                </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span class="flex items-center"><i class="fa fa-eye mr-1"></i> 1.5k</span>
+                                    <span class="flex items-center"><i class="fa fa-thumbs-o-up mr-1"></i> 78</span>
+                                    <span class="flex items-center"><i class="fa fa-comment-o mr-1"></i> 16</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 资讯项 4 -->
+                <div class="bg-white rounded-xl shadow-card overflow-hidden card-hover">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="md:w-1/4 h-48 md:h-auto">
+                            <img src="https://picsum.photos/id/119/600/400" alt="AI安全与伦理" class="w-full h-full object-cover">
+                        </div>
+                        <div class="md:w-3/4 p-6">
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                <span class="category-tag">技术趋势</span>
+                            </div>
+                            <h3 class="text-lg md:text-xl font-semibold mb-3 hover:text-primary transition-colors">
+                                <a href="#">企业AI应用的安全与伦理框架：规避风险的五大原则</a>
+                            </h3>
+                            <p class="text-gray-500 mb-4 line-clamp-2 md:line-clamp-3">
+                                随着AI在企业中的广泛应用，安全和伦理问题日益凸显。本文提出了企业AI治理的五大原则，包括数据隐私保护、算法透明度、偏见检测与缓解、人类监督机制和持续审计，并提供了实施路径图...
+                            </p>
+                            <div class="flex flex-wrap justify-between items-center">
+                                <div class="flex items-center text-gray-500 text-sm mb-2 md:mb-0">
+                                    <span>来源: 企业技术治理期刊</span>
+                                    <span class="mx-2">•</span>
+                                    <span>2023-10-23</span>
+                                </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                    <span class="flex items-center"><i class="fa fa-eye mr-1"></i> 732</span>
+                                    <span class="flex items-center"><i class="fa fa-thumbs-o-up mr-1"></i> 35</span>
+                                    <span class="flex items-center"><i class="fa fa-comment-o mr-1"></i> 9</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分页 -->
+            <div class="mt-8 flex justify-center">
+                <nav class="flex items-center space-x-1">
+                    <button class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-50" disabled>
+                        <i class="fa fa-angle-left"></i>
+                    </button>
+                    <button class="w-9 h-9 flex items-center justify-center rounded-md bg-primary text-white">1</button>
+                    <button class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-200 hover:bg-gray-50">2</button>
+                    <button class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-200 hover:bg-gray-50">3</button>
+                    <span class="w-9 h-9 flex items-center justify-center">...</span>
+                    <button class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-200 hover:bg-gray-50">8</button>
+                    <button class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50">
+                        <i class="fa fa-angle-right"></i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 2. 资讯详情页 -->
+        <div id="news-detail-section" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 左侧：资讯正文 -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- 资讯标题和基本信息 -->
+                    <div class="bg-white rounded-xl shadow-card p-6">
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="category-tag">AI工具</span>
+                            <span class="category-tag">市场评测</span>
+                        </div>
+                        <h1 class="text-2xl font-bold mb-4">重磅评测: 十大AI编码助手横向对比 - GitHub Copilot是否值得付费？</h1>
+                        <div class="flex flex-wrap items-center text-gray-500 text-sm mb-6 pb-4 border-b border-gray-100">
+                            <div class="flex items-center mr-6 mb-2 md:mb-0">
+                                <i class="fa fa-user-o mr-2"></i>
+                                <span>AI科技评论</span>
+                            </div>
+                            <div class="flex items-center mr-6 mb-2 md:mb-0">
+                                <i class="fa fa-clock-o mr-2"></i>
+                                <span>2023-10-26</span>
+                            </div>
+                            <div class="flex items-center mr-6 mb-2 md:mb-0">
+                                <i class="fa fa-link mr-2"></i>
+                                <a href="#" class="hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">查看原文</a>
+                            </div>
+                            <div class="flex items-center mb-2 md:mb-0">
+                                <i class="fa fa-eye mr-2"></i>
+                                <span>1.2k 阅读</span>
+                            </div>
+                        </div>
+
+                        <!-- 资讯正文 -->
+                        <div class="prose prose-lg max-w-none text-gray-700">
+                            <p>在软件开发领域，AI编码助手正迅速成为开发者不可或缺的工具。本文对当前市场上主流的10款AI编码助手进行了为期两周的实战测试，从多个维度进行评分，帮助企业和开发者做出更明智的选择。</p>
+                            
+                            <h2>评测方法论</h2>
+                            <p>我们选择了5个不同复杂度的真实开发任务，包括：</p>
+                            <ul>
+                                <li>一个RESTful API后端服务（Node.js）</li>
+                                <li>一个响应式前端组件（React）</li>
+                                <li>数据处理脚本（Python）</li>
+                                <li>移动端UI组件（Flutter）</li>
+                                <li>自动化测试生成（Java）</li>
+                            </ul>
+                            <p>每款工具都在相同的硬件环境下完成这些任务，我们从以下几个维度进行评分：</p>
+                            <ol>
+                                <li>代码质量（30%）：正确性、性能、可读性</li>
+                                <li>开发效率（25%）：完成时间、代码量减少比例</li>
+                                <li>学习曲线（15%）：上手难度、配置复杂度</li>
+                                <li>集成能力（20%）：IDE兼容性、项目适配性</li>
+                                <li>价格与许可（10%）：成本效益、商业使用许可</li>
+                            </ol>
+                            
+                            <h2>评测结果概览</h2>
+                            <p>经过两周的密集测试，GitHub Copilot以总分86分位居榜首，特别是在代码质量和集成能力方面表现突出。紧随其后的是Amazon CodeWhisperer（82分）和Tabnine（79分）。</p>
+                            
+                            <img src="https://picsum.photos/id/2/800/400" alt="AI编码助手评测结果对比图" class="w-full h-auto rounded-lg my-4">
+                            
+                            <h2>GitHub Copilot深度分析</h2>
+                            <p>GitHub Copilot由GitHub和OpenAI联合开发，基于GPT模型架构，是目前市场上最成熟的AI编码助手之一。</p>
+                            
+                            <h3>优势</h3>
+                            <ul>
+                                <li>对多种编程语言的支持非常全面，特别是对主流语言的理解准确率高达92%</li>
+                                <li>与Visual Studio Code等主流IDE的集成非常流畅，几乎零配置</li>
+                                <li>能够理解项目上下文和代码风格，生成的代码一致性强</li>
+                                <li>注释生成能力出色，有助于提升代码文档质量</li>
+                            </ul>
+                            
+                            <h3>不足</h3>
+                            <ul>
+                                <li>在处理复杂算法和边缘情况时，建议准确率下降至65%</li>
+                                <li>商业使用许可费用相对较高，对小型团队可能构成负担</li>
+                                <li>偶尔会生成有安全隐患的代码，需要开发者仔细审核</li>
+                            </ul>
+                            
+                            <h2>企业采用建议</h2>
+                            <p>对于大型开发团队和对代码质量有高要求的企业，GitHub Copilot是目前综合表现最佳的选择，尽管成本较高，但能显著提升团队生产力。对于预算有限的小型团队，可以考虑Amazon CodeWhisperer的免费 tier，或者开源的Tabnine。</p>
+                            <p>无论选择哪款工具，我们都建议建立明确的代码审查流程，不能完全依赖AI生成的代码，特别是在安全敏感的场景中。</p>
+                        </div>
+                        
+                        <!-- 互动按钮 -->
+                        <div class="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-100">
+                            <button class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                <i class="fa fa-thumbs-o-up mr-2"></i>
+                                <span>点赞 (42)</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                <i class="fa fa-bookmark-o mr-2"></i>
+                                <span>收藏</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                <i class="fa fa-share-alt mr-2"></i>
+                                <span>分享</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                <i class="fa fa-comment-o mr-2"></i>
+                                <span>评论 (8)</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 评论区 -->
+                    <div class="bg-white rounded-xl shadow-card p-6">
+                        <h3 class="text-lg font-semibold mb-4">评论 (8)</h3>
+                        
+                        <!-- 评论输入框 -->
+                        <div class="mb-6">
+                            <textarea rows="3" placeholder="分享你的观点..." 
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"></textarea>
+                            <div class="flex justify-end mt-3">
+                                <button class="btn-primary">发布评论</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 评论列表 -->
+                        <div class="space-y-6">
+                            <!-- 评论项 1 -->
+                            <div class="flex gap-3">
+                                <img src="https://picsum.photos/id/1012/100" alt="李开发" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-medium">李开发</h4>
+                                            <p class="text-xs text-gray-500 mt-0.5">2天前</p>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fa fa-ellipsis-h"></i>
+                                        </button>
+                                    </div>
+                                    <p class="mt-2 text-gray-700">我们团队已经使用GitHub Copilot三个月了，确实能节省不少时间，特别是在写重复性代码和单元测试的时候。不过正如文章所说，复杂逻辑还是需要自己写，AI生成的代码不能完全信任。</p>
+                                    <div class="flex items-center mt-2 space-x-4 text-sm">
+                                        <button class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                            <i class="fa fa-thumbs-o-up mr-1"></i>
+                                            <span>12</span>
+                                        </button>
+                                        <button class="text-gray-500 hover:text-primary transition-colors">回复</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 评论项 2 -->
+                            <div class="flex gap-3">
+                                <img src="https://picsum.photos/id/1025/100" alt="王架构" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-medium">王架构</h4>
+                                            <p class="text-xs text-gray-500 mt-0.5">3天前</p>
+                                        </div>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fa fa-ellipsis-h"></i>
+                                        </button>
+                                    </div>
+                                    <p class="mt-2 text-gray-700">想知道和Amazon CodeWhisperer相比，在处理AWS相关服务的代码生成方面有什么差异？我们团队主要用AWS，可能CodeWhisperer更有优势？</p>
+                                    <div class="flex items-center mt-2 space-x-4 text-sm">
+                                        <button class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                            <i class="fa fa-thumbs-o-up mr-1"></i>
+                                            <span>5</span>
+                                        </button>
+                                        <button class="text-gray-500 hover:text-primary transition-colors">回复</button>
+                                    </div>
+                                    
+                                    <!-- 评论回复 -->
+                                    <div class="mt-4 ml-6 pl-4 border-l-2 border-gray-100">
+                                        <div class="flex gap-3">
+                                            <img src="https://picsum.photos/id/1005/100" alt="张小明" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                                            <div class="flex-1">
+                                                <div class="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 class="font-medium text-sm">张小明 <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded ml-2">作者</span></h4>
+                                                        <p class="text-xs text-gray-500 mt-0.5">2天前</p>
+                                                    </div>
+                                                </div>
+                                                <p class="mt-1 text-gray-700 text-sm">在AWS相关代码生成方面，CodeWhisperer确实有优势，特别是对AWS SDK的理解更深入。但Copilot在整体代码质量和多语言支持上更好。如果你们主要用AWS，可以考虑CodeWhisperer的免费版。</p>
+                                                <div class="flex items-center mt-1 space-x-4 text-xs">
+                                                    <button class="flex items-center text-gray-500 hover:text-primary transition-colors">
+                                                        <i class="fa fa-thumbs-o-up mr-1"></i>
+                                                        <span>3</span>
+                                                    </button>
+                                                    <button class="text-gray-500 hover:text-primary transition-colors">回复</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧：工具信息卡片和相关资讯 -->
+                <div class="space-y-6">
+                    <!-- AI工具信息卡片 -->
+                    <div class="bg-white rounded-xl shadow-card overflow-hidden sticky top-24">
+                        <div class="p-6 border-b border-gray-100">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-[#FF6B6B] rounded-lg flex items-center justify-center">
+                                        <i class="fa fa-code text-white text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg">GitHub Copilot</h3>
+                                        <span class="status-badge bg-success/10 text-success">已授权</span>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-primary transition-colors">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </button>
+                            </div

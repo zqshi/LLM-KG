@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术分享 - 企业论坛</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        elite: '#F97316',
+                        top: '#EF4444',
+                        vote: '#8B5CF6' // 投票帖专用颜色
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-shadow { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+            .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
+            .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+            .badge { @apply inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium; }
+            .nav-active { @apply text-primary border-b-2 border-primary; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+    <!-- 顶部固定导航 -->
+    <header class="bg-white shadow-sm z-50 sticky top-0 transition-all duration-300" id="main-header">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-10 border-b">
+                <div class="text-sm text-gray-500">今天是周三，9月3日</div>
+                <div class="flex items-center space-x-4 text-sm">
+                    <a href="#" class="text-gray-500 hover:text-primary transition-colors">帮助中心</a>
+                    <a href="#" class="text-gray-500 hover:text-primary transition-colors">联系IT</a>
+                    <div class="flex items-center cursor-pointer relative group">
+                        <i class="fa fa-bell-o text-gray-500 mr-1"></i>
+                        <span class="text-gray-500">通知</span>
+                        <span class="absolute -top-1 -right-3 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                        <!-- 通知下拉菜单 -->
+                        <div class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-50 hidden group-hover:block">
+                            <div class="px-4 py-2 border-b text-sm font-medium">通知消息</div>
+                            <div class="px-4 py-3 hover:bg-gray-50 text-sm">
+                                <p>您参与的投票"技术分享会主题"即将结束</p>
+                                <p class="text-xs text-gray-500 mt-1">1小时前</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fa fa-cloud text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-primary ml-3">金山云</h1>
+                </div>
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="text-gray-600 hover:text-primary py-5 transition-all">首页</a>
+                    <a href="#" class="text-gray-600 hover:text-primary py-5 transition-all">AI工具箱</a>
+                    <a href="forum-home.html" class="nav-active py-5 transition-all">论坛</a>
+                    <a href="#" class="text-gray-600 hover:text-primary py-5 transition-all">学习平台</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <div class="relative hidden md:block group">
+                        <input type="text" placeholder="搜索帖子、话题、用户..." class="w-48 pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-all group-hover:w-64" />
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <div class="flex items-center space-x-2 cursor-pointer group">
+                        <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-primary transition-all" />
+                        <span class="hidden md:inline text-sm font-medium">张明</span>
+                        <i class="fa fa-angle-down text-gray-500 group-hover:text-primary transition-colors"></i>
+                    </div>
+                    <button class="md:hidden text-gray-500 hover:text-primary transition-colors">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 板块主体内容 -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- 面包屑导航 -->
+        <div class="text-sm text-gray-500 mb-4">
+            <a href="#" class="hover:text-primary transition-colors">首页</a>
+            <i class="fa fa-angle-right mx-2 text-gray-400 text-xs"></i>
+            <a href="forum-home.html" class="hover:text-primary transition-colors">论坛</a>
+            <i class="fa fa-angle-right mx-2 text-gray-400 text-xs"></i>
+            <span class="text-gray-700">技术分享</span>
+        </div>
+
+        <!-- 板块头部 -->
+        <div class="mb-6 bg-white rounded-xl card-shadow p-5 hover-lift">
+            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fa fa-code text-primary text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold">技术分享</h2>
+                        <p class="text-sm text-gray-500 mt-1">分享技术文章、编程技巧、架构讨论、问题求助</p>
+                    </div>
+                </div>
+                <!-- 发帖按钮 -->
+                <div class="flex flex-wrap gap-3 self-start md:self-auto">
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg flex items-center hover:bg-primary/90 transition-colors" onclick="location.href='create-post.html'">
+                        <i class="fa fa-pencil mr-2"></i> 发布帖子
+                    </button>
+                    <button class="bg-vote text-white px-4 py-2 rounded-lg flex items-center hover:bg-vote/90 transition-colors" onclick="location.href='create-vote.html'">
+                        <i class="fa fa-bar-chart mr-2"></i> 发起投票
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 筛选与排序 -->
+        <div class="bg-white rounded-xl card-shadow p-4 mb-6 hover-lift">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex flex-wrap gap-2">
+                    <button class="px-3 py-1.5 text-sm bg-primary text-white rounded-full">全部</button>
+                    <button class="px-3 py-1.5 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full transition-colors">技术文章</button>
+                    <button class="px-3 py-1.5 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full transition-colors">问题求助</button>
+                    <button class="px-3 py-1.5 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full transition-colors">架构讨论</button>
+                    <button class="px-3 py-1.5 text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-full transition-colors">
+                        <i class="fa fa-bar-chart mr-1"></i>投票
+                    </button>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-500">排序：</span>
+                    <select class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                        <option>最新发布</option>
+                        <option>最多评论</option>
+                        <option>最多点赞</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帖子列表 -->
+        <section class="mb-8">
+            <div class="bg-white rounded-xl card-shadow overflow-hidden">
+                <div class="divide-y divide-gray-100">
+                    <!-- 置顶+精华帖 -->
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <img src="https://picsum.photos/id/1012/40/40" alt="作者头像" class="w-10 h-10 rounded-full object-cover" />
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center mb-1">
+                                    <span class="badge bg-top text-white mr-2"><i class="fa fa-thumb-tack mr-1"></i>置顶</span>
+                                    <span class="badge bg-elite text-white mr-2"><i class="fa fa-star mr-1"></i>精华</span>
+                                </div>
+                                <h4 class="font-medium mb-2 hover:text-primary transition-colors"><a href="post-detail.html">【干货】云服务器性能优化的10个实战技巧</a></h4>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <span>李华</span>
+                                    <span class="mx-2">·</span>
+                                    <span>3天前</span>
+                                    <span class="mx-2">·</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 1256</span>
+                                    <span class="mx-3"><i class="fa fa-comment-o mr-1"></i> 42</span>
+                                    <span><i class="fa fa-thumbs-o-up mr-1"></i> 89</span>
+                                </div>
+                                <!-- 版主操作按钮（仅版主可见） -->
+                                <div class="mt-2 flex space-x-2">
+                                    <button class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">取消置顶</button>
+                                    <button class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">取消精华</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 投票帖示例 1 - 进行中 -->
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <img src="https://picsum.photos/id/1025/40/40" alt="作者头像" class="w-10 h-10 rounded-full object-cover" />
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center mb-1">
+                                    <span class="badge bg-vote text-white mr-2">
+                                        <i class="fa fa-bar-chart mr-1"></i>投票
+                                    </span>
+                                    <span class="badge bg-green-100 text-green-800 mr-2 text-xs">
+                                        进行中
+                                    </span>
+                                </div>
+                                <h4 class="font-medium mb-2 hover:text-primary transition-colors">
+                                    <a href="vote-detail.html">你最希望下一期技术分享会讲解什么主题？</a>
+                                </h4>
+                                <!-- 投票信息摘要 -->
+                                <div class="bg-gray-50 p-3 rounded-lg text-sm mb-2">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <span class="font-medium">4个选项</span>
+                                            <span class="text-gray-500 ml-2">• 最多选3项</span>
+                                        </div>
+                                        <span class="text-vote font-medium">75人已参与</span>
+                                    </div>
+                                    <div class="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-vote" style="width: 65%"></div>
+                                    </div>
+                                    <div class="flex justify-between mt-1 text-xs text-gray-500">
+                                        <span>剩余时间: 6天18小时</span>
+                                        <span>参与率: 65%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <span>李技术</span>
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded ml-2">管理员</span>
+                                    <span class="mx-2">·</span>
+                                    <span>发布于 2023-10-15</span>
+                                    <span class="mx-2">·</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 342</span>
+                                    <span class="mx-3"><i class="fa fa-comment-o mr-1"></i> 18</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 普通帖子 -->
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <img src="https://picsum.photos/id/1005/40/40" alt="作者头像" class="w-10 h-10 rounded-full object-cover" />
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium mb-2 hover:text-primary transition-colors"><a href="post-detail.html">【求助】前端打包后体积过大的优化方案</a></h4>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <span>张明</span>
+                                    <span class="mx-2">·</span>
+                                    <span>昨天 14:30</span>
+                                    <span class="mx-2">·</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 328</span>
+                                    <span class="mx-3"><i class="fa fa-comment-o mr-1"></i> 15</span>
+                                    <span><i class="fa fa-thumbs-o-up mr-1"></i> 23</span>
+                                </div>
+                                <!-- 版主操作按钮 -->
+                                <div class="mt-2 flex space-x-2">
+                                    <button class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">设为精华</button>
+                                    <button class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">移动板块</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 带图片的帖子 -->
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <img src="https://picsum.photos/id/1025/40/40" alt="作者头像" class="w-10 h-10 rounded-full object-cover" />
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-medium mb-2 hover:text-primary transition-colors"><a href="post-detail.html">【分享】新版监控系统的Dashboard设计方案</a></h4>
+                                <div class="flex space-x-2 mb-2">
+                                    <img src="https://picsum.photos/id/180/100/80" alt="帖子图片" class="w-20 h-16 rounded object-cover" />
+                                    <img src="https://picsum.photos/id/160/100/80" alt="帖子图片" class="w-20 h-16 rounded object-cover" />
+                                </div>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <span>王芳</span>
+                                    <span class="mx-2">·</span>
+                                    <span>2天前</span>
+                                    <span class="mx-2">·</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 512</span>
+                                    <span class="mx-3"><i class="fa fa-comment-o mr-1"></i> 27</span>
+                                    <span><i class="fa fa-thumbs-o-up mr-1"></i> 45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 投票帖示例 2 - 即将结束 -->
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-3">
+                                <img src="https://picsum.photos/id/1074/40/40" alt="作者头像" class="w-10 h-10 rounded-full object-cover" />
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center mb-1">
+                                    <span class="badge bg-vote text-white mr-2">
+                                        <i class="fa fa-bar-chart mr-1"></i>投票
+                                    </span>
+                                    <span class="badge bg-orange-100 text-orange-800 mr-2 text-xs">
+                                        即将结束
+                                    </span>
+                                </div>
+                                <h4 class="font-medium mb-2 hover:text-primary transition-colors">
+                                    <a href="vote-detail.html">你最常用的前端状态管理方案是什么？</a>
+                                </h4>
+                                <!-- 投票信息摘要 -->
+                                <div class="bg-gray-50 p-3 rounded-lg text-sm mb-2">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <span class="font-medium">5个选项</span>
+                                            <span class="text-gray-500 ml-2">• 单选</span>
+                                        </div>
+                                        <span class="text-vote font-medium">128人已参与</span>
+                                    </div>
+                                    <div class="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="h-full bg-vote" style="width: 85%"></div>
+                                    </div>
+                                    <div class="flex justify-between mt-1 text-xs text-gray-500">
+                                        <span class="text-orange-600 font-medium">剩余时间: 2小时30分</span>
+                                        <span>参与率: 85%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-xs text-gray-500">
+                                    <span>张前端</span>
+                                    <span class="mx-2">·</span>
+                                    <span>发布于 2023-10-18</span>
+                                    <span class="mx-2">·</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 456</span>
+                                    <span class="mx-3"><i class="fa fa-comment-o mr-1"></i> 32</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div class="p-4 border-t border-gray-100">
+                    <div class="flex items-center justify-center space-x-2">
+                        <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors">
+                            <i class="fa fa-angle-left"></i>
+                        </button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white">1</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">2</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">3</button>
+                        <span class="text-gray-500">...</span>
+                        <button class="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors">12</button>
+                        <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary transition-colors">
+                            <i class="fa fa-angle-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 移动端底部导航 -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-40">
+        <div class="flex justify-around">
+            <a href="#" class="flex flex-col items-center py-2 px-4 text-gray-500">
+                <i class="fa fa-home text-lg"></i>
+                <span class="text-xs mt-1">首页</span>
+            </a>
+            <a href="#" class="flex flex-col items-center py-2 px-4 text-gray-500">
+                <i class="fa fa-wrench text-lg"></i>
+                <span class="text-xs mt-1">工具</span>
+            </a>
+            <a href="forum-home.html" class="flex flex-col items-center py-2 px-4 text-primary">
+                <i class="fa fa-comments-o text-lg"></i>
+                <span class="text-xs mt-1">论坛</span>
+            </a>
+            <a href="#" class="flex flex-col items-center py-2 px-4 text-gray-500">
+                <i class="fa fa-user-o text-lg"></i>
+                <span class="text-xs mt-1">我的</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 10) {
+                header.classList.add('shadow');
+            } else {
+                header.classList.remove('shadow');
+            }
+        });
+
+        // 投票帖交互效果
+        document.querySelectorAll('a[href="vote-detail.html"]').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.closest('.hover\\:bg-gray-50').classList.add('bg-gray-50');
+            });
+        });
+    </script>
+</body>
+</html>
