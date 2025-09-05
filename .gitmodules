@@ -1,0 +1,3 @@
+[submodule "arco-design"]
+	path = arco-design
+	url = git@github.com:arco-design/arco-design.git

@@ -291,6 +291,38 @@ const routes: RouteRecordRaw[] = [
         ]
       },
       {
+        path: 'portal-config',
+        name: 'PortalConfig',
+        redirect: '/portal-config/navigation',
+        meta: { title: '门户配置管理', icon: 'Grid', permission: 'portal:config:view' },
+        children: [
+          {
+            path: 'navigation',
+            name: 'PortalNavigation',
+            component: () => import('@/views/portal-config/Navigation.vue'),
+            meta: { title: '导航管理', icon: 'Menu', permission: 'portal:navigation:view' }
+          },
+          {
+            path: 'entry-panel',
+            name: 'PortalEntryPanel',
+            component: () => import('@/views/portal-config/EntryPanel.vue'),
+            meta: { title: '入口面板', icon: 'Grid', permission: 'portal:panel:view' }
+          },
+          {
+            path: 'version-control',
+            name: 'PortalVersionControl',
+            component: () => import('@/views/portal-config/VersionControl.vue'),
+            meta: { title: '版本管理', icon: 'Clock', permission: 'portal:version:view' }
+          },
+          {
+            path: 'audit-logs',
+            name: 'PortalAuditLogs',
+            component: () => import('@/views/portal-config/AuditLogs.vue'),
+            meta: { title: '操作日志', icon: 'Document', permission: 'portal:audit:view' }
+          }
+        ]
+      },
+      {
         path: 'system',
         name: 'System',
         redirect: '/system/settings',

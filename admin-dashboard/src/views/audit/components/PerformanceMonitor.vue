@@ -57,7 +57,8 @@
       <!-- 异步处理队列状态 -->
       <el-col :span="12">
         <el-card>
-          <div slot="header">
+          <template v-slot:header>
+<div >
             <span>异步处理队列</span>
             <el-tag 
               :type="queueStatus.processing ? 'success' : 'info'" 
@@ -66,6 +67,7 @@
               {{ queueStatus.processing ? '处理中' : '空闲' }}
             </el-tag>
           </div>
+</template>
           <div class="queue-stats">
             <div class="queue-item">
               <span class="label">队列长度:</span>
@@ -90,7 +92,7 @@
             :status="getQueueEfficiency() > 80 ? 'success' : 'warning'"
             style="margin-top: 15px;"
           >
-            <template slot="default">队列效率</template>
+            <template v-slot:default>队列效率</template>
           </el-progress>
         </el-card>
       </el-col>
@@ -98,7 +100,8 @@
       <!-- 数据库性能指标 -->
       <el-col :span="12">
         <el-card>
-          <div slot="header">
+          <template v-slot:header>
+<div >
             <span>数据库性能</span>
             <el-tooltip content="点击查看详细报告">
               <el-button 
@@ -109,6 +112,7 @@
               />
             </el-tooltip>
           </div>
+</template>
           <div class="db-metrics">
             <el-row :gutter="12">
               <el-col :span="12">
@@ -145,7 +149,8 @@
       <!-- 响应时间趋势图 -->
       <el-col :span="24">
         <el-card>
-          <div slot="header">
+          <template v-slot:header>
+<div >
             <span>响应时间趋势</span>
             <el-select 
               v-model="selectedTimeRange" 
@@ -159,6 +164,7 @@
               <el-option label="最近7天" value="7d" />
             </el-select>
           </div>
+</template>
           <div id="response-time-chart" style="height: 300px;"></div>
         </el-card>
       </el-col>
@@ -168,7 +174,8 @@
       <!-- 慢查询列表 -->
       <el-col :span="14">
         <el-card>
-          <div slot="header">
+          <template v-slot:header>
+<div >
             <span>慢查询分析</span>
             <el-button 
               type="text" 
@@ -178,20 +185,21 @@
               刷新
             </el-button>
           </div>
+</template>
           <el-table 
             :data="slowQueries.slice(0, 5)" 
             size="small"
             max-height="350"
           >
             <el-table-column label="查询" width="200">
-              <template slot-scope="scope">
+              <template v-slot="scope">
                 <el-tooltip :content="scope.row.query" placement="top">
                   <span class="query-text">{{ truncateQuery(scope.row.query) }}</span>
                 </el-tooltip>
               </template>
             </el-table-column>
             <el-table-column prop="averageTime" label="平均时间(ms)" width="100">
-              <template slot-scope="scope">
+              <template v-slot="scope">
                 <el-tag :type="scope.row.averageTime > 2000 ? 'danger' : 'warning'">
                   {{ Math.round(scope.row.averageTime) }}
                 </el-tag>
@@ -199,7 +207,7 @@
             </el-table-column>
             <el-table-column prop="frequency" label="频次" width="80" />
             <el-table-column label="操作" width="100">
-              <template slot-scope="scope">
+              <template v-slot="scope">
                 <el-button 
                   type="text" 
                   size="small"
@@ -216,7 +224,8 @@
       <!-- 优化建议 -->
       <el-col :span="10">
         <el-card>
-          <div slot="header">
+          <template v-slot:header>
+<div >
             <span>优化建议</span>
             <el-badge 
               :value="optimizationSuggestions.length" 
@@ -224,6 +233,7 @@
               style="float: right;"
             />
           </div>
+</template>
           <div class="suggestions-list" style="max-height: 350px; overflow-y: auto;">
             <div 
               v-for="(suggestion, index) in optimizationSuggestions.slice(0, 8)" 
@@ -260,7 +270,7 @@
     <!-- 数据库优化报告对话框 -->
     <el-dialog 
       title="数据库优化报告" 
-      :visible.sync="showReportDialog"
+      v-model:visible="showReportDialog"
       width="80%"
       :before-close="closeReportDialog"
     >
@@ -289,7 +299,7 @@
           <el-tab-pane label="索引建议" name="indexes">
             <el-table :data="databaseReport.indexRecommendations" size="small">
               <el-table-column prop="priority" label="优先级" width="80">
-                <template slot-scope="scope">
+                <template v-slot="scope">
                   <el-tag :type="getSuggestionTagType(scope.row.priority)" size="small">
                     {{ getPriorityText(scope.row.priority) }}
                   </el-tag>
@@ -297,7 +307,7 @@
               </el-table-column>
               <el-table-column prop="description" label="建议" />
               <el-table-column prop="sqlCommand" label="SQL命令" width="300">
-                <template slot-scope="scope">
+                <template v-slot="scope">
                   <el-button 
                     type="text" 
                     size="small"
@@ -333,10 +343,12 @@
         </el-tabs>
       </div>
       
-      <div slot="footer">
+      <template v-slot:footer>
+<div >
         <el-button @click="closeReportDialog">关闭</el-button>
         <el-button type="primary" @click="exportReport">导出报告</el-button>
       </div>
+</template>
     </el-dialog>
   </div>
 </template>

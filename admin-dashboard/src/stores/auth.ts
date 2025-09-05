@@ -103,13 +103,25 @@ function generateDefaultMenus(): MenuNode[] {
     },
     {
       id: 9,
+      name: '门户配置管理',
+      path: '/portal-config',
+      icon: 'Grid',
+      children: [
+        { id: 111, name: '导航管理', path: '/portal-config/navigation', icon: 'Menu' },
+        { id: 112, name: '入口面板', path: '/portal-config/entry-panel', icon: 'Grid' },
+        { id: 113, name: '版本管理', path: '/portal-config/version-control', icon: 'Clock' },
+        { id: 114, name: '操作日志', path: '/portal-config/audit-logs', icon: 'Document' }
+      ]
+    },
+    {
+      id: 10,
       name: '配置与审计',
       path: '/system',
       icon: 'Tools',
       children: [
-        { id: 101, name: '系统配置', path: '/system/settings', icon: 'Setting' },
-        { id: 102, name: '审计日志', path: '/system/logs', icon: 'DocumentChecked' },
-        { id: 103, name: '操作告警', path: '/system/alerts', icon: 'Bell' }
+        { id: 121, name: '系统配置', path: '/system/settings', icon: 'Setting' },
+        { id: 122, name: '审计日志', path: '/system/logs', icon: 'DocumentChecked' },
+        { id: 123, name: '操作告警', path: '/system/alerts', icon: 'Bell' }
       ]
     }
   ]

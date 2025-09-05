@@ -1,287 +1,313 @@
 <template>
-  <div class="forum-page">
-    <div class="container">
-      <!-- 页面标题 -->
-      <div class="page-header">
-        <h1>企业论坛</h1>
-        <p>分享观点，交流经验，共建和谐职场</p>
-        <el-button type="primary" size="large" @click="$router.push('/forum/create')">
-          <el-icon><Edit /></el-icon>
-          发布话题
-        </el-button>
+  <div class="forum-page bg-gray-50 font-sans text-gray-800 min-h-screen">
+    <!-- 面包屑导航 -->
+    <div class="container mx-auto px-4 py-6">
+      <div class="text-sm text-gray-500 mb-4">
+        <router-link to="/" class="hover:text-primary transition-colors">首页</router-link>
+        <i class="fa fa-angle-right mx-2 text-gray-400 text-xs"></i>
+        <span class="text-gray-700">论坛</span>
       </div>
 
-      <!-- 热门话题和统计 -->
-      <div class="forum-stats">
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-number">{{ contentStore.forumPosts.length }}</div>
-            <div class="stat-label">话题总数</div>
+      <!-- 板块头部 -->
+      <div class="mb-6 bg-white rounded-xl shadow-sm p-5 hover:shadow-lg transition-all duration-300">
+        <div class="flex flex-col md:flex-row md:items-center justify-between">
+          <div class="flex items-center mb-4 md:mb-0">
+            <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
+              <i class="fa fa-comments text-primary text-2xl"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold">企业论坛</h2>
+              <p class="text-sm text-gray-500 mt-1">分享观点，交流经验，共建和谐职场</p>
+            </div>
           </div>
-          <div class="stat-item">
-            <div class="stat-number">{{ totalReplies }}</div>
-            <div class="stat-label">回复总数</div>
+          <button 
+            @click="$router.push('/forum/create')"
+            class="bg-primary text-white px-4 py-2 rounded-lg flex items-center hover:bg-primary/90 transition-colors self-start md:self-auto"
+          >
+            <i class="fa fa-pencil mr-2"></i> 发布话题
+          </button>
+        </div>
+      </div>
+
+      <!-- 论坛统计 -->
+      <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary mb-1">{{ contentStore.forumPosts.length }}</div>
+            <div class="text-sm text-gray-500">话题总数</div>
           </div>
-          <div class="stat-item">
-            <div class="stat-number">{{ activeUsers }}</div>
-            <div class="stat-label">活跃用户</div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary mb-1">{{ totalReplies }}</div>
+            <div class="text-sm text-gray-500">回复总数</div>
           </div>
-          <div class="stat-item">
-            <div class="stat-number">{{ todayPosts }}</div>
-            <div class="stat-label">今日话题</div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary mb-1">{{ activeUsers }}</div>
+            <div class="text-sm text-gray-500">活跃用户</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-primary mb-1">{{ todayPosts }}</div>
+            <div class="text-sm text-gray-500">今日话题</div>
           </div>
         </div>
       </div>
 
-      <!-- 搜索和筛选 -->
-      <div class="filter-section">
-        <div class="search-controls">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索话题、内容或用户..."
-            :prefix-icon="Search"
-            clearable
-            @input="handleSearch"
-            style="width: 400px"
-          />
-          <div class="filter-buttons">
-            <el-select
-              v-model="selectedCategory"
-              placeholder="分类"
-              clearable
-              style="width: 120px"
-              @change="handleFilter"
+      <!-- 筛选与排序 -->
+      <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex flex-wrap gap-2">
+            <button 
+              @click="selectedCategory = ''"
+              :class="selectedCategory === '' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              class="px-3 py-1.5 text-sm rounded-full transition-colors"
             >
-              <el-option
-                v-for="category in categories"
-                :key="category"
-                :label="category"
-                :value="category"
+              全部
+            </button>
+            <button 
+              v-for="category in categories"
+              :key="category"
+              @click="selectedCategory = category"
+              :class="selectedCategory === category ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              class="px-3 py-1.5 text-sm rounded-full transition-colors"
+            >
+              {{ category }}
+            </button>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+            <div class="relative">
+              <input 
+                v-model="searchKeyword"
+                @input="handleSearch"
+                type="text" 
+                placeholder="搜索帖子、用户..." 
+                class="w-48 pl-8 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm"
               />
-            </el-select>
-            <el-select
+              <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <select 
               v-model="sortBy"
-              placeholder="排序"
-              style="width: 120px"
               @change="handleSort"
+              class="px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm"
             >
-              <el-option label="最新发布" value="createTime" />
-              <el-option label="最新回复" value="updateTime" />
-              <el-option label="热门话题" value="replyCount" />
-              <el-option label="浏览最多" value="viewCount" />
-            </el-select>
+              <option value="updateTime">最新回复</option>
+              <option value="createTime">最新发布</option>
+              <option value="replyCount">热门话题</option>
+              <option value="viewCount">浏览最多</option>
+            </select>
           </div>
         </div>
       </div>
 
-      <!-- 置顶话题 -->
-      <div v-if="topPosts.length > 0" class="top-posts">
-        <h3>置顶话题</h3>
-        <div class="post-list">
+      <!-- 置顶帖子 -->
+      <div v-if="topPosts.length > 0" class="bg-white rounded-xl shadow-sm p-5 mb-6">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+          <i class="fa fa-thumbtack text-red-500 mr-2"></i>
+          置顶话题
+        </h3>
+        <div class="space-y-4">
           <div
             v-for="post in topPosts"
             :key="post.id"
-            class="post-item top-post"
-            @click="$router.push(`/forum/post/${post.id}`)"
+            @click="handlePostClick(post)"
+            class="border border-red-100 bg-red-50/30 rounded-lg p-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:-translate-y-1"
           >
-            <div class="post-avatar">
-              <el-avatar :size="48" :src="post.author.avatar" />
-            </div>
-            <div class="post-content">
-              <div class="post-header">
-                <el-tag type="danger" size="small">置顶</el-tag>
-                <h4>{{ post.title }}</h4>
-                <div v-if="post.isHighlight" class="highlight-badge">
-                  <el-tag type="warning" size="small">精华</el-tag>
+            <div class="flex items-start gap-4">
+              <img 
+                :src="post.author.avatar" 
+                :alt="post.author.name" 
+                class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-red-100 text-red-800">置顶</span>
+                  <span v-if="post.isHighlight" class="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-orange-100 text-orange-800">精华</span>
+                  <span :class="getCategoryColorClass(post.category)" class="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium">
+                    {{ post.category }}
+                  </span>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2 line-clamp-2">{{ post.title }}</h4>
+                <div class="flex items-center text-xs text-gray-500 space-x-4">
+                  <span>{{ post.author.name }}</span>
+                  <span>{{ post.author.department }}</span>
+                  <span>{{ formatTime(post.createTime) }}</span>
                 </div>
               </div>
-              <div class="post-meta">
-                <span>{{ post.author.name }}</span>
-                <span>{{ post.author.department }}</span>
-                <span>{{ formatTime(post.createTime) }}</span>
-              </div>
-              <div class="post-tags">
-                <el-tag
-                  v-for="tag in post.tags.slice(0, 3)"
-                  :key="tag"
-                  size="small"
-                  type="info"
-                  effect="plain"
-                >
-                  {{ tag }}
-                </el-tag>
-              </div>
-            </div>
-            <div class="post-stats">
-              <div class="stat">
-                <el-icon><View /></el-icon>
-                <span>{{ post.viewCount }}</span>
-              </div>
-              <div class="stat">
-                <el-icon><ChatDotRound /></el-icon>
-                <span>{{ post.replyCount }}</span>
-              </div>
-              <div class="stat">
-                <el-icon><Star /></el-icon>
-                <span>{{ post.likeCount }}</span>
+              <div class="flex items-center gap-4 text-xs text-gray-500">
+                <div class="flex items-center gap-1">
+                  <i class="fa fa-eye"></i>
+                  <span>{{ post.viewCount }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <i class="fa fa-comment"></i>
+                  <span>{{ post.replyCount }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <i class="fa fa-heart"></i>
+                  <span>{{ post.likeCount }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 话题列表 -->
-      <div class="forum-content">
-        <div v-if="loading" class="loading">
-          <el-skeleton :rows="6" animated />
-        </div>
-
-        <div v-else-if="filteredPosts.length === 0" class="empty">
-          <el-empty description="暂无相关话题">
-            <el-button type="primary" @click="clearFilters">清除筛选条件</el-button>
-          </el-empty>
-        </div>
-
-        <div v-else>
-          <div class="result-info">
-            共找到 {{ filteredPosts.length }} 个话题
+      <!-- 帖子列表 -->
+      <div class="bg-white rounded-xl shadow-sm">
+        <div class="p-5 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">
+              话题列表
+              <span class="text-sm text-gray-500 font-normal ml-2">共 {{ filteredPosts.length }} 个话题</span>
+            </h3>
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+              <i class="fa fa-clock-o"></i>
+              <span>实时更新</span>
+            </div>
           </div>
+        </div>
 
-          <div class="post-list">
-            <div
-              v-for="post in paginatedPosts"
-              :key="post.id"
-              class="post-item"
-              :class="{ 'poll-post': post.type === 'poll' }"
-              @click="handlePostClick(post)"
-            >
-              <div class="post-avatar">
-                <el-avatar :size="48" :src="post.author.avatar" />
-                <div class="user-level">{{ post.author.level }}</div>
+        <div v-if="loading" class="p-8 text-center">
+          <i class="fa fa-spinner fa-spin text-2xl text-gray-400 mb-4"></i>
+          <div class="text-gray-500">加载中...</div>
+        </div>
+
+        <div v-else-if="filteredPosts.length === 0" class="p-16 text-center">
+          <i class="fa fa-inbox text-4xl text-gray-300 mb-4"></i>
+          <div class="text-gray-500 mb-4">暂无相关话题</div>
+          <button @click="clearFilters" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+            清除筛选条件
+          </button>
+        </div>
+
+        <div v-else class="divide-y divide-gray-100">
+          <div
+            v-for="post in paginatedPosts"
+            :key="post.id"
+            @click="handlePostClick(post)"
+            :class="{
+              'border-l-4 border-l-purple-400': post.type === 'poll',
+              'bg-gradient-to-r from-purple-50/50 to-transparent': post.type === 'poll'
+            }"
+            class="p-5 cursor-pointer hover:bg-gray-50 transition-all duration-200 hover:shadow-sm"
+          >
+            <div class="flex items-start gap-4">
+              <!-- 用户头像 -->
+              <div class="flex-shrink-0">
+                <img 
+                  :src="post.author.avatar" 
+                  :alt="post.author.name" 
+                  class="w-12 h-12 rounded-full object-cover"
+                />
+                <div class="text-center mt-1">
+                  <span class="text-xs bg-primary text-white px-2 py-0.5 rounded-full">{{ post.author.level || 'LV1' }}</span>
+                </div>
               </div>
-              
-              <div class="post-content">
-                <div class="post-header">
-                  <div class="title-row">
-                    <div class="post-type-icon" v-if="post.type === 'poll'">
-                      <el-icon><DataBoard /></el-icon>
-                    </div>
-                    <h4>{{ post.title }}</h4>
+
+              <!-- 帖子内容 -->
+              <div class="flex-1 min-w-0">
+                <!-- 标题和标签 -->
+                <div class="flex items-start justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <i v-if="post.type === 'poll'" class="fa fa-pie-chart text-purple-500"></i>
+                    <h3 class="font-semibold text-gray-900 line-clamp-2 hover:text-primary transition-colors">{{ post.title }}</h3>
                   </div>
-                  <div class="post-badges">
-                    <el-tag
-                      v-if="post.type === 'poll'"
-                      type="primary"
-                      size="small"
-                    >
-                      投票帖
-                    </el-tag>
-                    <el-tag
-                      v-if="post.type === 'poll' && post.poll?.hasRewards"
-                      type="warning"
-                      size="small"
-                    >
-                      有奖
-                    </el-tag>
-                    <el-tag
-                      v-if="post.isHighlight"
-                      type="warning"
-                      size="small"
-                    >
-                      精华
-                    </el-tag>
-                    <el-tag :type="getCategoryType(post.category)" size="small">
+                  <div class="flex gap-1 ml-4 flex-shrink-0">
+                    <span v-if="post.type === 'poll'" class="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-purple-100 text-purple-800">投票</span>
+                    <span v-if="post.type === 'poll' && post.poll?.hasRewards" class="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-orange-100 text-orange-800">有奖</span>
+                    <span v-if="post.isHighlight" class="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium bg-orange-100 text-orange-800">精华</span>
+                    <span :class="getCategoryColorClass(post.category)" class="inline-flex items-center px-2 py-0.5 text-xs rounded-full font-medium">
                       {{ post.category }}
-                    </el-tag>
+                    </span>
                   </div>
                 </div>
-                
-                <!-- 投票帖预览 -->
-                <div v-if="post.type === 'poll' && post.poll" class="poll-preview">
-                  <div class="poll-question">
-                    <el-icon><QuestionFilled /></el-icon>
+
+                <!-- 投票预览 -->
+                <div v-if="post.type === 'poll' && post.poll" class="bg-gray-50 rounded-lg p-3 mb-3">
+                  <div class="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                    <i class="fa fa-question-circle text-purple-500"></i>
                     {{ post.poll.question }}
                   </div>
-                  <div class="poll-info">
-                    <span class="poll-type">
-                      {{ post.poll.isMultiChoice ? '多选' : '单选' }}
+                  <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded">{{ post.poll.isMultiChoice ? '多选' : '单选' }}</span>
+                    <span :class="getPollStatusColorClass(post.poll.status)">{{ getPollStatusText(post.poll.status) }}</span>
+                    <span>{{ post.poll.participantCount }} 人参与</span>
+                    <span v-if="post.poll.status === 'ongoing'" class="text-orange-600">
+                      <i class="fa fa-clock-o mr-1"></i>
+                      {{ getPollDeadline(post.poll.endTime) }}
                     </span>
-                    <span class="poll-status" :class="getPollStatusClass(post.poll.status)">
-                      {{ getPollStatusText(post.poll.status) }}
-                    </span>
-                    <span class="poll-participants">
-                      {{ post.poll.participantCount }} 人参与
-                    </span>
-                  </div>
-                  <div v-if="post.poll.status === 'ongoing'" class="poll-deadline">
-                    <el-icon><Timer /></el-icon>
-                    {{ getPollDeadline(post.poll.endTime) }}
                   </div>
                 </div>
-                
+
                 <!-- 普通帖子预览 -->
-                <div v-else class="post-preview">
+                <div v-else class="text-sm text-gray-600 mb-3 line-clamp-2">
                   {{ getContentPreview(post.content) }}
                 </div>
-                
-                <div class="post-tags">
-                  <el-tag
+
+                <!-- 标签 -->
+                <div class="flex flex-wrap gap-1 mb-3">
+                  <span 
                     v-for="tag in post.tags.slice(0, 4)"
                     :key="tag"
-                    size="small"
-                    type="info"
-                    effect="plain"
+                    class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded"
                   >
                     {{ tag }}
-                  </el-tag>
+                  </span>
                 </div>
-                
-                <div class="post-meta">
-                  <div class="meta-left">
-                    <span><strong>{{ post.author.name }}</strong></span>
+
+                <!-- 底部信息 -->
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                  <div class="flex items-center gap-4">
+                    <span class="font-medium text-gray-700">{{ post.author.name }}</span>
                     <span>{{ post.author.department }}</span>
                     <span>{{ formatTime(post.createTime) }}</span>
-                  </div>
-                  <div class="meta-right">
                     <span v-if="post.updateTime !== post.createTime">
                       最后回复: {{ formatTime(post.updateTime) }}
                     </span>
                   </div>
                 </div>
               </div>
-              
-              <div class="post-stats">
-                <div class="stat">
-                  <el-icon><View /></el-icon>
-                  <span>{{ post.viewCount }}</span>
-                  <label>浏览</label>
-                </div>
-                <div class="stat">
-                  <el-icon><ChatDotRound /></el-icon>
-                  <span>{{ post.replyCount }}</span>
-                  <label>回复</label>
-                </div>
-                <div class="stat">
-                  <el-icon><Star /></el-icon>
-                  <span>{{ post.likeCount }}</span>
-                  <label>点赞</label>
+
+              <!-- 统计数据 -->
+              <div class="flex-shrink-0 text-center">
+                <div class="grid grid-cols-1 gap-2 text-xs">
+                  <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-1 text-gray-500">
+                      <i class="fa fa-eye"></i>
+                      <span>{{ post.viewCount }}</span>
+                    </div>
+                    <span class="text-gray-400">浏览</span>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-1 text-gray-500">
+                      <i class="fa fa-comment"></i>
+                      <span>{{ post.replyCount }}</span>
+                    </div>
+                    <span class="text-gray-400">回复</span>
+                  </div>
+                  <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-1 text-gray-500">
+                      <i class="fa fa-heart"></i>
+                      <span>{{ post.likeCount }}</span>
+                    </div>
+                    <span class="text-gray-400">点赞</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- 分页 -->
-          <div class="pagination">
-            <el-pagination
-              v-model:current-page="currentPage"
-              :page-size="pageSize"
-              :total="filteredPosts.length"
-              layout="total, sizes, prev, pager, next, jumper"
-              :page-sizes="[10, 20, 50]"
-              @current-change="handlePageChange"
-              @size-change="handleSizeChange"
-            />
-          </div>
+        <!-- 分页 -->
+        <div v-if="filteredPosts.length > 0" class="p-5 border-t border-gray-100">
+          <el-pagination
+            v-model:current-page="currentPage"
+            :page-size="pageSize"
+            :total="filteredPosts.length"
+            layout="total, sizes, prev, pager, next, jumper"
+            :page-sizes="[10, 20, 50]"
+            @current-change="handlePageChange"
+            @size-change="handleSizeChange"
+            class="justify-center"
+          />
         </div>
       </div>
     </div>
@@ -497,6 +523,28 @@ const getPollDeadline = (endTime: string) => {
   return '即将结束'
 }
 
+const getCategoryColorClass = (category: string) => {
+  const colorClasses: Record<string, string> = {
+    '技术讨论': 'bg-blue-100 text-blue-800',
+    '产品反馈': 'bg-green-100 text-green-800',
+    '公司建议': 'bg-yellow-100 text-yellow-800',
+    '生活分享': 'bg-gray-100 text-gray-800',
+    '求助问答': 'bg-red-100 text-red-800',
+    '活动组织': 'bg-purple-100 text-purple-800'
+  }
+  return colorClasses[category] || 'bg-gray-100 text-gray-800'
+}
+
+const getPollStatusColorClass = (status: string) => {
+  const colorClasses: Record<string, string> = {
+    ongoing: 'text-green-600 bg-green-100 px-2 py-1 rounded',
+    ended: 'text-gray-600 bg-gray-100 px-2 py-1 rounded',
+    scheduled: 'text-orange-600 bg-orange-100 px-2 py-1 rounded',
+    cancelled: 'text-red-600 bg-red-100 px-2 py-1 rounded'
+  }
+  return colorClasses[status] || 'text-gray-600 bg-gray-100 px-2 py-1 rounded'
+}
+
 // 组件挂载时初始化数据
 onMounted(async () => {
   if (contentStore.forumPosts.length === 0) {
@@ -510,406 +558,83 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped lang="scss">
-.forum-page {
-  min-height: 100vh;
-  padding: 40px 0;
-  background: var(--el-bg-color-page);
+<style scoped>
+:root {
+  --primary: #3B82F6;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 40px;
-  position: relative;
-
-  h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--el-text-color-primary);
-    margin-bottom: 12px;
-  }
-
-  p {
-    font-size: 16px;
-    color: var(--el-text-color-regular);
-    margin-bottom: 24px;
-  }
-
-  .el-button {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-  }
+.primary {
+  color: var(--primary);
 }
 
-.forum-stats {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: var(--el-box-shadow-light);
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-
-    .stat-item {
-      text-align: center;
-
-      .stat-number {
-        font-size: 32px;
-        font-weight: 700;
-        color: var(--el-color-primary);
-        margin-bottom: 8px;
-      }
-
-      .stat-label {
-        font-size: 14px;
-        color: var(--el-text-color-secondary);
-      }
-    }
-  }
+.bg-primary {
+  background-color: var(--primary);
 }
 
-.filter-section {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: var(--el-box-shadow-light);
-
-  .search-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .filter-buttons {
-      display: flex;
-      gap: 12px;
-    }
-  }
+.hover\:bg-primary\/90:hover {
+  background-color: rgba(59, 130, 246, 0.9);
 }
 
-.top-posts {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: var(--el-box-shadow-light);
-
-  h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--el-text-color-primary);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    &::before {
-      content: '';
-      width: 4px;
-      height: 18px;
-      background: var(--el-color-danger);
-      border-radius: 2px;
-    }
-  }
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.forum-content {
-  background: white;
-  border-radius: 8px;
-  box-shadow: var(--el-box-shadow-light);
-  padding: 24px;
-
-  .loading {
-    padding: 40px 0;
-  }
-
-  .empty {
-    text-align: center;
-    padding: 80px 0;
-  }
-
-  .result-info {
-    font-size: 14px;
-    color: var(--el-text-color-secondary);
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-  }
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-.post-list {
-  .post-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-    cursor: pointer;
-    transition: all 0.3s;
-
-    &:hover {
-      background: var(--el-fill-color-lighter);
-      border-radius: 8px;
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &.top-post {
-      background: var(--el-color-danger-light-9);
-      border: 1px solid var(--el-color-danger-light-7);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 12px;
-    }
-
-    &.poll-post {
-      border-left: 4px solid var(--el-color-primary);
-      background: linear-gradient(90deg, var(--el-color-primary-light-9) 0%, white 10%);
-    }
-
-    .post-avatar {
-      position: relative;
-      flex-shrink: 0;
-
-      .user-level {
-        position: absolute;
-        bottom: -6px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 10px;
-        background: var(--el-color-primary);
-        color: white;
-        padding: 2px 6px;
-        border-radius: 10px;
-        white-space: nowrap;
-      }
-    }
-
-    .post-content {
-      flex: 1;
-      min-width: 0;
-
-      .post-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 8px;
-
-        .title-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-right: 16px;
-          flex: 1;
-
-          .post-type-icon {
-            color: var(--el-color-primary);
-            font-size: 18px;
-            flex-shrink: 0;
-          }
-
-          h4 {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--el-text-color-primary);
-            margin: 0;
-            line-height: 1.4;
-          }
-        }
-
-        .post-badges {
-          display: flex;
-          gap: 8px;
-          flex-shrink: 0;
-        }
-      }
-
-      .post-preview {
-        font-size: 14px;
-        color: var(--el-text-color-regular);
-        line-height: 1.6;
-        margin-bottom: 12px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-
-      .poll-preview {
-        background: var(--el-fill-color-extra-light);
-        border-radius: 6px;
-        padding: 12px;
-        margin-bottom: 12px;
-        border: 1px solid var(--el-border-color-light);
-
-        .poll-question {
-          font-size: 15px;
-          font-weight: 500;
-          color: var(--el-text-color-primary);
-          margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-
-          .el-icon {
-            color: var(--el-color-primary);
-          }
-        }
-
-        .poll-info {
-          display: flex;
-          gap: 12px;
-          font-size: 12px;
-          margin-bottom: 8px;
-
-          .poll-type {
-            background: var(--el-color-primary-light-8);
-            color: var(--el-color-primary);
-            padding: 2px 6px;
-            border-radius: 3px;
-          }
-
-          .poll-status {
-            padding: 2px 6px;
-            border-radius: 3px;
-            
-            &.status-ongoing {
-              background: var(--el-color-success-light-8);
-              color: var(--el-color-success);
-            }
-
-            &.status-ended {
-              background: var(--el-color-info-light-8);
-              color: var(--el-color-info);
-            }
-
-            &.status-scheduled {
-              background: var(--el-color-warning-light-8);
-              color: var(--el-color-warning);
-            }
-
-            &.status-cancelled {
-              background: var(--el-color-danger-light-8);
-              color: var(--el-color-danger);
-            }
-          }
-
-          .poll-participants {
-            color: var(--el-text-color-secondary);
-          }
-        }
-
-        .poll-deadline {
-          font-size: 12px;
-          color: var(--el-color-warning);
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-weight: 500;
-        }
-      }
-
-      .post-tags {
-        margin-bottom: 12px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      .post-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-
-        .meta-left {
-          display: flex;
-          gap: 12px;
-        }
-      }
-    }
-
-    .post-stats {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      align-items: center;
-      min-width: 80px;
-      padding: 8px;
-      background: var(--el-fill-color-extra-light);
-      border-radius: 6px;
-
-      .stat {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        font-size: 12px;
-        color: var(--el-text-color-secondary);
-
-        span {
-          font-weight: 500;
-          color: var(--el-text-color-primary);
-        }
-
-        label {
-          font-size: 10px;
-        }
-      }
-    }
-  }
+.hover\:shadow-md:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 32px;
+.hover\:shadow-lg:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.hover\:-translate-y-1:hover {
+  transform: translateY(-0.25rem);
+}
+
+.hover\:text-primary:hover {
+  color: var(--primary);
+}
+
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.duration-200 {
+  transition-duration: 200ms;
+}
+
+.duration-300 {
+  transition-duration: 300ms;
 }
 
 @media (max-width: 768px) {
-  .page-header {
-    .el-button {
-      position: static;
-      transform: none;
-      margin-top: 16px;
-    }
-  }
-
-  .forum-stats .stats-grid {
+  .grid-cols-2 {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  .filter-section .search-controls {
-    flex-direction: column;
-    gap: 16px;
-    align-items: stretch;
+  
+  .md\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
   }
-
-  .post-item {
+  
+  .flex-col {
     flex-direction: column;
-    
-    .post-content .post-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .post-stats {
-      flex-direction: row;
-      justify-content: space-around;
-      min-width: auto;
-      width: 100%;
-    }
+  }
+  
+  .md\:flex-row {
+    flex-direction: column;
+  }
+  
+  .gap-2 {
+    gap: 0.5rem;
   }
 }
 </style>
