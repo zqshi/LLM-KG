@@ -1,4 +1,4 @@
-import type { Router, RouteLocationNormalized } from 'vue-router'
+import type { Router } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 

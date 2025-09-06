@@ -110,7 +110,7 @@ function generateDefaultMenus(): MenuNode[] {
         { id: 111, name: '导航管理', path: '/portal-config/navigation', icon: 'Menu' },
         { id: 112, name: '入口面板', path: '/portal-config/entry-panel', icon: 'Grid' },
         { id: 113, name: '版本管理', path: '/portal-config/version-control', icon: 'Clock' },
-        { id: 114, name: '操作日志', path: '/portal-config/audit-logs', icon: 'Document' }
+        { id: 115, name: '性能监控', path: '/portal-config/performance', icon: 'Monitor' }
       ]
     },
     {

@@ -84,6 +84,11 @@ export const navigationApi = {
       method: 'PUT',
       body: JSON.stringify({ roles }),
     })
+  },
+
+  // 获取导航树结构（兼容原有代码）
+  async getNavigationTree(): Promise<ApiResponse<NavigationItem[]>> {
+    return this.getNavigations()
   }
 }
 

@@ -68,13 +68,13 @@
           </el-radio>
           <el-radio value="list" class="mode-radio">
             <div class="radio-content">
-              <i class="el-icon-s-unfold" class="mode-icon"></i>
+              <i class="el-icon-s-unfold mode-icon"></i>
               <span>列表模式</span>
             </div>
           </el-radio>
           <el-radio value="carousel" class="mode-radio">
             <div class="radio-content">
-              <i class="el-icon-right" class="mode-icon"></i>
+              <i class="el-icon-right mode-icon"></i>
               <span>轮播模式</span>
             </div>
           </el-radio>

@@ -3,9 +3,7 @@
     <div class="container">
       <div class="header-left">
         <router-link to="/" class="logo">
-          <el-icon :size="28" style="color: var(--el-color-primary)">
-            <OfficeBuilding />
-          </el-icon>
+          <a-icon :size="28" type="building" style="color: var(--primary-color)" />
           <span class="logo-text">企业门户</span>
         </router-link>
       </div>
@@ -19,9 +17,7 @@
             class="nav-item"
             :class="{ active: $route.path === item.path }"
           >
-            <el-icon>
-              <component :is="item.icon" />
-            </el-icon>
+            <a-icon :size="18" :type="item.icon" />
             {{ item.title }}
           </router-link>
         </nav>
@@ -29,30 +25,28 @@
 
       <div class="header-right">
         <div class="search-box">
-          <el-input
+          <a-input
             v-model="searchKeyword"
             placeholder="搜索内容..."
-            :prefix-icon="Search"
+            :prefix-icon="search"
             @keyup.enter="handleSearch"
-            clearable
+            allow-clear
           />
         </div>
 
-        <el-dropdown v-if="userStore.isLoggedIn" @command="handleNotificationCommand">
-          <el-badge :value="userStore.unreadCount" :hidden="userStore.unreadCount === 0">
-            <el-button type="text" class="notification-btn">
-              <el-icon :size="20">
-                <Bell />
-              </el-icon>
-            </el-button>
-          </el-badge>
-          <template #dropdown>
-            <el-dropdown-menu class="notification-dropdown">
+        <a-dropdown v-if="userStore.isLoggedIn" @select="handleNotificationCommand">
+          <a-badge :count="userStore.unreadCount" :show-zero="false">
+            <a-button class="notification-btn" type="text">
+              <a-icon :size="20" type="bell" />
+            </a-button>
+          </a-badge>
+          <template #content>
+            <a-dropdown-menu class="notification-dropdown">
               <div class="notification-header">
                 <span>消息通知</span>
-                <el-button text size="small" @click="handleNotificationCommand('markAllRead')">
+                <a-button size="small" @click="handleNotificationCommand('markAllRead')">
                   全部已读
-                </el-button>
+                </a-button>
               </div>
               <div class="notification-list">
                 <div
@@ -69,33 +63,31 @@
                   </div>
                 </div>
               </div>
-              <el-dropdown-item command="viewAll" class="view-all">
+              <a-dropdown-item key="viewAll" class="view-all">
                 查看全部消息
-              </el-dropdown-item>
-            </el-dropdown-menu>
+              </a-dropdown-item>
+            </a-dropdown-menu>
           </template>
-        </el-dropdown>
+        </a-dropdown>
 
-        <el-dropdown v-if="userStore.isLoggedIn" @command="handleUserCommand">
+        <a-dropdown v-if="userStore.isLoggedIn" @select="handleUserCommand">
           <div class="user-info">
-            <el-avatar :size="36" :src="userStore.userInfo?.avatar" />
+            <a-avatar :size="36" :src="userStore.userInfo?.avatar" />
             <span class="username">{{ userStore.userInfo?.name }}</span>
-            <el-icon>
-              <ArrowDown />
-            </el-icon>
+            <a-icon :size="16" type="chevron-down" />
           </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="profile">个人中心</el-dropdown-item>
-              <el-dropdown-item command="settings">设置</el-dropdown-item>
-              <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
-            </el-dropdown-menu>
+          <template #content>
+            <a-dropdown-menu>
+              <a-dropdown-item key="profile">个人中心</a-dropdown-item>
+              <a-dropdown-item key="settings">设置</a-dropdown-item>
+              <a-dropdown-item key="logout" divider>退出登录</a-dropdown-item>
+            </a-dropdown-menu>
           </template>
-        </el-dropdown>
+        </a-dropdown>
 
-        <el-button v-else type="primary" @click="$router.push('/login')">
+        <a-button v-else type="primary" @click="$router.push('/login')">
           登录
-        </el-button>
+        </a-button>
       </div>
     </div>
   </header>
@@ -106,18 +98,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import type { Notification } from '@/types'
-import {
-  Search,
-  Bell,
-  OfficeBuilding,
-  ArrowDown,
-  HomeFilled,
-  Document,
-  Reading,
-  ChatDotRound,
-  Shop,
-  User
-} from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -125,11 +106,11 @@ const userStore = useUserStore()
 const searchKeyword = ref('')
 
 const menuItems = [
-  { path: '/', title: '首页', icon: HomeFilled },
-  { path: '/news', title: '资讯中心', icon: Document },
-  { path: '/knowledge', title: '知识平台', icon: Reading },
-  { path: '/forum', title: '企业论坛', icon: ChatDotRound },
-  { path: '/market', title: '跳蚤市场', icon: Shop }
+  { path: '/', title: '首页', icon: 'home' },
+  { path: '/news', title: '资讯中心', icon: 'file-text' },
+  { path: '/knowledge', title: '知识平台', icon: 'book' },
+  { path: '/forum', title: '企业论坛', icon: 'message-square' },
+  { path: '/market', title: '跳蚤市场', icon: 'shopping-bag' }
 ]
 
 const handleSearch = () => {
@@ -212,7 +193,7 @@ const formatTime = (time: string) => {
     display: flex;
     align-items: center;
     text-decoration: none;
-    color: var(--el-text-color-primary);
+    color: var(--color-text-1);
 
     .logo-text {
       font-size: 20px;
@@ -237,19 +218,19 @@ const formatTime = (time: string) => {
       align-items: center;
       padding: 8px 16px;
       text-decoration: none;
-      color: var(--el-text-color-regular);
+      color: var(--color-text-2);
       border-radius: 6px;
       transition: all 0.3s;
       font-size: 14px;
 
-      .el-icon {
+      .a-icon {
         margin-bottom: 4px;
       }
 
       &:hover,
       &.active {
-        color: var(--el-color-primary);
-        background: var(--el-color-primary-light-9);
+        color: var(--primary-color);
+        background: var(--primary-color-light-9);
       }
     }
   }
@@ -278,12 +259,12 @@ const formatTime = (time: string) => {
     transition: all 0.3s;
 
     &:hover {
-      background: var(--el-fill-color-light);
+      background: var(--color-bg-2);
     }
 
     .username {
       font-size: 14px;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
     }
   }
 }
@@ -296,7 +277,7 @@ const formatTime = (time: string) => {
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--el-border-color-light);
+    border-bottom: 1px solid var(--color-border-2);
     font-weight: 600;
   }
 
@@ -308,16 +289,16 @@ const formatTime = (time: string) => {
   .notification-item {
     padding: 12px 16px;
     cursor: pointer;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: 1px solid var(--color-border-3);
     transition: all 0.3s;
 
     &:hover {
-      background: var(--el-fill-color-light);
+      background: var(--color-bg-2);
     }
 
     &.unread {
-      background: var(--el-color-primary-light-9);
-      border-left: 3px solid var(--el-color-primary);
+      background: var(--primary-color-light-9);
+      border-left: 3px solid var(--primary-color);
     }
 
     .notification-content {
@@ -325,12 +306,12 @@ const formatTime = (time: string) => {
         font-size: 14px;
         font-weight: 500;
         margin-bottom: 4px;
-        color: var(--el-text-color-primary);
+        color: var(--color-text-1);
       }
 
       p {
         font-size: 12px;
-        color: var(--el-text-color-regular);
+        color: var(--color-text-2);
         margin-bottom: 4px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -339,14 +320,14 @@ const formatTime = (time: string) => {
 
       .notification-time {
         font-size: 11px;
-        color: var(--el-text-color-secondary);
+        color: var(--color-text-3);
       }
     }
   }
 
   .view-all {
     text-align: center;
-    color: var(--el-color-primary);
+    color: var(--primary-color);
     font-weight: 500;
   }
 }

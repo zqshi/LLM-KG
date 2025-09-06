@@ -18,7 +18,7 @@ export const globalAuditApi = {
     return http.get<{
       list: GlobalAuditLog[];
       total: number;
-    }>('/api/audit/global/logs', { params })
+    }>('/audit/global/logs', { params })
   },
 
   /**
@@ -26,7 +26,7 @@ export const globalAuditApi = {
    * 包括总数、趋势、模块统计、操作员排行等
    */
   getGlobalAuditStatistics() {
-    return http.get<GlobalAuditLogStatistics>('/api/audit/global/statistics')
+    return http.get<GlobalAuditLogStatistics>('/audit/global/statistics')
   },
 
   /**
@@ -48,7 +48,7 @@ export const globalAuditApi = {
       downloadUrl: string
       fileName: string
       reportId: string
-    }>('/api/audit/global/export', params)
+    }>('/audit/global/export', params)
   },
 
   /**
@@ -69,7 +69,7 @@ export const globalAuditApi = {
       downloadUrl: string
       fileName: string
       status: 'generating' | 'completed' | 'failed'
-    }>('/api/audit/global/reports/generate', params)
+    }>('/audit/global/reports/generate', params)
   },
 
   /**
@@ -82,7 +82,7 @@ export const globalAuditApi = {
       progress: number
       downloadUrl?: string
       error?: string
-    }>(`/api/audit/global/reports/${reportId}/status`)
+    }>(`/audit/global/reports/${reportId}/status`)
   },
 
   /**
@@ -103,7 +103,7 @@ export const globalAuditApi = {
         modulesInvolved: string[]
         timeSpan: string
       }
-    }>('/api/audit/global/trace', { params })
+    }>('/audit/global/trace', { params })
   },
 
   /**
@@ -117,7 +117,7 @@ export const globalAuditApi = {
         previousOperation?: GlobalAuditLog
         nextOperation?: GlobalAuditLog
       }
-    }>(`/api/audit/global/logs/${logId}`)
+    }>(`/audit/global/logs/${logId}`)
   },
 
   /**
@@ -131,7 +131,7 @@ export const globalAuditApi = {
       module: string[]
       operationCount: number
       lastOperationTime: string
-    }[]>('/api/audit/global/operators')
+    }[]>('/audit/global/operators')
   },
 
   /**
@@ -145,7 +145,7 @@ export const globalAuditApi = {
         responseTime: number
         frequency: number
       }
-    }>('/api/audit/global/risk-config')
+    }>('/audit/global/risk-config')
   },
 
   /**
@@ -159,7 +159,7 @@ export const globalAuditApi = {
       frequency: number
     }
   }) {
-    return http.put<{ updated: boolean }>('/api/audit/global/risk-config', config)
+    return http.put<{ updated: boolean }>('/audit/global/risk-config', config)
   },
 
   /**
@@ -173,7 +173,7 @@ export const globalAuditApi = {
       riskLogs: number
       avgResponseTime: number
       isActive: boolean
-    }[]>('/api/audit/global/modules')
+    }[]>('/audit/global/modules')
   },
 
   /**
@@ -191,21 +191,21 @@ export const globalAuditApi = {
     return http.delete<{
       deletedCount: number
       backupFile?: string
-    }>('/api/audit/global/logs/batch', { data: params })
+    }>('/audit/global/logs/batch', { data: params })
   },
 
   /**
    * 创建审计日志记录（供各业务模块调用）
    */
   createAuditLog(data: Omit<GlobalAuditLog, 'id' | 'createTime'>) {
-    return http.post<GlobalAuditLog>('/api/audit/global/logs', data)
+    return http.post<GlobalAuditLog>('/audit/global/logs', data)
   },
 
   /**
    * 批量创建审计日志记录
    */
   batchCreateAuditLogs(data: Array<Omit<GlobalAuditLog, 'id' | 'createTime'>>) {
-    return http.post<GlobalAuditLog[]>('/api/audit/global/logs/batch', { logs: data })
+    return http.post<GlobalAuditLog[]>('/audit/global/logs/batch', { logs: data })
   },
 
   /**
@@ -213,7 +213,7 @@ export const globalAuditApi = {
    */
   createRealtimeConnection() {
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const wsUrl = `${wsProtocol}//${window.location.host}/api/audit/global/realtime`
+    const wsUrl = `${wsProtocol}//${window.location.host}/audit/global/realtime`
     
     const ws = new WebSocket(wsUrl)
     

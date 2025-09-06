@@ -25,6 +25,7 @@ const ROLE_MENU_ACCESS: Record<UserRole, string[]> = {
     'quotation',
     'audit',
     'operation',
+    'portal-config',
     'system'
   ],
   [UserRole.ADMIN]: [
@@ -36,11 +37,12 @@ const ROLE_MENU_ACCESS: Record<UserRole, string[]> = {
     'flea-market',
     'quotation',
     'audit',
-    'operation'
+    'operation',
+    'portal-config'
   ],
   [UserRole.CONTENT_MANAGER]: ['dashboard', 'content', 'news', 'banner', 'quotation'],
   [UserRole.AUDIT_MANAGER]: ['dashboard', 'content', 'news', 'banner', 'flea-market', 'audit'],
-  [UserRole.OPERATION_MANAGER]: ['dashboard', 'content', 'operation', 'banner'],
+  [UserRole.OPERATION_MANAGER]: ['dashboard', 'content', 'operation', 'banner', 'portal-config'],
   [UserRole.EDITOR]: ['dashboard', 'content', 'news'],
   [UserRole.VIEWER]: ['dashboard']
 }
@@ -101,7 +103,8 @@ export function useMenuFilter() {
     const accessibleMenus = ROLE_MENU_ACCESS[userRole] || []
 
     // 提取菜单的顶级路径
-    const topLevelPath = menuPath.split('/')[1] || menuPath.replace('/', '')
+    const pathParts = menuPath.split('/')
+    const topLevelPath = pathParts.length > 1 ? pathParts[1] : menuPath.replace('/', '')
 
     return accessibleMenus.includes(topLevelPath)
   }

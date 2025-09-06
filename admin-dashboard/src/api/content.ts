@@ -8,8 +8,7 @@ import type {
   BatchContentOperation,
   ContentCategory,
   HotContent,
-  ContentPreview,
-  PaginationParams
+  ContentPreview
 } from '@/types'
 
 export const contentApi = {

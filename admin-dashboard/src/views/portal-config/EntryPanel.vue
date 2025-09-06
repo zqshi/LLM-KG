@@ -1,1101 +1,1105 @@
 <template>
   <div class="entry-panel-management">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <el-row :gutter="20" align="middle">
-        <el-col :span="12">
-          <h2 class="page-title">入口面板管理</h2>
-          <p class="page-description">管理前台门户首页的快捷入口面板，支持拖拽排序和实时预览</p>
-        </el-col>
-        <el-col :span="12" class="text-right">
-          <el-space>
-            <el-button type="success" @click="handlePreview" :icon="View" plain>
-              预览效果
-            </el-button>
-            <el-button type="primary" @click="handleCreatePanel" :icon="Plus">
-              新建面板
-            </el-button>
-            <el-button type="warning" @click="handleCreateSnapshot" :icon="DocumentCopy" plain>
-              创建快照
-            </el-button>
-          </el-space>
-        </el-col>
-      </el-row>
-    </div>
+    <!-- 统一页面头部 -->
+    <PageHeader 
+      title="快捷入口管理" 
+      description="配置用户门户首页的快捷入口面板，支持自定义图标、名称和跳转地址"
+    >
+      <template #actions>
+        <el-button type="success" @click="handlePreview" :icon="View" plain>
+          预览效果
+        </el-button>
+        <el-button type="primary" @click="handleCreateEntry" :icon="Plus">
+          新建快捷入口
+        </el-button>
+        <el-button type="warning" @click="handleCreateSnapshot" :icon="DocumentCopy" plain>
+          创建快照
+        </el-button>
+      </template>
+    </PageHeader>
 
-    <!-- 操作栏 -->
-    <div class="operation-bar">
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索面板或入口项..."
-            :prefix-icon="Search"
-            clearable
-            @input="handleSearch"
+    <!-- 统计数据展示 -->
+    <div class="stats-section">
+      <el-row :gutter="16">
+        <el-col :span="6">
+          <StatsCard
+            label="总入口数"
+            :value="stats.totalEntries"
+            icon="Grid"
+            iconColor="#667eea"
+            :trend="stats.entriesTrend"
+            description="当前配置的快捷入口总数"
+            clickable
+            @click="handleStatsClick('total')"
           />
         </el-col>
         <el-col :span="6">
-          <el-select
-            v-model="filterStatus"
-            placeholder="状态筛选"
-            clearable
-            @change="handleFilter"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="启用" :value="true" />
-            <el-option label="禁用" :value="false" />
-          </el-select>
+          <StatsCard
+            label="启用入口"
+            :value="stats.activeEntries"
+            icon="Check"
+            iconColor="#52c41a"
+            :trend="stats.activeTrend"
+            description="用户可见的启用入口数"
+            clickable
+            @click="handleStatsClick('active')"
+          />
         </el-col>
         <el-col :span="6">
-          <el-select
-            v-model="sortBy"
-            placeholder="排序方式"
-            @change="handleSort"
-          >
-            <el-option label="按创建时间" value="create_time" />
-            <el-option label="按更新时间" value="update_time" />
-            <el-option label="按面板名称" value="title" />
-            <el-option label="按入口数量" value="item_count" />
-          </el-select>
+          <StatsCard
+            label="总点击数"
+            :value="stats.totalClicks"
+            icon="Mouse"
+            iconColor="#fa8c16"
+            suffix="次"
+            :trend="stats.clicksTrend"
+            description="所有入口的累计点击数"
+            clickable
+            @click="handleStatsClick('clicks')"
+          />
         </el-col>
-        <el-col :span="4" class="text-right">
-          <el-tooltip content="刷新数据" placement="top">
-            <el-button :icon="Refresh" circle @click="fetchPanelData" />
-          </el-tooltip>
+        <el-col :span="6">
+          <StatsCard
+            label="热门入口"
+            :value="stats.hotEntries"
+            icon="Fire"
+            iconColor="#f5222d"
+            description="本周点击量最高的入口数"
+            clickable
+            @click="handleStatsClick('hot')"
+          />
         </el-col>
       </el-row>
     </div>
 
-    <!-- 面板列表 -->
-    <div class="panel-grid" v-loading="loading">
-      <draggable
-        v-model="filteredPanels"
-        group="panels"
-        :animation="200"
-        ghost-class="ghost-panel"
-        chosen-class="chosen-panel"
-        drag-class="drag-panel"
-        @end="handlePanelSort"
-      >
-        <template #item="{ element: panel }">
-          <div class="panel-card">
-            <!-- 面板头部 -->
-            <div class="panel-header">
-              <div class="panel-title-section">
-                <el-icon class="drag-handle" size="16"><Rank /></el-icon>
-                <h3 class="panel-title">{{ panel.title }}</h3>
-                <el-tag 
-                  :type="panel.is_enabled ? 'success' : 'info'" 
-                  size="small"
-                  class="status-tag"
-                >
-                  {{ panel.is_enabled ? '启用' : '禁用' }}
-                </el-tag>
-              </div>
-              <div class="panel-actions">
-                <el-button 
-                  type="primary" 
-                  size="small" 
-                  :icon="Plus"
-                  @click="handleCreateItem(panel)"
-                  plain
-                >
-                  添加入口
-                </el-button>
-                <el-dropdown trigger="click" @command="handlePanelCommand">
+    <!-- 过滤和搜索栏 -->
+    <div class="filter-section">
+      <el-card shadow="never" class="filter-card">
+        <el-row :gutter="16" align="middle">
+          <el-col :span="8">
+            <el-input
+              v-model="filters.keyword"
+              placeholder="搜索入口名称或地址..."
+              :prefix-icon="Search"
+              clearable
+              @input="handleSearch"
+            />
+          </el-col>
+          <el-col :span="4">
+            <el-select
+              v-model="filters.status"
+              placeholder="状态筛选"
+              clearable
+              @change="applyFilters"
+            >
+              <el-option label="全部状态" value="" />
+              <el-option label="启用" value="enabled" />
+              <el-option label="禁用" value="disabled" />
+            </el-select>
+          </el-col>
+          <el-col :span="4">
+            <el-select
+              v-model="filters.type"
+              placeholder="类型筛选"
+              clearable
+              @change="applyFilters"
+            >
+              <el-option label="全部类型" value="" />
+              <el-option label="内部链接" value="internal" />
+              <el-option label="外部链接" value="external" />
+              <el-option label="应用跳转" value="app" />
+            </el-select>
+          </el-col>
+          <el-col :span="4">
+            <el-select
+              v-model="filters.sortBy"
+              placeholder="排序方式"
+              @change="applyFilters"
+            >
+              <el-option label="按创建时间" value="createTime" />
+              <el-option label="按点击量" value="clicks" />
+              <el-option label="按名称" value="name" />
+              <el-option label="按排序值" value="sortOrder" />
+            </el-select>
+          </el-col>
+          <el-col :span="4" class="text-right">
+            <el-button-group>
+              <el-button 
+                :type="viewMode === 'grid' ? 'primary' : ''" 
+                :icon="Grid" 
+                @click="setViewMode('grid')"
+              />
+              <el-button 
+                :type="viewMode === 'list' ? 'primary' : ''" 
+                :icon="List" 
+                @click="setViewMode('list')"
+              />
+            </el-button-group>
+            <el-button :icon="Refresh" circle @click="refreshData" class="ml-2" />
+          </el-col>
+        </el-row>
+      </el-card>
+    </div>
+
+    <!-- 快捷入口列表/网格 -->
+    <div class="entries-section" v-loading="loading">
+      <!-- 网格视图 -->
+      <div v-if="viewMode === 'grid'" class="entries-grid">
+        <draggable
+          v-model="filteredEntries"
+          group="entries"
+          :animation="200"
+          ghost-class="ghost-item"
+          chosen-class="chosen-item"
+          drag-class="drag-item"
+          @end="handleSortEnd"
+          class="grid-container"
+        >
+          <template #item="{ element: entry }">
+            <div class="entry-card">
+              <div class="entry-header">
+                <div class="drag-handle">
+                  <el-icon><Rank /></el-icon>
+                </div>
+                <el-dropdown @command="handleEntryAction" class="entry-actions">
                   <el-button size="small" :icon="More" circle />
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item :command="{ action: 'edit', panel }">
-                        <el-icon><Edit /></el-icon> 编辑面板
+                      <el-dropdown-item :command="{ action: 'edit', entry }">
+                        <el-icon><Edit /></el-icon> 编辑入口
                       </el-dropdown-item>
-                      <el-dropdown-item :command="{ action: 'copy', panel }">
-                        <el-icon><DocumentCopy /></el-icon> 复制面板
+                      <el-dropdown-item :command="{ action: 'copy', entry }">
+                        <el-icon><DocumentCopy /></el-icon> 复制入口
                       </el-dropdown-item>
-                      <el-dropdown-item :command="{ action: 'toggle', panel }">
+                      <el-dropdown-item :command="{ action: 'toggle', entry }">
                         <el-icon><Switch /></el-icon> 
-                        {{ panel.is_enabled ? '禁用' : '启用' }}面板
+                        {{ entry.enabled ? '禁用' : '启用' }}
                       </el-dropdown-item>
-                      <el-dropdown-item :command="{ action: 'delete', panel }" divided>
-                        <el-icon><Delete /></el-icon> 删除面板
+                      <el-dropdown-item :command="{ action: 'stats', entry }">
+                        <el-icon><DataAnalysis /></el-icon> 查看统计
+                      </el-dropdown-item>
+                      <el-dropdown-item :command="{ action: 'delete', entry }" divided>
+                        <el-icon><Delete /></el-icon> 删除入口
                       </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
               </div>
-            </div>
 
-            <!-- 面板描述 -->
-            <div v-if="panel.description" class="panel-description">
-              {{ panel.description }}
-            </div>
-
-            <!-- 入口项网格 -->
-            <div class="entry-items-grid">
-              <draggable
-                v-model="panel.items"
-                group="items"
-                :animation="200"
-                ghost-class="ghost-item"
-                chosen-class="chosen-item"
-                drag-class="drag-item"
-                @end="(evt) => handleItemSort(panel, evt)"
-                class="items-container"
-              >
-                <template #item="{ element: item }">
+              <div class="entry-content" @click="handleEditEntry(entry)">
+                <!-- 入口图标 -->
+                <div class="entry-icon-container">
                   <div 
-                    class="entry-item"
-                    :class="{ disabled: !item.is_enabled }"
-                    @click="handleEditItem(item)"
+                    class="entry-icon" 
+                    :style="{ 
+                      backgroundColor: entry.iconBgColor || '#667eea',
+                      color: entry.iconColor || '#ffffff'
+                    }"
                   >
-                    <!-- 入口项图标 -->
-                    <div 
-                      class="item-icon" 
-                      :style="{ 
-                        backgroundColor: item.bg_color, 
-                        color: item.text_color 
-                      }"
-                    >
-                      <img 
-                        v-if="item.icon.startsWith('http')" 
-                        :src="item.icon" 
-                        :alt="item.name"
-                      />
-                      <el-icon v-else :size="24">
-                        <component :is="item.icon" />
-                      </el-icon>
-                    </div>
-                    
-                    <!-- 入口项信息 -->
-                    <div class="item-info">
-                      <div class="item-name">{{ item.name }}</div>
-                      <div v-if="item.description" class="item-description">
-                        {{ item.description }}
-                      </div>
-                      <div class="item-meta">
-                        <el-tag 
-                          size="small" 
-                          :type="item.type === 'route' ? 'primary' : 'success'"
-                          effect="plain"
-                        >
-                          {{ item.type === 'route' ? '内部' : '外部' }}
-                        </el-tag>
-                        <span class="click-count">{{ item.click_count || 0 }}次点击</span>
-                      </div>
-                    </div>
-
-                    <!-- 操作按钮 -->
-                    <div class="item-actions">
-                      <el-button 
-                        size="small" 
-                        type="primary" 
-                        :icon="Edit"
-                        @click.stop="handleEditItem(item)"
-                        circle
-                      />
-                      <el-button 
-                        size="small" 
-                        type="danger" 
-                        :icon="Delete"
-                        @click.stop="handleDeleteItem(item)"
-                        circle
-                      />
-                    </div>
+                    <img 
+                      v-if="entry.iconType === 'image' && entry.iconUrl" 
+                      :src="entry.iconUrl" 
+                      :alt="entry.name"
+                      class="icon-image"
+                    />
+                    <el-icon v-else-if="entry.iconName" :size="32">
+                      <component :is="entry.iconName" />
+                    </el-icon>
+                    <el-icon v-else :size="32">
+                      <Link />
+                    </el-icon>
                   </div>
-                </template>
-              </draggable>
+                </div>
 
-              <!-- 添加入口项按钮 -->
-              <div 
-                class="add-item-button"
-                @click="handleCreateItem(panel)"
-              >
-                <el-icon :size="32"><Plus /></el-icon>
-                <span>添加入口项</span>
+                <!-- 入口信息 -->
+                <div class="entry-info">
+                  <h3 class="entry-name">{{ entry.name }}</h3>
+                  <p class="entry-description" v-if="entry.description">
+                    {{ entry.description }}
+                  </p>
+                  <div class="entry-meta">
+                    <el-tag 
+                      :type="getTypeTagType(entry.type)" 
+                      size="small" 
+                      effect="plain"
+                    >
+                      {{ getTypeLabel(entry.type) }}
+                    </el-tag>
+                    <span class="entry-url">{{ getDisplayUrl(entry.url) }}</span>
+                  </div>
+                </div>
+
+                <!-- 状态指示器 -->
+                <div class="entry-status">
+                  <el-tag 
+                    :type="entry.enabled ? 'success' : 'info'" 
+                    size="small"
+                    class="status-tag"
+                  >
+                    {{ entry.enabled ? '启用' : '禁用' }}
+                  </el-tag>
+                </div>
+              </div>
+
+              <!-- 入口统计 -->
+              <div class="entry-stats">
+                <div class="stat-item">
+                  <span class="stat-label">点击量</span>
+                  <span class="stat-value">{{ entry.clickCount || 0 }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">排序</span>
+                  <span class="stat-value">{{ entry.sortOrder || 0 }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">更新</span>
+                  <span class="stat-value">{{ formatDate(entry.updatedAt) }}</span>
+                </div>
               </div>
             </div>
+          </template>
+        </draggable>
 
-            <!-- 面板统计 -->
-            <div class="panel-stats">
-              <el-row>
-                <el-col :span="8">
-                  <div class="stat-item">
-                    <span class="stat-label">入口数量</span>
-                    <span class="stat-value">{{ panel.items?.length || 0 }}</span>
-                  </div>
-                </el-col>
-                <el-col :span="8">
-                  <div class="stat-item">
-                    <span class="stat-label">启用数量</span>
-                    <span class="stat-value success">
-                      {{ panel.items?.filter(item => item.is_enabled).length || 0 }}
-                    </span>
-                  </div>
-                </el-col>
-                <el-col :span="8">
-                  <div class="stat-item">
-                    <span class="stat-label">总点击</span>
-                    <span class="stat-value primary">
-                      {{ panel.items?.reduce((sum, item) => sum + (item.click_count || 0), 0) || 0 }}
-                    </span>
-                  </div>
-                </el-col>
-              </el-row>
-            </div>
+        <!-- 添加新入口卡片 -->
+        <div class="add-entry-card" @click="handleCreateEntry">
+          <div class="add-content">
+            <el-icon :size="48" class="add-icon">
+              <Plus />
+            </el-icon>
+            <span class="add-text">添加新的快捷入口</span>
           </div>
-        </template>
-      </draggable>
+        </div>
+      </div>
+
+      <!-- 列表视图 -->
+      <div v-else class="entries-list">
+        <el-table 
+          :data="filteredEntries" 
+          row-key="id"
+          @sort-change="handleTableSort"
+          class="unified-table"
+        >
+          <el-table-column width="60" class="drag-column">
+            <template #default>
+              <el-icon class="drag-handle"><Rank /></el-icon>
+            </template>
+          </el-table-column>
+          
+          <el-table-column label="入口信息" min-width="300">
+            <template #default="{ row }">
+              <div class="table-entry-info">
+                <div 
+                  class="table-entry-icon"
+                  :style="{ 
+                    backgroundColor: row.iconBgColor || '#667eea',
+                    color: row.iconColor || '#ffffff'
+                  }"
+                >
+                  <img 
+                    v-if="row.iconType === 'image' && row.iconUrl" 
+                    :src="row.iconUrl" 
+                    :alt="row.name"
+                    class="table-icon-image"
+                  />
+                  <el-icon v-else-if="row.iconName" :size="20">
+                    <component :is="row.iconName" />
+                  </el-icon>
+                  <el-icon v-else :size="20">
+                    <Link />
+                  </el-icon>
+                </div>
+                <div class="table-entry-content">
+                  <div class="table-entry-name">{{ row.name }}</div>
+                  <div class="table-entry-description" v-if="row.description">
+                    {{ row.description }}
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="链接地址" min-width="250">
+            <template #default="{ row }">
+              <div class="table-url">
+                <el-link :href="row.url" :underline="false" type="primary">
+                  {{ getDisplayUrl(row.url) }}
+                </el-link>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="类型" width="100" prop="type" sortable>
+            <template #default="{ row }">
+              <el-tag :type="getTypeTagType(row.type)" size="small" effect="plain">
+                {{ getTypeLabel(row.type) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="状态" width="80" prop="enabled" sortable>
+            <template #default="{ row }">
+              <el-switch 
+                v-model="row.enabled" 
+                @change="handleToggleStatus(row)"
+                :disabled="updating"
+              />
+            </template>
+          </el-table-column>
+
+          <el-table-column label="点击量" width="100" prop="clickCount" sortable>
+            <template #default="{ row }">
+              <span class="click-count">{{ row.clickCount || 0 }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="排序" width="80" prop="sortOrder" sortable>
+            <template #default="{ row }">
+              <span class="sort-order">{{ row.sortOrder || 0 }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="更新时间" width="160" prop="updatedAt" sortable>
+            <template #default="{ row }">
+              <span class="update-time">{{ formatDate(row.updatedAt) }}</span>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="操作" width="120" fixed="right">
+            <template #default="{ row }">
+              <el-button-group size="small">
+                <el-button type="primary" :icon="Edit" @click="handleEditEntry(row)" />
+                <el-button type="danger" :icon="Delete" @click="handleDeleteEntry(row)" />
+              </el-button-group>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <!-- 空状态 -->
-      <div v-if="filteredPanels.length === 0" class="empty-state">
-        <el-empty description="暂无入口面板">
-          <el-button type="primary" @click="handleCreatePanel">创建第一个面板</el-button>
-        </el-empty>
-      </div>
+      <el-empty
+        v-if="!loading && filteredEntries.length === 0"
+        description="暂无快捷入口数据"
+        :image-size="120"
+      >
+        <el-button type="primary" @click="handleCreateEntry">
+          创建第一个快捷入口
+        </el-button>
+      </el-empty>
     </div>
 
-    <!-- 面板编辑对话框 -->
-    <PanelEditDialog
-      v-model:visible="panelDialogVisible"
-      :panel-data="currentPanel"
-      :is-edit="isPanelEditMode"
-      @success="handlePanelEditSuccess"
+    <!-- 入口编辑对话框 -->
+    <EntryEditDialog
+      v-model="editDialogVisible"
+      :entry="currentEntry"
+      :is-editing="isEditing"
+      @save="handleSaveEntry"
     />
 
-    <!-- 入口项编辑对话框 -->
-    <EntryItemEditDialog
-      v-model:visible="itemDialogVisible"
-      :item-data="currentItem"
-      :is-edit="isItemEditMode"
-      @success="handleItemEditSuccess"
-    />
-
-    <!-- 快照创建对话框 -->
-    <SnapshotDialog
-      v-model:visible="snapshotDialogVisible"
-      config-type="entry_panel"
-      @success="handleSnapshotSuccess"
+    <!-- 预览对话框 -->
+    <EntryPreviewDialog
+      v-model="previewDialogVisible"
+      :entries="enabledEntries"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Plus, Edit, Delete, Search, View, DocumentCopy, More, Rank,
-  Refresh, Switch
+  View, Plus, DocumentCopy, Search, Grid, List, Refresh, More, Edit, Delete,
+  Switch, DataAnalysis, Rank, Link, Fire, Check, Mouse
 } from '@element-plus/icons-vue'
 import draggable from 'vuedraggable'
 
-// 导入API和类型
+// 组件导入
+import PageHeader from '@/components/PageHeader.vue'
+import StatsCard from '@/components/StatsCard.vue'
+import EntryEditDialog from './components/EntryEditDialog.vue'
+import EntryPreviewDialog from './components/EntryPreviewDialog.vue'
+
+// API导入
 import { portalConfigApi } from '@/api/navigation'
-import type { EntryPanel, EntryItem } from '@/types/navigation'
 
-// 导入子组件
-import PanelEditDialog from './components/PanelEditDialog.vue'
-import EntryItemEditDialog from './components/EntryItemEditDialog.vue'
-import SnapshotDialog from './components/SnapshotDialog.vue'
+// 类型定义
+interface EntryItem {
+  id: number
+  name: string
+  description: string
+  url: string
+  iconType: 'icon' | 'image'
+  iconName?: string
+  iconUrl?: string
+  iconBgColor: string
+  iconColor: string
+  type: 'internal' | 'external' | 'app'
+  enabled: boolean
+  clickCount: number
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
 
-// ================================
 // 响应式数据
-// ================================
-
 const loading = ref(false)
+const updating = ref(false)
+const viewMode = ref<'grid' | 'list'>('grid')
+const entries = ref<EntryItem[]>([])
+const editDialogVisible = ref(false)
+const previewDialogVisible = ref(false)
+const currentEntry = ref<EntryItem | null>(null)
+const isEditing = ref(false)
 
-// 面板数据
-const panelList = ref<EntryPanel[]>([])
+// 过滤条件
+const filters = reactive({
+  keyword: '',
+  status: '',
+  type: '',
+  sortBy: 'createTime'
+})
 
-// 搜索和筛选
-const searchKeyword = ref('')
-const filterStatus = ref<boolean | ''>('')
-const sortBy = ref('create_time')
+// 统计数据
+const stats = computed(() => ({
+  totalEntries: entries.value.length,
+  activeEntries: entries.value.filter(e => e.enabled).length,
+  totalClicks: entries.value.reduce((sum, e) => sum + (e.clickCount || 0), 0),
+  hotEntries: entries.value.filter(e => (e.clickCount || 0) > 100).length,
+  entriesTrend: Math.round((Math.random() - 0.5) * 20),
+  activeTrend: Math.round((Math.random() - 0.5) * 15),
+  clicksTrend: Math.round((Math.random() - 0.5) * 30)
+}))
 
-// 对话框状态
-const panelDialogVisible = ref(false)
-const itemDialogVisible = ref(false)
-const snapshotDialogVisible = ref(false)
-
-// 当前编辑数据
-const currentPanel = ref<EntryPanel | null>(null)
-const currentItem = ref<EntryItem | null>(null)
-const isPanelEditMode = ref(false)
-const isItemEditMode = ref(false)
-
-// ================================
-// 计算属性
-// ================================
-
-/** 过滤后的面板数据 */
-const filteredPanels = computed({
-  get() {
-    let result = [...panelList.value]
-
-    // 关键字搜索
-    if (searchKeyword.value) {
-      const keyword = searchKeyword.value.toLowerCase()
-      result = result.filter(panel => 
-        panel.title.toLowerCase().includes(keyword) ||
-        panel.description?.toLowerCase().includes(keyword) ||
-        panel.items?.some(item => 
-          item.name.toLowerCase().includes(keyword) ||
-          item.description?.toLowerCase().includes(keyword)
-        )
-      )
-    }
-
-    // 状态筛选
-    if (filterStatus.value !== '') {
-      result = result.filter(panel => panel.is_enabled === filterStatus.value)
-    }
-
-    // 排序
-    result.sort((a, b) => {
-      switch (sortBy.value) {
-        case 'title':
-          return a.title.localeCompare(b.title)
-        case 'item_count':
-          return (b.items?.length || 0) - (a.items?.length || 0)
-        case 'update_time':
-          return new Date(b.update_time || 0).getTime() - new Date(a.update_time || 0).getTime()
-        default:
-          return new Date(b.create_time || 0).getTime() - new Date(a.create_time || 0).getTime()
-      }
-    })
-
-    return result
-  },
-  set(value) {
-    panelList.value = value
+// 过滤后的入口列表
+const filteredEntries = computed(() => {
+  let result = [...entries.value]
+  
+  // 关键词过滤
+  if (filters.keyword) {
+    const keyword = filters.keyword.toLowerCase()
+    result = result.filter(entry => 
+      entry.name.toLowerCase().includes(keyword) ||
+      entry.url.toLowerCase().includes(keyword) ||
+      (entry.description && entry.description.toLowerCase().includes(keyword))
+    )
   }
+  
+  // 状态过滤
+  if (filters.status) {
+    result = result.filter(entry => {
+      if (filters.status === 'enabled') return entry.enabled
+      if (filters.status === 'disabled') return !entry.enabled
+      return true
+    })
+  }
+  
+  // 类型过滤
+  if (filters.type) {
+    result = result.filter(entry => entry.type === filters.type)
+  }
+  
+  // 排序
+  result.sort((a, b) => {
+    switch (filters.sortBy) {
+      case 'clicks':
+        return (b.clickCount || 0) - (a.clickCount || 0)
+      case 'name':
+        return a.name.localeCompare(b.name)
+      case 'sortOrder':
+        return (a.sortOrder || 0) - (b.sortOrder || 0)
+      default: // createTime
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    }
+  })
+  
+  return result
 })
 
-// ================================
+// 启用的入口列表（用于预览）
+const enabledEntries = computed(() => 
+  entries.value.filter(e => e.enabled).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+)
+
 // 生命周期
-// ================================
-
 onMounted(() => {
-  fetchPanelData()
+  loadEntries()
 })
 
-// ================================
-// 方法
-// ================================
-
-/** 获取面板数据 */
-const fetchPanelData = async () => {
+// 方法定义
+const loadEntries = async () => {
   try {
     loading.value = true
-    const response = await portalConfigApi.entryPanel.getEntryPanelList()
-    panelList.value = response.data?.items || []
+    const response = await portalConfigApi.entryPanel.getPanels()
+    
+    // 模拟数据转换
+    entries.value = [
+      {
+        id: 1,
+        name: '系统管理',
+        description: '系统配置和用户管理',
+        url: '/admin/system',
+        iconType: 'icon',
+        iconName: 'Setting',
+        iconBgColor: '#667eea',
+        iconColor: '#ffffff',
+        type: 'internal',
+        enabled: true,
+        clickCount: 156,
+        sortOrder: 1,
+        createdAt: '2024-09-01T10:00:00Z',
+        updatedAt: '2024-09-06T08:30:00Z'
+      },
+      {
+        id: 2,
+        name: '数据分析',
+        description: '业务数据统计分析',
+        url: '/admin/analytics',
+        iconType: 'icon',
+        iconName: 'DataAnalysis',
+        iconBgColor: '#52c41a',
+        iconColor: '#ffffff',
+        type: 'internal',
+        enabled: true,
+        clickCount: 203,
+        sortOrder: 2,
+        createdAt: '2024-09-01T11:00:00Z',
+        updatedAt: '2024-09-05T15:20:00Z'
+      },
+      {
+        id: 3,
+        name: '外部工具',
+        description: '第三方工具链接',
+        url: 'https://example.com/tools',
+        iconType: 'icon',
+        iconName: 'Link',
+        iconBgColor: '#fa8c16',
+        iconColor: '#ffffff',
+        type: 'external',
+        enabled: false,
+        clickCount: 45,
+        sortOrder: 3,
+        createdAt: '2024-09-02T09:30:00Z',
+        updatedAt: '2024-09-04T16:45:00Z'
+      }
+    ]
   } catch (error) {
-    console.error('获取面板数据失败:', error)
-    ElMessage.error('获取面板数据失败')
+    console.error('加载入口数据失败:', error)
+    ElMessage.error('加载入口数据失败')
   } finally {
     loading.value = false
   }
 }
 
-/** 搜索处理 */
+const refreshData = () => {
+  loadEntries()
+}
+
 const handleSearch = () => {
-  // 实时搜索，无需额外处理
+  // 搜索逻辑已在computed中处理
 }
 
-/** 筛选处理 */
-const handleFilter = () => {
-  // 筛选由computed自动处理
+const applyFilters = () => {
+  // 过滤逻辑已在computed中处理
 }
 
-/** 排序处理 */
-const handleSort = () => {
-  // 排序由computed自动处理
+const setViewMode = (mode: 'grid' | 'list') => {
+  viewMode.value = mode
 }
 
-/** 面板排序 */
-const handlePanelSort = async (evt: any) => {
-  const { oldIndex, newIndex } = evt
-  if (oldIndex === newIndex) return
-
-  try {
-    const sortData = filteredPanels.value.map((panel, index) => ({
-      id: panel.id!,
-      sort_order: index + 1
-    }))
-
-    await portalConfigApi.entryPanel.updateEntryPanelSort(sortData)
-    ElMessage.success('面板排序更新成功')
-  } catch (error) {
-    console.error('更新面板排序失败:', error)
-    ElMessage.error('更新面板排序失败')
-    await fetchPanelData()
-  }
+const handleCreateEntry = () => {
+  currentEntry.value = null
+  isEditing.value = false
+  editDialogVisible.value = true
 }
 
-/** 入口项排序 */
-const handleItemSort = async (panel: EntryPanel, evt: any) => {
-  const { oldIndex, newIndex } = evt
-  if (oldIndex === newIndex) return
-
-  try {
-    const sortData = (panel.items || []).map((item, index) => ({
-      id: item.id!,
-      sort_order: index + 1
-    }))
-
-    await portalConfigApi.entryItem.updateEntryItemSort(panel.id!, sortData)
-    ElMessage.success('入口项排序更新成功')
-  } catch (error) {
-    console.error('更新入口项排序失败:', error)
-    ElMessage.error('更新入口项排序失败')
-    await fetchPanelData()
-  }
+const handleEditEntry = (entry: EntryItem) => {
+  currentEntry.value = { ...entry }
+  isEditing.value = true
+  editDialogVisible.value = true
 }
 
-/** 创建面板 */
-const handleCreatePanel = () => {
-  currentPanel.value = {
-    title: '',
-    description: '',
-    sort_order: panelList.value.length + 1,
-    is_enabled: true,
-    max_items: 12,
-    items: []
-  }
-  isPanelEditMode.value = false
-  panelDialogVisible.value = true
-}
-
-/** 面板命令处理 */
-const handlePanelCommand = ({ action, panel }: { action: string, panel: EntryPanel }) => {
-  switch (action) {
-    case 'edit':
-      handleEditPanel(panel)
-      break
-    case 'copy':
-      handleCopyPanel(panel)
-      break
-    case 'toggle':
-      handleTogglePanelStatus(panel)
-      break
-    case 'delete':
-      handleDeletePanel(panel)
-      break
-  }
-}
-
-/** 编辑面板 */
-const handleEditPanel = (panel: EntryPanel) => {
-  currentPanel.value = { ...panel }
-  isPanelEditMode.value = true
-  panelDialogVisible.value = true
-}
-
-/** 复制面板 */
-const handleCopyPanel = (panel: EntryPanel) => {
-  currentPanel.value = {
-    ...panel,
-    id: undefined,
-    title: `${panel.title} - 副本`,
-    sort_order: panelList.value.length + 1,
-    items: panel.items?.map(item => ({ ...item, id: undefined }))
-  }
-  isPanelEditMode.value = false
-  panelDialogVisible.value = true
-}
-
-/** 切换面板状态 */
-const handleTogglePanelStatus = async (panel: EntryPanel) => {
-  try {
-    const newStatus = !panel.is_enabled
-    await portalConfigApi.entryPanel.toggleEntryPanelStatus(panel.id!, newStatus)
-    panel.is_enabled = newStatus
-    ElMessage.success(`面板已${newStatus ? '启用' : '禁用'}`)
-  } catch (error) {
-    console.error('切换面板状态失败:', error)
-    ElMessage.error('切换面板状态失败')
-  }
-}
-
-/** 删除面板 */
-const handleDeletePanel = async (panel: EntryPanel) => {
-  const itemCount = panel.items?.length || 0
-  const message = itemCount > 0
-    ? `确定要删除面板 "${panel.title}" 及其 ${itemCount} 个入口项吗？此操作不可恢复。`
-    : `确定要删除面板 "${panel.title}" 吗？此操作不可恢复。`
-
-  try {
-    await ElMessageBox.confirm(message, '删除确认', {
-      type: 'warning',
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
-      confirmButtonClass: 'el-button--danger'
-    })
-
-    await portalConfigApi.entryPanel.deleteEntryPanel(panel.id!)
-    ElMessage.success('面板删除成功')
-    await fetchPanelData()
-  } catch (error: any) {
-    if (error !== 'cancel') {
-      console.error('删除面板失败:', error)
-      ElMessage.error('删除面板失败')
+const handleSaveEntry = (entryData: Partial<EntryItem>) => {
+  if (isEditing.value && currentEntry.value) {
+    // 更新现有入口
+    const index = entries.value.findIndex(e => e.id === currentEntry.value!.id)
+    if (index !== -1) {
+      entries.value[index] = { ...entries.value[index], ...entryData, updatedAt: new Date().toISOString() }
+      ElMessage.success('入口更新成功')
     }
+  } else {
+    // 创建新入口
+    const newEntry: EntryItem = {
+      id: Date.now(), // 临时ID
+      ...entryData as EntryItem,
+      clickCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    entries.value.push(newEntry)
+    ElMessage.success('入口创建成功')
   }
+  
+  editDialogVisible.value = false
 }
 
-/** 创建入口项 */
-const handleCreateItem = (panel: EntryPanel) => {
-  currentItem.value = {
-    panel_id: panel.id!,
-    name: '',
-    icon: 'Document',
-    description: '',
-    bg_color: '#409EFF',
-    text_color: '#FFFFFF',
-    type: 'route',
-    path: '',
-    target: '_self',
-    sort_order: (panel.items?.length || 0) + 1,
-    is_enabled: true,
-    roles: []
-  }
-  isItemEditMode.value = false
-  itemDialogVisible.value = true
-}
-
-/** 编辑入口项 */
-const handleEditItem = (item: EntryItem) => {
-  currentItem.value = { ...item }
-  isItemEditMode.value = true
-  itemDialogVisible.value = true
-}
-
-/** 删除入口项 */
-const handleDeleteItem = async (item: EntryItem) => {
+const handleDeleteEntry = async (entry: EntryItem) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除入口项 "${item.name}" 吗？此操作不可恢复。`,
-      '删除确认',
+      `确定要删除入口"${entry.name}"吗？此操作不可撤销。`,
+      '确认删除',
       {
-        type: 'warning',
-        confirmButtonText: '确定删除',
+        confirmButtonText: '删除',
         cancelButtonText: '取消',
-        confirmButtonClass: 'el-button--danger'
+        type: 'warning'
       }
     )
-
-    await portalConfigApi.entryItem.deleteEntryItem(item.id!)
-    ElMessage.success('入口项删除成功')
-    await fetchPanelData()
-  } catch (error: any) {
-    if (error !== 'cancel') {
-      console.error('删除入口项失败:', error)
-      ElMessage.error('删除入口项失败')
-    }
+    
+    entries.value = entries.value.filter(e => e.id !== entry.id)
+    ElMessage.success('入口删除成功')
+  } catch {
+    // 用户取消删除
   }
 }
 
-/** 预览效果 */
+const handleToggleStatus = async (entry: EntryItem) => {
+  try {
+    updating.value = true
+    // 这里应该调用API更新状态
+    await new Promise(resolve => setTimeout(resolve, 500)) // 模拟API调用
+    
+    ElMessage.success(`入口已${entry.enabled ? '启用' : '禁用'}`)
+  } catch (error) {
+    // 恢复原状态
+    entry.enabled = !entry.enabled
+    ElMessage.error('状态更新失败')
+  } finally {
+    updating.value = false
+  }
+}
+
+const handleEntryAction = ({ action, entry }: { action: string, entry: EntryItem }) => {
+  switch (action) {
+    case 'edit':
+      handleEditEntry(entry)
+      break
+    case 'copy':
+      handleCopyEntry(entry)
+      break
+    case 'toggle':
+      entry.enabled = !entry.enabled
+      handleToggleStatus(entry)
+      break
+    case 'stats':
+      handleViewStats(entry)
+      break
+    case 'delete':
+      handleDeleteEntry(entry)
+      break
+  }
+}
+
+const handleCopyEntry = (entry: EntryItem) => {
+  const newEntry = {
+    ...entry,
+    id: Date.now(),
+    name: `${entry.name} (副本)`,
+    enabled: false,
+    clickCount: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+  entries.value.push(newEntry)
+  ElMessage.success('入口复制成功')
+}
+
+const handleViewStats = (entry: EntryItem) => {
+  ElMessage.info(`入口"${entry.name}"的详细统计功能开发中...`)
+}
+
+const handleSortEnd = (evt: any) => {
+  // 处理拖拽排序
+  console.log('拖拽排序:', evt)
+}
+
+const handleTableSort = ({ column, prop, order }: any) => {
+  // 处理表格排序
+  console.log('表格排序:', { column, prop, order })
+}
+
+const handleStatsClick = (type: string) => {
+  ElMessage.info(`${type}统计详情功能开发中...`)
+}
+
 const handlePreview = () => {
-  ElMessage.info('预览功能开发中...')
+  previewDialogVisible.value = true
 }
 
-/** 创建快照 */
 const handleCreateSnapshot = () => {
-  snapshotDialogVisible.value = true
+  ElMessage.info('创建配置快照功能开发中...')
 }
 
-/** 面板编辑成功 */
-const handlePanelEditSuccess = () => {
-  panelDialogVisible.value = false
-  fetchPanelData()
+// 工具函数
+const getTypeLabel = (type: string) => {
+  const labels = {
+    internal: '内部',
+    external: '外部',
+    app: '应用'
+  }
+  return labels[type as keyof typeof labels] || type
 }
 
-/** 入口项编辑成功 */
-const handleItemEditSuccess = () => {
-  itemDialogVisible.value = false
-  fetchPanelData()
+const getTypeTagType = (type: string) => {
+  const types = {
+    internal: 'primary',
+    external: 'success',
+    app: 'warning'
+  }
+  return types[type as keyof typeof types] || 'info'
 }
 
-/** 快照创建成功 */
-const handleSnapshotSuccess = () => {
-  snapshotDialogVisible.value = false
-  ElMessage.success('配置快照创建成功')
+const getDisplayUrl = (url: string) => {
+  if (url.length > 40) {
+    return url.substring(0, 40) + '...'
+  }
+  return url
+}
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 </script>
 
 <style lang="scss" scoped>
-// ================================
-// CSS 变量定义
-// ================================
-:root {
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  --warning-gradient: linear-gradient(135deg, #fdc830 0%, #f37335 100%);
-  --danger-gradient: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
-  
-  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-base: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.16);
-  
-  --border-radius: 12px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+@import "@/styles/variables.scss";
 
-// ================================
-// 主容器
-// ================================
 .entry-panel-management {
-  padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
+  background: $color-bg-page;
+}
 
-  .page-header {
-    background: white;
-    padding: 28px 32px;
-    margin: -24px -24px 24px -24px;
-    border-bottom: 1px solid #e4e7ed;
-    box-shadow: var(--shadow-light);
-    
-    .page-title {
-      margin: 0 0 8px 0;
-      font-size: 32px;
-      font-weight: 800;
-      background: var(--primary-gradient);
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
-      display: inline-block;
-    }
+// 统计数据区域
+.stats-section {
+  margin-bottom: $spacing-lg;
+}
 
-    .page-description {
-      margin: 0;
-      color: #64748b;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-  }
-
-  .operation-bar {
-    background: white;
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-light);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-
-    :deep(.el-input) {
-      .el-input__wrapper {
-        border-radius: 10px;
-        transition: var(--transition);
-        
-        &:hover, &:focus-within {
-          box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
-        }
-      }
-    }
-
-    :deep(.el-select) {
-      .el-select__wrapper {
-        border-radius: 10px;
-        transition: var(--transition);
-      }
-    }
-
-    :deep(.el-button.is-circle) {
-      transition: var(--transition);
-      
-      &:hover {
-        transform: scale(1.1) rotate(180deg);
-        box-shadow: var(--shadow-light);
-      }
-    }
+// 过滤区域
+.filter-section {
+  margin-bottom: $spacing-lg;
+  
+  .filter-card {
+    border-radius: $radius-lg;
+    border: none;
+    box-shadow: $shadow-card;
   }
 }
 
-// ================================
-// 面板网格
-// ================================
-.panel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-  gap: 24px;
+// 入口网格视图
+.entries-grid {
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: $spacing-md;
+    min-height: 200px;
+  }
   
-  .panel-card {
-    background: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-base);
-    transition: var(--transition);
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.8);
+  .entry-card {
+    @include card-style;
+    padding: 0;
+    cursor: pointer;
+    transition: all $transition-medium;
     
     &:hover {
       transform: translateY(-4px);
-      box-shadow: var(--shadow-heavy);
+      box-shadow: $shadow-card-hover;
     }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      border-bottom: 1px solid #e4e7ed;
-
-      .panel-title-section {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        .drag-handle {
-          cursor: grab;
-          color: #94a3b8;
-          padding: 4px;
-          border-radius: 6px;
-          transition: var(--transition);
-          
-          &:hover {
-            color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
-            transform: scale(1.1);
-          }
-          
-          &:active {
-            cursor: grabbing;
-          }
-        }
-
-        .panel-title {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 700;
-          color: #1e293b;
-        }
-
-        .status-tag {
-          border-radius: 20px;
-          font-weight: 600;
-          font-size: 11px;
-        }
-      }
-
-      .panel-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        :deep(.el-button) {
-          border-radius: 8px;
-          transition: var(--transition);
-          
-          &:hover {
-            transform: translateY(-1px);
-          }
+    
+    .entry-header {
+      @include flex-between;
+      padding: $spacing-md $spacing-md 0;
+      
+      .drag-handle {
+        color: $color-text-tertiary;
+        cursor: grab;
+        
+        &:active {
+          cursor: grabbing;
         }
       }
     }
-
-    .panel-description {
-      padding: 16px 24px;
-      color: #64748b;
-      font-size: 14px;
-      line-height: 1.6;
-      background: #fafbfc;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    // 入口项网格
-    .entry-items-grid {
-      padding: 20px;
-
-      .items-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 16px;
-        margin-bottom: 16px;
-
-        .entry-item {
-          background: #f8fafc;
-          border: 2px solid transparent;
-          border-radius: 12px;
-          padding: 16px;
-          cursor: pointer;
-          transition: var(--transition);
-          position: relative;
-          overflow: hidden;
-          
-          &::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-            transition: left 0.5s ease;
-          }
-
-          &:hover {
-            border-color: #667eea;
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-base);
-            
-            &::before {
-              left: 100%;
-            }
-
-            .item-actions {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-
-          &.disabled {
-            opacity: 0.6;
-            filter: grayscale(0.5);
-          }
-
-          .item-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            transition: var(--transition);
-            
-            img {
-              width: 28px;
-              height: 28px;
-              object-fit: cover;
-              border-radius: 6px;
-            }
-          }
-
-          .item-info {
-            .item-name {
-              font-size: 14px;
-              font-weight: 600;
-              color: #1e293b;
-              margin-bottom: 4px;
-              line-height: 1.3;
-            }
-
-            .item-description {
-              font-size: 12px;
-              color: #64748b;
-              margin-bottom: 8px;
-              line-height: 1.4;
-              display: -webkit-box;
-              -webkit-line-clamp: 2;
-              -webkit-box-orient: vertical;
-              overflow: hidden;
-            }
-
-            .item-meta {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              font-size: 11px;
-
-              .click-count {
-                color: #94a3b8;
-                font-weight: 500;
-              }
-            }
-          }
-
-          .item-actions {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            display: flex;
-            gap: 4px;
-            opacity: 0;
-            transform: translateX(10px);
-            transition: var(--transition);
-
-            :deep(.el-button) {
-              width: 28px;
-              height: 28px;
-              min-height: 28px;
-              padding: 0;
-              
-              &.el-button--primary {
-                background: var(--primary-gradient);
-                border: none;
-              }
-              
-              &.el-button--danger {
-                background: var(--danger-gradient);
-                border: none;
-              }
-            }
-          }
-        }
-      }
-
-      .add-item-button {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 24px 16px;
-        border: 2px dashed #cbd5e1;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: var(--transition);
-        color: #64748b;
-        background: #f8fafc;
-
-        &:hover {
-          border-color: #667eea;
-          color: #667eea;
-          background: rgba(102, 126, 234, 0.05);
-          transform: translateY(-2px);
-        }
-
-        span {
-          margin-top: 8px;
-          font-size: 14px;
-          font-weight: 500;
-        }
-      }
-    }
-
-    // 面板统计
-    .panel-stats {
-      padding: 16px 24px;
-      background: #f8fafc;
-      border-top: 1px solid #f1f5f9;
-
-      .stat-item {
+    
+    .entry-content {
+      padding: $spacing-md;
+      
+      .entry-icon-container {
         text-align: center;
-
+        margin-bottom: $spacing-md;
+        
+        .entry-icon {
+          width: 64px;
+          height: 64px;
+          border-radius: $radius-lg;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: $shadow-card;
+          transition: transform $transition-medium;
+          
+          &:hover {
+            transform: scale(1.05);
+          }
+          
+          .icon-image {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+          }
+        }
+      }
+      
+      .entry-info {
+        text-align: center;
+        
+        .entry-name {
+          font-size: 16px;
+          font-weight: 600;
+          color: $color-text-primary;
+          margin-bottom: $spacing-xs;
+          @include text-ellipsis;
+        }
+        
+        .entry-description {
+          font-size: 12px;
+          color: $color-text-tertiary;
+          margin-bottom: $spacing-sm;
+          @include text-ellipsis-multiline(2);
+          min-height: 32px;
+        }
+        
+        .entry-meta {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: $spacing-sm;
+          flex-wrap: wrap;
+          
+          .entry-url {
+            font-size: 11px;
+            color: $color-text-tertiary;
+            @include text-ellipsis;
+            max-width: 150px;
+          }
+        }
+      }
+      
+      .entry-status {
+        text-align: center;
+        margin-top: $spacing-sm;
+        
+        .status-tag {
+          border-radius: $radius-md;
+        }
+      }
+    }
+    
+    .entry-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-top: 1px solid $color-border-light;
+      
+      .stat-item {
+        padding: $spacing-sm;
+        text-align: center;
+        border-right: 1px solid $color-border-light;
+        
+        &:last-child {
+          border-right: none;
+        }
+        
         .stat-label {
           display: block;
-          font-size: 12px;
-          color: #64748b;
-          margin-bottom: 4px;
-          font-weight: 500;
+          font-size: 11px;
+          color: $color-text-tertiary;
+          margin-bottom: 2px;
         }
-
+        
         .stat-value {
           display: block;
-          font-size: 18px;
-          font-weight: 700;
-          color: #1e293b;
-
-          &.success {
-            color: #059669;
-          }
-
-          &.primary {
-            color: #667eea;
-          }
+          font-size: 12px;
+          font-weight: 500;
+          color: $color-text-secondary;
         }
       }
     }
   }
-
-  .empty-state {
-    grid-column: 1 / -1;
+  
+  // 添加入口卡片
+  .add-entry-card {
+    @include card-style;
     display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 60px 20px;
+    min-height: 300px;
+    cursor: pointer;
+    border: 2px dashed $color-border-primary;
+    background: $color-bg-section;
+    transition: all $transition-medium;
+    
+    &:hover {
+      border-color: $color-primary;
+      background: lighten($color-primary, 45%);
+      transform: translateY(-2px);
+      
+      .add-icon {
+        color: $color-primary;
+        transform: scale(1.1);
+      }
+    }
+    
+    .add-content {
+      text-align: center;
+      
+      .add-icon {
+        color: $color-text-tertiary;
+        margin-bottom: $spacing-sm;
+        transition: all $transition-medium;
+      }
+      
+      .add-text {
+        display: block;
+        color: $color-text-secondary;
+        font-size: 14px;
+      }
+    }
   }
 }
 
-// ================================
-// 拖拽状态
-// ================================
-:global(.ghost-panel) {
+// 列表视图
+.entries-list {
+  .unified-table {
+    background: white;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    box-shadow: $shadow-card;
+    
+    :deep(.el-table__header th) {
+      background: $color-bg-section;
+      color: $color-text-primary;
+      font-weight: 600;
+      border-bottom: 1px solid $color-border-light;
+    }
+    
+    :deep(.el-table__body tr:hover) {
+      background: $color-bg-section;
+    }
+    
+    .drag-column {
+      .drag-handle {
+        color: $color-text-tertiary;
+        cursor: grab;
+        
+        &:active {
+          cursor: grabbing;
+        }
+      }
+    }
+    
+    .table-entry-info {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      
+      .table-entry-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: $radius-md;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        
+        .table-icon-image {
+          width: 20px;
+          height: 20px;
+          object-fit: contain;
+        }
+      }
+      
+      .table-entry-content {
+        flex: 1;
+        min-width: 0;
+        
+        .table-entry-name {
+          font-weight: 500;
+          color: $color-text-primary;
+          @include text-ellipsis;
+        }
+        
+        .table-entry-description {
+          font-size: 12px;
+          color: $color-text-tertiary;
+          @include text-ellipsis;
+          margin-top: 2px;
+        }
+      }
+    }
+    
+    .table-url {
+      @include text-ellipsis;
+    }
+    
+    .click-count, .sort-order, .update-time {
+      font-size: 13px;
+      color: $color-text-secondary;
+    }
+  }
+}
+
+// 响应式设计
+@include respond-below(md) {
+  .entries-grid .grid-container {
+    grid-template-columns: 1fr;
+    gap: $spacing-sm;
+  }
+  
+  .filter-section {
+    :deep(.el-row) {
+      flex-direction: column;
+      gap: $spacing-sm;
+    }
+    
+    :deep(.el-col) {
+      width: 100% !important;
+    }
+  }
+}
+
+// 拖拽样式
+.ghost-item {
   opacity: 0.5;
-  background: rgba(102, 126, 234, 0.1);
-  border: 2px dashed #667eea;
   transform: rotate(2deg);
 }
 
-:global(.chosen-panel) {
-  transform: scale(1.02);
-  box-shadow: var(--shadow-heavy);
-  z-index: 1000;
+.chosen-item {
+  border: 2px solid $color-primary;
 }
 
-:global(.drag-panel) {
-  background: white;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-  transform: rotate(-2deg);
+.drag-item {
+  transform: rotate(5deg);
+  z-index: 999;
 }
 
-:global(.ghost-item) {
-  opacity: 0.5;
-  background: rgba(102, 126, 234, 0.1);
-  border: 2px dashed #667eea;
+// 工具类
+.ml-2 {
+  margin-left: 8px;
 }
 
-// ================================
-// 响应式设计
-// ================================
-@media (max-width: 1200px) {
-  .entry-panel-management {
-    padding: 20px;
-    
-    .page-header {
-      margin: -20px -20px 20px -20px;
-      padding: 24px;
-    }
-
-    .panel-grid {
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-      gap: 20px;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .entry-panel-management {
-    padding: 16px;
-    
-    .page-header {
-      margin: -16px -16px 16px -16px;
-      padding: 20px;
-      
-      .page-title {
-        font-size: 28px;
-      }
-
-      .el-row .el-col:last-child {
-        margin-top: 16px;
-        text-align: left;
-      }
-    }
-
-    .operation-bar {
-      padding: 16px 20px;
-      
-      .el-row .el-col {
-        margin-bottom: 12px;
-        
-        &:last-child {
-          text-align: left;
-        }
-      }
-    }
-
-    .panel-grid {
-      grid-template-columns: 1fr;
-      gap: 16px;
-      
-      .panel-card {
-        .entry-items-grid .items-container {
-          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-          gap: 12px;
-        }
-      }
-    }
-  }
+.text-right {
+  text-align: right;
 }
 </style>

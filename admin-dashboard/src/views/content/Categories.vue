@@ -93,7 +93,6 @@
                     <el-tag v-if="!category.isActive" type="danger" size="small">已禁用</el-tag>
                   </div>
                   <div class="header-actions">
-                    <el-button text type="primary" @click="viewAll(category)">查看全部内容</el-button>
                     <el-button type="primary" plain size="small" @click="enterCategory(category)">进入版块</el-button>
                   </div>
                   <el-dropdown @command="(command) => handleAction(command, category)">
@@ -106,7 +105,6 @@
                       <el-dropdown-menu>
                         <el-dropdown-item command="edit">编辑</el-dropdown-item>
                         <el-dropdown-item command="moderators">管理版主</el-dropdown-item>
-                        <el-dropdown-item command="settings">版块设置</el-dropdown-item>
                         <el-dropdown-item command="toggle" divided>
                           {{ category.isActive ? '禁用' : '启用' }}
                         </el-dropdown-item>
@@ -523,10 +521,6 @@ const handleAction = (command: string, category: Category) => {
       moderatorDialogVisible.value = true
       break
 
-    case 'settings':
-      ElMessage.info('版块设置功能开发中...')
-      break
-
     case 'toggle':
       category.isActive = !category.isActive
       ElMessage.success(category.isActive ? '版块已启用' : '版块已禁用')
@@ -600,13 +594,6 @@ const removeModerator = (moderator: User) => {
   }
 }
 
-// 查看全部内容（跳到统一列表并自动筛选）
-const viewAll = (category: Category) => {
-  router.push({
-    name: 'ContentList',
-    query: { module: 'forum', category: category.name, from: 'category' }
-  })
-}
 
 // 进入版块专属页
 const enterCategory = (category: Category) => {

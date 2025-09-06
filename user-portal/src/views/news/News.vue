@@ -1,138 +1,251 @@
 <template>
-  <div class="news-page">
-    <div class="container">
-      <!-- 页面标题 -->
-      <div class="page-header">
-        <h1>资讯中心</h1>
-        <p>获取最新公司资讯、行业动态和政策信息</p>
-      </div>
-
-      <!-- 筛选和搜索 -->
-      <div class="filter-section">
-        <div class="filter-tabs">
-          <div
-            v-for="category in categories"
-            :key="category.value"
-            class="filter-tab"
-            :class="{ active: selectedCategory === category.value }"
-            @click="selectedCategory = category.value"
-          >
-            {{ category.label }}
+  <div class="font-inter bg-gray-100 text-gray-700 min-h-screen">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 z-50 bg-white shadow-sm transition-all duration-300">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <!-- Logo和主导航 -->
+          <div class="flex items-center space-x-8">
+            <router-link to="/" class="flex items-center space-x-2">
+              <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                <i class="fa fa-building text-white"></i>
+              </div>
+              <span class="text-lg font-semibold text-gray-700">企业内部门户</span>
+            </router-link>
+            <nav class="hidden md:flex space-x-6">
+              <router-link to="/" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">首页</router-link>
+              <router-link to="/forum" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">论坛</router-link>
+              <router-link to="/news" class="text-primary font-medium border-b-2 border-primary h-full flex items-center">资讯中心</router-link>
+              <router-link to="/knowledge" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">知识库</router-link>
+              <router-link to="#" class="text-gray-500 hover:text-primary transition-colors h-full flex items-center">应用</router-link>
+            </nav>
+          </div>
+          
+          <!-- 搜索框 -->
+          <div class="hidden md:flex relative flex-1 max-w-xl mx-8">
+            <input type="text" placeholder="搜索AI工具、资讯或技术趋势..." 
+              class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+            <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          </div>
+          
+          <!-- 用户区域 -->
+          <div class="flex items-center space-x-4">
+            <button class="relative p-2 text-gray-500 hover:text-primary transition-colors">
+              <i class="fa fa-bell text-xl"></i>
+              <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <div class="flex items-center space-x-2">
+              <img src="https://picsum.photos/id/1005/200" alt="用户头像" class="w-8 h-8 rounded-full object-cover">
+              <span class="hidden md:inline text-sm font-medium">张小明</span>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="filter-controls">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索资讯..."
-            :prefix-icon="Search"
-            @input="handleSearch"
-            clearable
-            style="width: 300px"
-          />
-          <el-select
-            v-model="sortBy"
-            placeholder="排序方式"
-            style="width: 120px"
-            @change="handleSort"
-          >
-            <el-option label="最新发布" value="publishTime" />
-            <el-option label="阅读量" value="readCount" />
-            <el-option label="点赞数" value="likeCount" />
-          </el-select>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+      <!-- 资讯中心主体 -->
+      <div class="bg-white rounded-xl shadow-card mb-8">
+        <div class="p-6 border-b border-gray-100">
+          <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">资讯中心</h1>
+            <p class="text-gray-600">获取最新公司资讯、AI工具动态和技术趋势</p>
+          </div>
+          
+          <!-- 分类导航 -->
+          <div class="flex flex-wrap justify-center gap-2 mb-6">
+            <button
+              v-for="category in categories"
+              :key="category.value"
+              @click="selectedCategory = category.value"
+              :class="selectedCategory === category.value ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              class="px-4 py-2 rounded-full text-sm font-medium transition-colors"
+            >
+              {{ category.label }}
+            </button>
+          </div>
+          
+          <!-- 搜索和排序 -->
+          <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <div class="relative">
+              <input
+                v-model="searchKeyword"
+                @input="handleSearch"
+                type="text"
+                placeholder="搜索资讯标题、内容..."
+                class="w-80 pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+              >
+              <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+            <select
+              v-model="sortBy"
+              @change="handleSort"
+              class="px-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm"
+            >
+              <option value="publishTime">最新发布</option>
+              <option value="readCount">阅读最多</option>
+              <option value="likeCount">点赞最多</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <!-- 置顶资讯 -->
-      <div v-if="topNews.length > 0" class="top-news">
-        <h3>置顶资讯</h3>
-        <div class="top-news-list">
-          <div
-            v-for="item in topNews"
-            :key="item.id"
-            class="top-news-item"
-            @click="$router.push(`/news/${item.id}`)"
-          >
-            <div class="news-badge">
-              <el-tag type="danger" size="small">置顶</el-tag>
-            </div>
-            <div class="news-content">
-              <h4>{{ item.title }}</h4>
-              <p>{{ item.summary }}</p>
-              <div class="news-meta">
-                <span><el-icon><User /></el-icon>{{ item.author }}</span>
-                <span><el-icon><Calendar /></el-icon>{{ formatTime(item.publishTime) }}</span>
-                <span><el-icon><View /></el-icon>{{ item.readCount }} 阅读</span>
-                <span><el-icon><Star /></el-icon>{{ item.likeCount }} 点赞</span>
+      <!-- 热门资讯轮播 -->
+      <div v-if="topNews.length > 0" class="bg-white rounded-xl shadow-card mb-8 overflow-hidden">
+        <div class="bg-gradient-to-r from-primary to-blue-600 text-white p-6">
+          <div class="flex items-center gap-3">
+            <i class="fa fa-fire text-2xl"></i>
+            <h2 class="text-xl font-bold">热门资讯</h2>
+          </div>
+        </div>
+        
+        <div class="p-6">
+          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div
+              v-for="item in topNews"
+              :key="item.id"
+              @click="$router.push(`/news/${item.id}`)"
+              class="group relative overflow-hidden rounded-lg bg-gradient-to-br from-gray-50 to-white border border-gray-100 hover:border-primary/50 cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+            >
+              <div class="absolute top-3 left-3 z-10">
+                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-red-500 text-white rounded-full">
+                  <i class="fa fa-fire mr-1"></i>热门
+                </span>
               </div>
-            </div>
-            <div v-if="item.coverImage" class="news-image">
-              <img :src="item.coverImage" :alt="item.title" />
+              
+              <div v-if="item.coverImage" class="aspect-video overflow-hidden bg-gray-100">
+                <img :src="item.coverImage" :alt="item.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+              </div>
+              
+              <div class="p-4">
+                <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">{{ item.title }}</h3>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ item.summary }}</p>
+                
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                  <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1">
+                      <i class="fa fa-user"></i>
+                      {{ item.author }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <i class="fa fa-calendar"></i>
+                      {{ formatTime(item.publishTime) }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1">
+                      <i class="fa fa-eye"></i>
+                      {{ item.readCount }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <i class="fa fa-heart"></i>
+                      {{ item.likeCount }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- 资讯列表 -->
-      <div class="news-list">
-        <div v-if="loading" class="loading">
-          <el-icon class="is-loading"><Loading /></el-icon>
-          <span>加载中...</span>
+      <div class="bg-white rounded-xl shadow-card">
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-900">最新资讯</h2>
+            <div class="text-sm text-gray-500">
+              共 {{ filteredNews.length }} 篇资讯
+            </div>
+          </div>
+        </div>
+        
+        <div v-if="loading" class="p-12 text-center">
+          <div class="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div class="text-gray-500">加载中...</div>
         </div>
 
-        <div v-else-if="filteredNews.length === 0" class="empty">
-          <el-empty description="暂无相关资讯" />
+        <div v-else-if="filteredNews.length === 0" class="p-16 text-center">
+          <i class="fa fa-inbox text-4xl text-gray-300 mb-4"></i>
+          <div class="text-gray-500 mb-4">暂无相关资讯</div>
+          <button @click="selectedCategory = 'all'; searchKeyword = ''" class="text-primary hover:underline">
+            清除筛选条件
+          </button>
         </div>
 
-        <div v-else>
-          <div
+        <div v-else class="divide-y divide-gray-100">
+          <article
             v-for="item in paginatedNews"
             :key="item.id"
-            class="news-item"
             @click="$router.push(`/news/${item.id}`)"
+            class="p-6 cursor-pointer hover:bg-gray-50 transition-colors content-auto"
           >
-            <div class="news-main">
-              <div class="news-category">
-                <el-tag :type="getCategoryType(item.category)" size="small">
-                  {{ item.category }}
-                </el-tag>
+            <div class="flex gap-6 items-start">
+              <div class="flex-1">
+                <!-- 分类和标签 -->
+                <div class="flex items-center gap-2 mb-3">
+                  <span :class="getCategoryColorClass(item.category)" class="category-tag">
+                    {{ item.category }}
+                  </span>
+                  <span v-for="tag in item.tags.slice(0, 2)" :key="tag" class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
+                    {{ tag }}
+                  </span>
+                </div>
+                
+                <!-- 标题 -->
+                <h3 class="text-lg font-semibold text-gray-900 mb-2 hover:text-primary transition-colors line-clamp-2">
+                  {{ item.title }}
+                </h3>
+                
+                <!-- 摘要 -->
+                <p class="text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                  {{ item.summary }}
+                </p>
+                
+                <!-- 元信息 -->
+                <div class="flex items-center gap-4 text-sm text-gray-500">
+                  <span class="flex items-center gap-1">
+                    <i class="fa fa-user"></i>
+                    {{ item.author }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <i class="fa fa-calendar"></i>
+                    {{ formatTime(item.publishTime) }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <i class="fa fa-eye"></i>
+                    {{ item.readCount }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <i class="fa fa-heart"></i>
+                    {{ item.likeCount }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <i class="fa fa-comment"></i>
+                    {{ item.commentCount }}
+                  </span>
+                </div>
               </div>
-              <h3>{{ item.title }}</h3>
-              <p>{{ item.summary }}</p>
-              <div class="news-tags">
-                <el-tag
-                  v-for="tag in item.tags.slice(0, 3)"
-                  :key="tag"
-                  size="small"
-                  type="info"
-                  effect="plain"
-                >
-                  {{ tag }}
-                </el-tag>
-              </div>
-              <div class="news-meta">
-                <span><el-icon><User /></el-icon>{{ item.author }}</span>
-                <span><el-icon><Calendar /></el-icon>{{ formatTime(item.publishTime) }}</span>
-                <span><el-icon><View /></el-icon>{{ item.readCount }} 阅读</span>
-                <span><el-icon><Star /></el-icon>{{ item.likeCount }} 点赞</span>
-                <span><el-icon><ChatDotRound /></el-icon>{{ item.commentCount }} 评论</span>
+              
+              <!-- 封面图片 -->
+              <div v-if="item.coverImage" class="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden bg-gray-100">
+                <img :src="item.coverImage" :alt="item.title" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
               </div>
             </div>
-            <div v-if="item.coverImage" class="news-image">
-              <img :src="item.coverImage" :alt="item.title" />
-            </div>
-          </div>
-
-          <!-- 分页 -->
-          <div class="pagination">
-            <el-pagination
-              v-model:current-page="currentPage"
-              :page-size="pageSize"
-              :total="filteredNews.length"
-              layout="prev, pager, next, jumper"
-              @current-change="handlePageChange"
-            />
-          </div>
+          </article>
+        </div>
+        
+        <!-- 分页 -->
+        <div v-if="filteredNews.length > 0" class="p-6 border-t border-gray-100">
+          <el-pagination
+            v-model:current-page="currentPage"
+            :page-size="pageSize"
+            :total="filteredNews.length"
+            layout="total, prev, pager, next, jumper"
+            @current-change="handlePageChange"
+            class="justify-center"
+          />
         </div>
       </div>
     </div>
@@ -143,15 +256,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useContentStore } from '@/stores/content'
 import type { News } from '@/types'
-import {
-  Search,
-  User,
-  Calendar,
-  View,
-  Star,
-  ChatDotRound,
-  Loading
-} from '@element-plus/icons-vue'
 
 const contentStore = useContentStore()
 
@@ -249,15 +353,15 @@ const formatTime = (time: string) => {
   }
 }
 
-const getCategoryType = (category: string) => {
-  const types: Record<string, string> = {
-    '公司新闻': 'primary',
-    '行业动态': 'success',
-    '政策法规': 'warning',
-    '培训通知': 'info',
-    '竞对信息': 'danger'
+const getCategoryColorClass = (category: string) => {
+  const colorClasses: Record<string, string> = {
+    '公司新闻': 'bg-blue-100 text-blue-800',
+    '行业动态': 'bg-green-100 text-green-800',
+    '政策法规': 'bg-yellow-100 text-yellow-800',
+    '培训通知': 'bg-purple-100 text-purple-800',
+    '竞对信息': 'bg-red-100 text-red-800'
   }
-  return types[category] || 'info'
+  return colorClasses[category] || 'bg-gray-100 text-gray-800'
 }
 
 // 监听分类变化

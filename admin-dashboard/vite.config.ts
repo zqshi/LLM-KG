@@ -88,14 +88,21 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 3100,
+    port: 3102,
+    strictPort: true,
     open: true,
     cors: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3007',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false
+      },
+      '/flea-market': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/flea-market/, '/api/flea-market')
       }
     }
   },

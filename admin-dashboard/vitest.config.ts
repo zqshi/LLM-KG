@@ -43,7 +43,7 @@ export default defineConfig({
       }
     },
     // 并行测试以提高速度
-    threads: true,
+
     // 超时设置
     testTimeout: 10000,
     hookTimeout: 10000,
@@ -72,7 +72,7 @@ export default defineConfig({
   define: {
     // 测试环境变量
     'import.meta.env.MODE': '"test"',
-    'import.meta.env.VITE_API_BASE_URL': '"/api"',
+    'import.meta.env.VITE_API_BASE_URL': '"http://localhost:3001"',
     'import.meta.env.VITE_APP_TITLE': '"测试环境"'
   }
 })

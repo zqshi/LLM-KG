@@ -36,15 +36,15 @@
           <h3>联系方式</h3>
           <div class="contact-info">
             <p>
-              <el-icon><Phone /></el-icon>
+              <a-icon type="phone" />
               客服热线：400-888-8888
             </p>
             <p>
-              <el-icon><Message /></el-icon>
+              <a-icon type="message" />
               邮箱：support@company.com
             </p>
             <p>
-              <el-icon><Location /></el-icon>
+              <a-icon type="location" />
               地址：北京市朝阳区xxx街道xxx号
             </p>
           </div>
@@ -66,13 +66,13 @@
 </template>
 
 <script setup lang="ts">
-import { Phone, Message, Location } from '@element-plus/icons-vue'
+// 图标已通过type属性直接使用，无需导入
 </script>
 
 <style scoped lang="scss">
 .app-footer {
-  background: var(--el-bg-color-page);
-  border-top: 1px solid var(--el-border-color-light);
+  background: var(--color-bg-1);
+  border-top: 1px solid var(--color-border-2);
   margin-top: auto;
 
   .footer-content {
@@ -86,7 +86,7 @@ import { Phone, Message, Location } from '@element-plus/icons-vue'
     h3 {
       font-size: 16px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
       margin-bottom: 20px;
     }
 

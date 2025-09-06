@@ -71,9 +71,11 @@
       </el-row>
     </div>
 
-    <!-- 导航树形表格 -->
-    <div class="navigation-tree">
-      <el-card v-loading="loading" :body-style="{ padding: 0 }">
+    <!-- 主要内容区域 - 三栏布局 -->
+    <div class="main-content-layout">
+      <!-- 左侧导航树表格 -->
+      <div class="navigation-tree-section">
+        <el-card v-loading="loading" :body-style="{ padding: 0 }">
         <el-table
           ref="navigationTableRef"
           :data="filteredNavigation"
@@ -277,9 +279,18 @@
     <!-- 快照创建对话框 -->
     <SnapshotDialog
       v-model:visible="snapshotDialogVisible"
-      config-type="navigation"
+      :config-type="ConfigVersionTypeEnum.MANUAL"
       @success="handleSnapshotSuccess"
     />
+
+      <!-- 右侧预览面板 -->
+      <div class="preview-section">
+        <PreviewPanel 
+          :navigation-data="navigationList"
+          :entry-panel-data="[]"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -294,23 +305,44 @@ import Sortable from 'sortablejs'
 
 // 导入API和类型
 import { portalConfigApi } from '@/api/navigation'
-import type { NavigationItem, NavigationQueryParams } from '@/types/navigation'
+import { globalAuditApi } from '@/api/system'
+import type { NavigationItem, NavigationQueryParams, ConfigVersionType } from '@/types/navigation'
+import type { GlobalAuditLog } from '@/types'
+import { ConfigVersionType as ConfigVersionTypeEnum } from '@/types/navigation'
 
 // 导入子组件
 import NavigationEditDialog from './components/NavigationEditDialog.vue'
 import NavigationRoleDialog from './components/NavigationRoleDialog.vue'
 import SnapshotDialog from './components/SnapshotDialog.vue'
+import PreviewPanel from './components/PreviewPanel.vue'
 
 // ================================
 // 响应式数据
 // ================================
 
 const loading = ref(false)
+
+// 操作日志记录函数
+const recordAuditLog = async (operationType: string, targetType: string, targetId: string, targetName: string, detail: string) => {
+  try {
+    await globalAuditApi.createAuditLog({
+      operationType: operationType as any,
+      module: 'PORTAL',
+      targetType: targetType as any,
+      targetId,
+      targetName,
+      detail,
+      riskLevel: 'LOW'
+    })
+  } catch (error) {
+    console.error('记录操作日志失败:', error)
+  }
+}
 const navigationTableRef = ref<InstanceType<typeof ElTable>>()
 
 // 导航数据
 const navigationList = ref<NavigationItem[]>([])
-const expandedKeys = ref<number[]>([])
+const expandedKeys = ref<string[]>([])
 
 // 搜索和筛选
 const searchKeyword = ref('')
@@ -466,7 +498,7 @@ const handleFilter = () => {
 
 /** 展开所有 */
 const expandAll = () => {
-  expandedKeys.value = navigationList.value.map(item => item.id!).filter(Boolean)
+  expandedKeys.value = navigationList.value.map(item => String(item.id!)).filter(Boolean)
 }
 
 /** 折叠所有 */
@@ -476,12 +508,13 @@ const collapseAll = () => {
 
 /** 处理展开/折叠 */
 const handleExpandChange = (row: NavigationItem, expanded: boolean) => {
+  const rowIdStr = String(row.id!)
   if (expanded) {
-    if (!expandedKeys.value.includes(row.id!)) {
-      expandedKeys.value.push(row.id!)
+    if (!expandedKeys.value.includes(rowIdStr)) {
+      expandedKeys.value.push(rowIdStr)
     }
   } else {
-    const index = expandedKeys.value.indexOf(row.id!)
+    const index = expandedKeys.value.indexOf(rowIdStr)
     if (index > -1) {
       expandedKeys.value.splice(index, 1)
     }
@@ -669,13 +702,493 @@ const getRoleName = (roleId: number) => {
 </script>
 
 <style lang="scss" scoped>
-// 这里包含之前优化的所有样式...
-// 为了节省空间，这里只显示主要的结构
 .navigation-management {
-  padding: 20px;
-  background: var(--bg-color-light);
+  padding: 24px;
+  background: #f5f7fa;
   min-height: calc(100vh - 60px);
+
+  // ================================
+  // 页面头部样式
+  // ================================
+  .page-header {
+    background: #fff;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e4e7ed;
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #303133;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .el-icon {
+        color: #409eff;
+      }
+    }
+
+    .page-description {
+      color: #606266;
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+  }
+
+  // ================================
+  // 操作栏样式
+  // ================================
+  .operation-bar {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e4e7ed;
+
+    .el-input {
+      :deep(.el-input__wrapper) {
+        border-radius: 6px;
+      }
+    }
+
+    .el-select {
+      width: 100%;
+
+      :deep(.el-input__wrapper) {
+        border-radius: 6px;
+      }
+    }
+
+    .text-right {
+      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .el-button.is-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+
+  // ================================
+  // 主要内容布局样式
+  // ================================
+  .main-content-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+
+    .navigation-tree-section {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .preview-section {
+      width: 400px;
+      flex-shrink: 0;
+    }
+  }
+
+  // ================================
+  // 导航树形表格样式
+  // ================================
+  .navigation-tree-section {
+    .el-card {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e4e7ed;
+
+      :deep(.el-card__body) {
+        padding: 0;
+      }
+    }
+
+    .el-table {
+      border-radius: 8px;
+      overflow: hidden;
+
+      // 表头样式
+      :deep(.el-table__header) {
+        th {
+          background: #fafbfc;
+          color: #606266;
+          font-weight: 600;
+          border-bottom: 1px solid #e4e7ed;
+          padding: 16px 12px;
+        }
+      }
+
+      // 表格行样式
+      :deep(.el-table__body) {
+        tr {
+          transition: all 0.3s ease;
+
+          &:hover {
+            background: #f8f9fa;
+          }
+
+          td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f0f2f5;
+          }
+        }
+      }
+
+      // 拖拽手柄样式
+      .drag-handle {
+        cursor: grab;
+        color: #c0c4cc;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: #409eff;
+        }
+
+        &:active {
+          cursor: grabbing;
+        }
+      }
+
+      // 菜单名称单元格
+      .menu-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .menu-icon {
+          color: #409eff;
+          flex-shrink: 0;
+        }
+
+        .menu-name {
+          font-weight: 500;
+          color: #303133;
+          flex: 1;
+        }
+
+        .level-tag {
+          margin-left: auto;
+          flex-shrink: 0;
+        }
+      }
+
+      // 路径单元格
+      .path-cell {
+        .external-link {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 13px;
+          max-width: 200px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+
+          .el-icon {
+            flex-shrink: 0;
+          }
+        }
+
+        .route-path {
+          background: #f1f3f4;
+          color: #5f6368;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+      }
+
+      // 角色单元格
+      .roles-cell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+
+        .role-tag {
+          font-size: 12px;
+        }
+      }
+
+      // 占位符文本
+      .text-placeholder {
+        color: #c0c4cc;
+        font-style: italic;
+      }
+
+      // 操作按钮组
+      .el-space {
+        .el-button {
+          border-radius: 6px;
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-1px);
+          }
+
+          &.is-plain {
+            background: #fff;
+            border: 1px solid #dcdfe6;
+
+            &:hover {
+              background: #ecf5ff;
+              border-color: #b3d8ff;
+            }
+          }
+        }
+
+        .el-dropdown {
+          .el-button.is-circle {
+            width: 32px;
+            height: 32px;
+          }
+        }
+      }
+    }
+  }
+
+  // ================================
+  // 拖拽相关样式
+  // ================================
+  .sortable-ghost {
+    opacity: 0.5;
+    background: #f0f9ff;
+  }
+
+  .sortable-chosen {
+    background: #e1f5fe;
+  }
+
+  .sortable-drag {
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+  }
+
+  // ================================
+  // 标签样式优化
+  // ================================
+  .el-tag {
+    border-radius: 4px;
+    font-weight: 500;
+
+    &.el-tag--small {
+      height: 24px;
+      line-height: 22px;
+      padding: 0 8px;
+      font-size: 12px;
+    }
+
+    // 类型标签颜色
+    &.el-tag--primary {
+      background: #e1f5fe;
+      color: #0277bd;
+      border-color: #b3e5fc;
+    }
+
+    &.el-tag--success {
+      background: #e8f5e8;
+      color: #2e7d32;
+      border-color: #c8e6c8;
+    }
+
+    &.el-tag--warning {
+      background: #fff3e0;
+      color: #ef6c00;
+      border-color: #ffcc02;
+    }
+
+    &.el-tag--info {
+      background: #f5f5f5;
+      color: #616161;
+      border-color: #e0e0e0;
+    }
+  }
+
+  // ================================
+  // 开关组件样式
+  // ================================
+  .el-switch {
+    --el-switch-on-color: #67c23a;
+    --el-switch-off-color: #dcdfe6;
+  }
+
+  // ================================
+  // 响应式适配
+  // ================================
+  @media (max-width: 1200px) {
+    padding: 16px;
+
+    .page-header {
+      padding: 20px;
+
+      .el-row {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .text-right {
+        text-align: left;
+      }
+    }
+
+    .operation-bar {
+      padding: 16px 20px;
+
+      .el-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .text-right {
+        justify-content: flex-start;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px;
+
+    .page-header {
+      padding: 16px;
+
+      .page-title {
+        font-size: 20px;
+      }
+    }
+
+    .operation-bar {
+      padding: 12px 16px;
+    }
+
+    .navigation-tree {
+      .el-table {
+        :deep(.el-table__header) {
+          th {
+            padding: 12px 8px;
+            font-size: 13px;
+          }
+        }
+
+        :deep(.el-table__body) {
+          td {
+            padding: 12px 8px;
+          }
+        }
+      }
+    }
+  }
+
+  // ================================
+  // 动画效果
+  // ================================
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
+
+  // 表格行展开动画
+  :deep(.el-table__expand-icon) {
+    transition: transform 0.3s ease;
+  }
+
+  // 按钮悬停效果
+  .el-button {
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // 卡片悬停效果
+  .el-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+  }
 }
 
-// 其他样式保持不变...
+// ================================
+// 全局样式覆盖
+// ================================
+:deep(.el-dialog) {
+  border-radius: 8px;
+  overflow: hidden;
+
+  .el-dialog__header {
+    background: #fafbfc;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e4e7ed;
+
+    .el-dialog__title {
+      font-weight: 600;
+      color: #303133;
+    }
+  }
+
+  .el-dialog__body {
+    padding: 24px;
+  }
+
+  .el-dialog__footer {
+    padding: 16px 24px;
+    background: #fafbfc;
+    border-top: 1px solid #e4e7ed;
+  }
+}
+
+:deep(.el-dropdown-menu) {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e4e7ed;
+
+  .el-dropdown-menu__item {
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #f0f9ff;
+      color: #409eff;
+    }
+
+    .el-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+:deep(.el-tooltip__popper) {
+  border-radius: 6px;
+}
 </style>

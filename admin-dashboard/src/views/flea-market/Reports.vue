@@ -449,11 +449,11 @@ const loadReports = async () => {
     
     const response = await fleaMarketApi.reports.list(params)
     
-    if (response.code === 200) {
-      reportsList.value = response.data.list
-      total.value = response.data.total
+    if (response.data.code === 200) {
+      reportsList.value = response.data.data.list
+      total.value = response.data.data.total
     } else {
-      throw new Error(response.message || '获取数据失败')
+      throw new Error(response.data.message || '获取数据失败')
     }
   } catch (err: any) {
     error.value = '加载举报数据失败'

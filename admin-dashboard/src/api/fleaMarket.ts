@@ -27,84 +27,84 @@ export function getGoodsList(params: FleaGoodsQueryParams): Promise<ApiResponse<
   list: FleaGoods[]
   total: number
 }>> {
-  return http.get('/api/flea-market/goods', { params })
+  return http.get('/flea-market/goods', { params })
 }
 
 /**
  * 获取商品详情
  */
 export function getGoodsDetail(id: number): Promise<ApiResponse<FleaGoodsDetail>> {
-  return http.get(`/api/flea-market/goods/${id}`)
+  return http.get(`/flea-market/goods/${id}`)
 }
 
 /**
  * 创建商品
  */
 export function createGoods(data: FleaGoodsForm): Promise<ApiResponse<FleaGoods>> {
-  return http.post('/api/flea-market/goods', data)
+  return http.post('/flea-market/goods', data)
 }
 
 /**
  * 更新商品
  */
 export function updateGoods(id: number, data: FleaGoodsForm): Promise<ApiResponse<FleaGoods>> {
-  return http.put(`/api/flea-market/goods/${id}`, data)
+  return http.put(`/flea-market/goods/${id}`, data)
 }
 
 /**
  * 删除商品
  */
 export function deleteGoods(id: number): Promise<ApiResponse<void>> {
-  return http.delete(`/api/flea-market/goods/${id}`)
+  return http.delete(`/flea-market/goods/${id}`)
 }
 
 /**
  * 批量操作商品
  */
 export function batchOperateGoods(data: FleaGoodsBatchOperation): Promise<ApiResponse<void>> {
-  return http.post('/api/flea-market/goods/batch', data)
+  return http.post('/flea-market/goods/batch', data)
 }
 
 /**
  * 审核商品（通过）
  */
 export function approveGoods(id: number, remark?: string): Promise<ApiResponse<void>> {
-  return http.post(`/api/flea-market/goods/${id}/approve`, { remark })
+  return http.post(`/flea-market/goods/${id}/approve`, { remark })
 }
 
 /**
  * 审核商品（拒绝）
  */
 export function rejectGoods(id: number, reason: string): Promise<ApiResponse<void>> {
-  return http.post(`/api/flea-market/goods/${id}/reject`, { reason })
+  return http.post(`/flea-market/goods/${id}/reject`, { reason })
 }
 
 /**
  * 上架商品
  */
 export function publishGoods(id: number): Promise<ApiResponse<void>> {
-  return http.post(`/api/flea-market/goods/${id}/publish`)
+  return http.post(`/flea-market/goods/${id}/publish`)
 }
 
 /**
  * 下架商品
  */
 export function offlineGoods(id: number, reason?: string): Promise<ApiResponse<void>> {
-  return http.post(`/api/flea-market/goods/${id}/offline`, { reason })
+  return http.post(`/flea-market/goods/${id}/offline`, { reason })
 }
 
 /**
  * 标记商品为已售出
  */
 export function markGoodsAsSold(id: number): Promise<ApiResponse<void>> {
-  return http.post(`/api/flea-market/goods/${id}/sold`)
+  return http.post(`/flea-market/goods/${id}/sold`)
 }
 
 /**
  * 获取用户的商品统计
  */
 export function getUserGoodsStats(userId: number): Promise<ApiResponse<UserGoodsStats>> {
-  return http.get(`/api/flea-market/users/${userId}/goods-stats`)
+  return http.get(`/flea-market/users/${userId}/goods-stats`)
 }
 
 // ======================== 分类管理相关API ========================
@@ -113,35 +113,35 @@ export function getUserGoodsStats(userId: number): Promise<ApiResponse<UserGoods
  * 获取分类列表
  */
 export function getCategoryList(params?: FleaCategoryQueryParams): Promise<ApiResponse<FleaCategory[]>> {
-  return http.get('/api/flea-market/categories', { params })
+  return http.get('/flea-market/categories', { params })
 }
 
 /**
  * 获取分类详情
  */
 export function getCategoryDetail(id: number): Promise<ApiResponse<FleaCategory>> {
-  return http.get(`/api/flea-market/categories/${id}`)
+  return http.get(`/flea-market/categories/${id}`)
 }
 
 /**
  * 创建分类
  */
 export function createCategory(data: Omit<FleaCategory, 'id' | 'createTime'>): Promise<ApiResponse<FleaCategory>> {
-  return http.post('/api/flea-market/categories', data)
+  return http.post('/flea-market/categories', data)
 }
 
 /**
  * 更新分类
  */
 export function updateCategory(id: number, data: Omit<FleaCategory, 'id' | 'createTime'>): Promise<ApiResponse<FleaCategory>> {
-  return http.put(`/api/flea-market/categories/${id}`, data)
+  return http.put(`/flea-market/categories/${id}`, data)
 }
 
 /**
  * 删除分类
  */
 export function deleteCategory(id: number): Promise<ApiResponse<void>> {
-  return http.delete(`/api/flea-market/categories/${id}`)
+  return http.delete(`/flea-market/categories/${id}`)
 }
 
 // ======================== 举报管理相关API ========================
@@ -153,14 +153,14 @@ export function getReportList(params: FleaReportQueryParams): Promise<ApiRespons
   list: FleaReport[]
   total: number
 }>> {
-  return http.get('/api/flea-market/reports', { params })
+  return http.get('/flea-market/reports', { params })
 }
 
 /**
  * 获取举报详情
  */
 export function getReportDetail(id: number): Promise<ApiResponse<FleaReport>> {
-  return http.get(`/api/flea-market/reports/${id}`)
+  return http.get(`/flea-market/reports/${id}`)
 }
 
 /**
@@ -171,7 +171,7 @@ export function createReport(data: {
   targetId: number
   reason: string
 }): Promise<ApiResponse<FleaReport>> {
-  return http.post('/api/flea-market/reports', data)
+  return http.post('/flea-market/reports', data)
 }
 
 /**
@@ -181,7 +181,7 @@ export function handleReport(id: number, data: {
   handleRemark: string
   action: 'dismiss' | 'warn' | 'ban' | 'remove'
 }): Promise<ApiResponse<void>> {
-  return http.post(`/api/flea-market/reports/${id}/handle`, data)
+  return http.post(`/flea-market/reports/${id}/handle`, data)
 }
 
 // ======================== 聊天相关API ========================
@@ -193,14 +193,14 @@ export function getChatSessionList(params: FleaChatSessionQueryParams): Promise<
   list: FleaChatSession[]
   total: number
 }>> {
-  return http.get('/api/flea-market/chat/sessions', { params })
+  return http.get('/flea-market/chat/sessions', { params })
 }
 
 /**
  * 获取聊天会话详情
  */
 export function getChatSessionDetail(id: number): Promise<ApiResponse<FleaChatSession>> {
-  return http.get(`/api/flea-market/chat/sessions/${id}`)
+  return http.get(`/flea-market/chat/sessions/${id}`)
 }
 
 /**
@@ -210,7 +210,7 @@ export function createChatSession(data: {
   goodsId: number
   buyerId: number
 }): Promise<ApiResponse<FleaChatSession>> {
-  return http.post('/api/flea-market/chat/sessions', data)
+  return http.post('/flea-market/chat/sessions', data)
 }
 
 /**
@@ -220,7 +220,7 @@ export function getChatMessages(sessionId: number, params?: PaginationParams): P
   list: FleaChatMessage[]
   total: number
 }>> {
-  return http.get(`/api/flea-market/chat/sessions/${sessionId}/messages`, { params })
+  return http.get(`/flea-market/chat/sessions/${sessionId}/messages`, { params })
 }
 
 /**
@@ -229,7 +229,7 @@ export function getChatMessages(sessionId: number, params?: PaginationParams): P
 export function sendChatMessage(sessionId: number, data: {
   content: string
 }): Promise<ApiResponse<FleaChatMessage>> {
-  return http.post(`/api/flea-market/chat/sessions/${sessionId}/messages`, data)
+  return http.post(`/flea-market/chat/sessions/${sessionId}/messages`, data)
 }
 
 // ======================== 统计数据相关API ========================
@@ -238,7 +238,7 @@ export function sendChatMessage(sessionId: number, data: {
  * 获取跳蚤市场统计数据
  */
 export function getFleaMarketStatistics(): Promise<ApiResponse<FleaMarketStatistics>> {
-  return http.get('/api/flea-market/statistics')
+  return http.get('/flea-market/statistics')
 }
 
 /**
@@ -253,7 +253,7 @@ export function getGoodsViewTrend(params?: {
   views: number
   goods: number
 }[]>> {
-  return http.get('/api/flea-market/statistics/view-trend', { params })
+  return http.get('/flea-market/statistics/view-trend', { params })
 }
 
 /**
@@ -265,7 +265,7 @@ export function getPopularCategories(limit?: number): Promise<ApiResponse<{
   count: number
   percentage: number
 }[]>> {
-  return http.get('/api/flea-market/statistics/popular-categories', { 
+  return http.get('/flea-market/statistics/popular-categories', { 
     params: { limit } 
   })
 }
@@ -282,7 +282,7 @@ export function getUserActivityStats(params?: {
   newUsers: number
   transactions: number
 }[]>> {
-  return http.get('/api/flea-market/statistics/user-activity', { params })
+  return http.get('/flea-market/statistics/user-activity', { params })
 }
 
 // ======================== 文件上传相关API ========================
@@ -298,7 +298,7 @@ export function uploadGoodsImage(file: File): Promise<ApiResponse<{
   const formData = new FormData()
   formData.append('file', file)
   
-  return http.post('/api/flea-market/upload/goods-image', formData, {
+  return http.post('/flea-market/upload/goods-image', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
@@ -318,7 +318,7 @@ export function uploadGoodsImages(files: File[]): Promise<ApiResponse<{
     formData.append('files', file)
   })
   
-  return http.post('/api/flea-market/upload/goods-images', formData, {
+  return http.post('/flea-market/upload/goods-images', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }

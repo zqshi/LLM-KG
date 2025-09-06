@@ -1,6 +1,5 @@
 import { EventEmitter } from '@/utils/EventEmitter'
 import { request } from './request'
-import type { BizType } from '@/types'
 
 /**
  * 告警级别
@@ -299,7 +298,6 @@ export class AuditAlertSystem extends EventEmitter {
    * 批量记录指标
    */
   recordMetrics(metrics: Omit<MetricDataPoint, 'timestamp'>[]): void {
-    const timestamp = Date.now()
     metrics.forEach(m => {
       this.recordMetric(m.metric, m.value, m.labels)
     })

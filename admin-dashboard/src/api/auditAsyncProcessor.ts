@@ -438,11 +438,11 @@ class RateLimiter {
  */
 export class AuditAsyncProcessor extends EventEmitter {
   private config: AsyncProcessorConfig
-  private taskQueue: MessageQueue
-  private cache: CacheManager
+  private taskQueue!: MessageQueue
+  private cache!: CacheManager
   private monitor = new PerformanceMonitor()
-  private circuitBreaker: CircuitBreaker
-  private rateLimiter: RateLimiter
+  private circuitBreaker!: CircuitBreaker
+  private rateLimiter!: RateLimiter
   private workers: any[] = [] // 浏览器中使用Web Worker
   private isProcessing = false
 
@@ -722,11 +722,20 @@ export class AuditAsyncProcessor extends EventEmitter {
   private async processTaskDirectly(task: AsyncTaskConfig): Promise<void> {
     // 根据任务类型执行不同的处理逻辑
     switch (task.bizType) {
-      case 'content':
+      case 'forum_post':
         await this.processContentTask(task)
         break
-      case 'flea_market':
+      case 'flea_goods':
         await this.processFleaMarketTask(task)
+        break
+      case 'banner':
+        await this.processBannerTask(task)
+        break
+      case 'news':
+        await this.processNewsTask(task)
+        break
+      case 'quotation':
+        await this.processQuotationTask(task)
         break
       default:
         throw new Error(`Unknown task type: ${task.bizType}`)
@@ -744,6 +753,30 @@ export class AuditAsyncProcessor extends EventEmitter {
   private async processFleaMarketTask(task: AsyncTaskConfig): Promise<void> {
     // 二手市场任务处理
     await request.post('/audit/flea-market/process', {
+      taskId: task.taskId,
+      data: task.data
+    })
+  }
+
+  private async processBannerTask(task: AsyncTaskConfig): Promise<void> {
+    // Banner任务处理
+    await request.post('/audit/banner/process', {
+      taskId: task.taskId,
+      data: task.data
+    })
+  }
+
+  private async processNewsTask(task: AsyncTaskConfig): Promise<void> {
+    // 新闻任务处理
+    await request.post('/audit/news/process', {
+      taskId: task.taskId,
+      data: task.data
+    })
+  }
+
+  private async processQuotationTask(task: AsyncTaskConfig): Promise<void> {
+    // 名言任务处理
+    await request.post('/audit/quotation/process', {
       taskId: task.taskId,
       data: task.data
     })

@@ -9,19 +9,24 @@ import type { AuditCallbackData } from './auditNode'
  * Banner审核节点配置
  */
 class BannerAuditNode extends ContentAuditNode {
-  constructor() {
-    super({
+  constructor(config?: Partial<AuditNodeConfig>) {
+    const defaultConfig: Partial<AuditNodeConfig> = {
       bizType: 'banner',
       nodeId: 'banner_audit_node',
       nodeName: 'Banner审核节点',
       endpoint: '/api/banner/audit-callback',
+      enabled: true,
+      retryCount: 3,
+      timeout: 30000,
       ruleConfig: {
         imageRequired: true,
         dimensionCheck: true,
         brandCheck: true,
         legalCompliance: true
-      }
-    })
+      },
+      ...config
+    }
+    super(defaultConfig)
   }
 
   /**
@@ -32,7 +37,7 @@ class BannerAuditNode extends ContentAuditNode {
       const { taskId, status, reason, detail } = callbackData
 
       // 获取原始业务数据
-      const taskInfo = await this.getTaskInfo(taskId)
+      const taskInfo = await this.getBannerTaskInfo(taskId)
       if (!taskInfo) {
         throw new Error('任务信息不存在')
       }
@@ -54,7 +59,7 @@ class BannerAuditNode extends ContentAuditNode {
       }
 
       // 通知Banner创建者
-      await this.notifyAuthor(taskInfo, status, reason)
+      await this.notifyBannerAuthor(taskInfo, status, reason)
 
     } catch (error) {
       console.error('处理Banner审核结果失败:', error)
@@ -95,9 +100,9 @@ class BannerAuditNode extends ContentAuditNode {
   }
 
   /**
-   * 获取任务信息
+   * 获取Banner任务信息
    */
-  private async getTaskInfo(taskId: string): Promise<any> {
+  private async getBannerTaskInfo(taskId: string): Promise<any> {
     try {
       const response = await request.get(`/audit/tasks/${taskId}`)
       return response.data
@@ -110,9 +115,9 @@ class BannerAuditNode extends ContentAuditNode {
   /**
    * 通知Banner创建者
    */
-  private async notifyAuthor(taskInfo: any, status: string, reason?: string): Promise<void> {
+  private async notifyBannerAuthor(taskInfo: any, status: string, reason?: string): Promise<void> {
     try {
-      const message = this.buildNotificationMessage(status, reason)
+      const message = this.buildBannerNotificationMessage(status, reason)
       
       await request.post('/api/notifications/send', {
         userId: taskInfo.submitterId,
@@ -129,9 +134,9 @@ class BannerAuditNode extends ContentAuditNode {
   }
 
   /**
-   * 构建通知消息
+   * 构建Banner通知消息
    */
-  private buildNotificationMessage(status: string, reason?: string): string {
+  private buildBannerNotificationMessage(status: string, reason?: string): string {
     switch (status) {
       case 'approved':
       case 'auto_approved':
@@ -149,12 +154,15 @@ class BannerAuditNode extends ContentAuditNode {
  * 资讯审核节点配置
  */
 class NewsAuditNode extends ContentAuditNode {
-  constructor() {
-    super({
+  constructor(config?: Partial<AuditNodeConfig>) {
+    const defaultConfig: Partial<AuditNodeConfig> = {
       bizType: 'news',
       nodeId: 'news_audit_node',
       nodeName: '资讯审核节点',
       endpoint: '/api/news/audit-callback',
+      enabled: true,
+      retryCount: 3,
+      timeout: 30000,
       ruleConfig: {
         titleRequired: true,
         sourceRequired: true,
@@ -163,8 +171,10 @@ class NewsAuditNode extends ContentAuditNode {
           enabled: true,
           threshold: 0.8
         }
-      }
-    })
+      },
+      ...config
+    }
+    super(defaultConfig)
   }
 }
 
@@ -172,12 +182,15 @@ class NewsAuditNode extends ContentAuditNode {
  * 名言审核节点配置
  */
 class QuotationAuditNode extends ContentAuditNode {
-  constructor() {
-    super({
+  constructor(config?: Partial<AuditNodeConfig>) {
+    const defaultConfig: Partial<AuditNodeConfig> = {
       bizType: 'quotation',
       nodeId: 'quotation_audit_node',
       nodeName: '名言审核节点',
       endpoint: '/api/quotation/audit-callback',
+      enabled: true,
+      retryCount: 3,
+      timeout: 30000,
       ruleConfig: {
         leaderRequired: true,
         occasionRequired: true,
@@ -186,8 +199,10 @@ class QuotationAuditNode extends ContentAuditNode {
           enabled: true,
           level: 'high'
         }
-      }
-    })
+      },
+      ...config
+    }
+    super(defaultConfig)
   }
 }
 
@@ -299,7 +314,10 @@ export class AuditNodeUtils {
       throw new Error(`未找到${bizType}类型的审核节点`)
     }
 
-    return await node.submitAuditTask(data)
+    return await node.submitAuditTask({
+      bizType,
+      ...data
+    })
   }
 
   /**
@@ -387,8 +405,6 @@ export class AuditNodeMonitor {
     const healthStatus: Record<string, boolean> = {}
     
     try {
-      const manager = AuditNodeFactory.getAllNodes()
-      
       // 这里应该实现具体的健康检查逻辑
       // 比如检查节点是否能正常响应API调用
       

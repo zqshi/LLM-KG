@@ -3,13 +3,13 @@
     <!-- Banner 轮播区 -->
     <section class="banner-section">
       <div class="container">
-        <el-carousel
+        <a-carousel
           height="400px"
-          indicator-position="outside"
+          indicator-position="bottom"
           :autoplay="true"
           :interval="5000"
         >
-          <el-carousel-item
+          <a-carousel-item
             v-for="banner in contentStore.activeBanners"
             :key="banner.id"
             @click="handleBannerClick(banner)"
@@ -19,12 +19,12 @@
                 <div class="banner-content">
                   <h2>{{ banner.title }}</h2>
                   <p>{{ banner.description }}</p>
-                  <el-button type="primary" size="large">了解详情</el-button>
+                  <a-button type="primary" size="large">了解详情</a-button>
                 </div>
               </div>
             </div>
-          </el-carousel-item>
-        </el-carousel>
+          </a-carousel-item>
+        </a-carousel>
       </div>
     </section>
 
@@ -39,9 +39,7 @@
             @click="handleQuickAccess(item)"
           >
             <div class="quick-icon">
-              <el-icon :size="32">
-                <component :is="item.icon" />
-              </el-icon>
+              <a-icon :size="32" :type="item.iconType" />
             </div>
             <h3>{{ item.title }}</h3>
             <p>{{ item.description }}</p>
@@ -58,7 +56,7 @@
           <div class="content-card recommendations">
             <div class="card-header">
               <h3>个性化推荐</h3>
-              <el-button text>更多</el-button>
+              <a-button text>更多</a-button>
             </div>
             <div class="recommendations-list">
               <div
@@ -68,9 +66,9 @@
                 @click="handleRecommendationClick(item)"
               >
                 <div class="rec-type">
-                  <el-tag :type="getTypeTagType(item.type)" size="small">
+                  <a-tag :type="getTypeTagType(item.type)" size="small">
                     {{ getTypeName(item.type) }}
-                  </el-tag>
+                  </a-tag>
                 </div>
                 <div class="rec-content">
                   <h4>{{ item.title }}</h4>
@@ -88,7 +86,7 @@
           <div class="content-card news">
             <div class="card-header">
               <h3>最新资讯</h3>
-              <el-button text @click="$router.push('/news')">更多</el-button>
+              <a-button text @click="$router.push('/news')">更多</a-button>
             </div>
             <div class="news-list">
               <div
@@ -106,7 +104,7 @@
                     <span>{{ item.readCount }} 阅读</span>
                   </div>
                 </div>
-                <el-tag v-if="item.isTop" type="danger" size="small">置顶</el-tag>
+                <a-tag v-if="item.isTop" type="danger" size="small">置顶</a-tag>
               </div>
             </div>
           </div>
@@ -115,7 +113,7 @@
           <div class="content-card forum">
             <div class="card-header">
               <h3>热门讨论</h3>
-              <el-button text @click="$router.push('/forum')">更多</el-button>
+              <a-button text @click="$router.push('/forum')">更多</a-button>
             </div>
             <div class="forum-list">
               <div
@@ -125,7 +123,7 @@
                 @click="$router.push(`/forum/post/${post.id}`)"
               >
                 <div class="forum-author">
-                  <el-avatar :size="32" :src="post.author.avatar" />
+                  <a-avatar :size="32" :src="post.author.avatar" />
                 </div>
                 <div class="forum-content">
                   <h4>{{ post.title }}</h4>
@@ -137,14 +135,14 @@
                   </div>
                 </div>
                 <div class="forum-tags">
-                  <el-tag
+                  <a-tag
                     v-for="tag in post.tags.slice(0, 2)"
                     :key="tag"
                     size="small"
                     type="info"
                   >
                     {{ tag }}
-                  </el-tag>
+                  </a-tag>
                 </div>
               </div>
             </div>
@@ -182,13 +180,13 @@
           <div class="content-card leader-quote">
             <div class="card-header">
               <h3>领导名言</h3>
-              <el-button
+              <a-button
                 text
                 size="small"
                 @click="refreshQuote"
               >
-                <el-icon><Refresh /></el-icon>
-              </el-button>
+                <a-icon type="refresh" />
+              </a-button>
             </div>
             <div v-if="currentQuote" class="quote-content">
               <blockquote>
@@ -214,15 +212,6 @@ import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useContentStore } from '@/stores/content'
 import type { Banner, Recommendation } from '@/types'
-import {
-  Document,
-  Reading,
-  ChatDotRound,
-  Shop,
-  Service,
-  Management,
-  Refresh
-} from '@element-plus/icons-vue'
 
 const router = useRouter()
 const contentStore = useContentStore()
@@ -231,38 +220,38 @@ const quickAccessItems = [
   {
     title: '资讯中心',
     description: '获取最新公司资讯',
-    icon: Document,
+    iconType: 'document',
     path: '/news'
   },
   {
     title: '知识平台',
     description: '学习企业知识库',
-    icon: Reading,
+    iconType: 'reading',
     path: '/knowledge'
   },
   {
     title: '企业论坛',
     description: '参与员工讨论',
-    icon: ChatDotRound,
+    iconType: 'message-square',
     path: '/forum'
   },
   {
     title: '跳蚤市场',
     description: '员工二手交易',
-    icon: Shop,
+    iconType: 'shopping-bag',
     path: '/market'
   },
   {
     title: 'OA系统',
     description: '办公自动化',
-    icon: Management,
+    iconType: 'management',
     external: true,
     url: 'http://oa.company.com'
   },
   {
     title: '技术支持',
     description: '获取技术帮助',
-    icon: Service,
+    iconType: 'service',
     path: '/support'
   }
 ]
@@ -387,29 +376,29 @@ onMounted(() => {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
-    border: 1px solid var(--el-border-color-lighter);
+    border: 1px solid var(--color-border-3);
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: var(--el-box-shadow-light);
-      border-color: var(--el-color-primary);
+      box-shadow: var(--shadow-light);
+      border-color: var(--primary-color);
     }
 
     .quick-icon {
       margin-bottom: 16px;
-      color: var(--el-color-primary);
+      color: var(--primary-color);
     }
 
     h3 {
       font-size: 18px;
       font-weight: 600;
       margin-bottom: 8px;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
     }
 
     p {
       font-size: 14px;
-      color: var(--el-text-color-regular);
+      color: var(--color-text-2);
       margin: 0;
     }
   }
@@ -417,7 +406,7 @@ onMounted(() => {
 
 .main-content {
   padding: 60px 0;
-  background: var(--el-bg-color-page);
+  background: var(--color-bg-1);
 
   .content-grid {
     display: grid;
@@ -440,7 +429,7 @@ onMounted(() => {
 .content-card {
   background: white;
   border-radius: 8px;
-  box-shadow: var(--el-box-shadow-light);
+  box-shadow: var(--shadow-light);
   padding: 24px;
 
   .card-header {
@@ -448,13 +437,13 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: 1px solid var(--color-border-3);
     padding-bottom: 16px;
 
     h3 {
       font-size: 18px;
       font-weight: 600;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
       margin: 0;
     }
   }
@@ -466,12 +455,12 @@ onMounted(() => {
     align-items: center;
     gap: 12px;
     padding: 12px 0;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: 1px solid var(--color-border-3);
     cursor: pointer;
     transition: background 0.3s;
 
     &:hover {
-      background: var(--el-fill-color-lighter);
+      background: var(--color-bg-2);
       border-radius: 6px;
       padding-left: 12px;
       padding-right: 12px;
@@ -488,12 +477,12 @@ onMounted(() => {
         font-size: 14px;
         font-weight: 500;
         margin-bottom: 4px;
-        color: var(--el-text-color-primary);
+        color: var(--color-text-1);
       }
 
       p {
         font-size: 12px;
-        color: var(--el-text-color-regular);
+        color: var(--color-text-2);
         margin-bottom: 4px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -502,14 +491,14 @@ onMounted(() => {
 
       .rec-reason {
         font-size: 11px;
-        color: var(--el-color-primary);
+        color: var(--primary-color);
       }
     }
 
     .rec-score {
       font-size: 12px;
       font-weight: 500;
-      color: var(--el-color-success);
+      color: var(--color-success);
     }
   }
 }
@@ -519,12 +508,12 @@ onMounted(() => {
     display: flex;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    border-bottom: 1px solid var(--color-border-3);
     cursor: pointer;
     transition: all 0.3s;
 
     &:hover {
-      background: var(--el-fill-color-lighter);
+      background: var(--color-bg-2);
       border-radius: 6px;
       padding-left: 12px;
       padding-right: 12px;
@@ -544,7 +533,7 @@ onMounted(() => {
       font-size: 14px;
       font-weight: 500;
       margin-bottom: 6px;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -552,7 +541,7 @@ onMounted(() => {
 
     p {
       font-size: 12px;
-      color: var(--el-text-color-regular);
+      color: var(--color-text-2);
       margin-bottom: 6px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -563,7 +552,7 @@ onMounted(() => {
       display: flex;
       gap: 12px;
       font-size: 11px;
-      color: var(--el-text-color-secondary);
+      color: var(--color-text-3);
     }
   }
 }
@@ -578,14 +567,14 @@ onMounted(() => {
       font-size: 14px;
       font-weight: 500;
       margin-bottom: 6px;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
     }
 
     .forum-meta {
       display: flex;
       gap: 12px;
       font-size: 11px;
-      color: var(--el-text-color-secondary);
+      color: var(--color-text-2);
     }
   }
 
@@ -602,7 +591,7 @@ onMounted(() => {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--el-color-primary);
+    background: var(--primary-color);
     flex-shrink: 0;
     margin-top: 8px;
   }
@@ -614,12 +603,12 @@ onMounted(() => {
       font-size: 14px;
       font-weight: 500;
       margin-bottom: 4px;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
     }
 
     .update-time {
       font-size: 12px;
-      color: var(--el-text-color-secondary);
+      color: var(--color-text-2);
     }
   }
 }
@@ -628,10 +617,10 @@ onMounted(() => {
   blockquote {
     font-size: 16px;
     font-style: italic;
-    color: var(--el-text-color-primary);
+    color: var(--color-text-1);
     margin: 0 0 16px 0;
     padding-left: 16px;
-    border-left: 4px solid var(--el-color-primary);
+    border-left: 4px solid var(--primary-color);
     line-height: 1.6;
   }
 
@@ -642,18 +631,18 @@ onMounted(() => {
 
     strong {
       font-size: 14px;
-      color: var(--el-text-color-primary);
+      color: var(--color-text-1);
     }
 
     span {
       font-size: 12px;
-      color: var(--el-text-color-secondary);
+      color: var(--color-text-2);
     }
   }
 
   .quote-context {
     font-size: 12px;
-    color: var(--el-text-color-regular);
+    color: var(--color-text-2);
     margin: 0;
     opacity: 0.8;
   }

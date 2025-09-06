@@ -74,49 +74,49 @@
           </div>
 
           <!-- 右侧内容 -->
-          <div class=\"content-area\">
+          <div class="content-area">
             <!-- 个人资料 -->
-            <div v-show=\"activeTab === 'info'\" class=\"tab-content\">
-              <div class=\"section-header\">
+            <div v-show="activeTab === 'info'" class="tab-content">
+              <div class="section-header">
                 <h3>个人资料</h3>
-                <el-button type=\"primary\" @click=\"editMode = !editMode\">
+                <el-button type="primary" @click="editMode = !editMode">
                   {{ editMode ? '保存' : '编辑' }}
                 </el-button>
               </div>
               
-              <el-form :model=\"userInfo\" label-width=\"100px\" :disabled=\"!editMode\">
-                <el-form-item label=\"姓名\">
-                  <el-input v-model=\"userInfo.name\" />
+              <el-form :model="userInfo" label-width="100px" :disabled="!editMode">
+                <el-form-item label="姓名">
+                  <el-input v-model="userInfo.name" />
                 </el-form-item>
-                <el-form-item label=\"部门\">
-                  <el-input v-model=\"userInfo.department\" />
+                <el-form-item label="部门">
+                  <el-input v-model="userInfo.department" />
                 </el-form-item>
-                <el-form-item label=\"职位\">
-                  <el-input v-model=\"userInfo.position\" />
+                <el-form-item label="职位">
+                  <el-input v-model="userInfo.position" />
                 </el-form-item>
-                <el-form-item label=\"邮箱\">
-                  <el-input v-model=\"userInfo.email\" />
+                <el-form-item label="邮箱">
+                  <el-input v-model="userInfo.email" />
                 </el-form-item>
-                <el-form-item label=\"电话\">
-                  <el-input v-model=\"userInfo.phone\" />
+                <el-form-item label="电话">
+                  <el-input v-model="userInfo.phone" />
                 </el-form-item>
               </el-form>
             </div>
 
             <!-- 我的话题 -->
-            <div v-show=\"activeTab === 'posts'\" class=\"tab-content\">
-              <div class=\"section-header\">
+            <div v-show="activeTab === 'posts'" class="tab-content">
+              <div class="section-header">
                 <h3>我的话题</h3>
               </div>
-              <div class=\"posts-list\">
+              <div class="posts-list">
                 <div
-                  v-for=\"post in myPosts\"
-                  :key=\"post.id\"
-                  class=\"post-item\"
-                  @click=\"$router.push(`/forum/post/${post.id}`)\"
+                  v-for="post in myPosts"
+                  :key="post.id"
+                  class="post-item"
+                  @click="$router.push(`/forum/post/${post.id}`)"
                 >
                   <h4>{{ post.title }}</h4>
-                  <div class=\"post-meta\">
+                  <div class="post-meta">
                     <span>{{ post.category }}</span>
                     <span>{{ formatTime(post.createTime) }}</span>
                     <span>{{ post.viewCount }} 浏览</span>
@@ -127,60 +127,60 @@
             </div>
 
             <!-- 我的商品 -->
-            <div v-show=\"activeTab === 'items'\" class=\"tab-content\">
-              <div class=\"section-header\">
+            <div v-show="activeTab === 'items'" class="tab-content">
+              <div class="section-header">
                 <h3>我的商品</h3>
-                <el-button type=\"primary\" @click=\"$router.push('/market/publish')\">发布商品</el-button>
+                <el-button type="primary" @click="$router.push('/market/publish')">发布商品</el-button>
               </div>
-              <div class=\"items-grid\">
+              <div class="items-grid">
                 <div
-                  v-for=\"item in myItems\"
-                  :key=\"item.id\"
-                  class=\"item-card\"
-                  @click=\"$router.push(`/market/${item.id}`)\"
+                  v-for="item in myItems"
+                  :key="item.id"
+                  class="item-card"
+                  @click="$router.push(`/market/${item.id}`)"
                 >
-                  <div class=\"item-image\">
-                    <img :src=\"item.images[0]\" :alt=\"item.title\" />
-                    <el-tag :type=\"getStatusType(item.status)\" size=\"small\" class=\"status-tag\">
+                  <div class="item-image">
+                    <img :src="item.images[0]" :alt="item.title" />
+                    <el-tag :type="getStatusType(item.status)" size="small" class="status-tag">
                       {{ getStatusText(item.status) }}
                     </el-tag>
                   </div>
-                  <div class=\"item-info\">
+                  <div class="item-info">
                     <h4>{{ item.title }}</h4>
-                    <div class=\"price\">¥{{ item.price }}</div>
+                    <div class="price">¥{{ item.price }}</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- 我的收藏 -->
-            <div v-show=\"activeTab === 'favorites'\" class=\"tab-content\">
-              <div class=\"section-header\">
+            <div v-show="activeTab === 'favorites'" class="tab-content">
+              <div class="section-header">
                 <h3>我的收藏</h3>
               </div>
-              <el-empty description=\"暂无收藏内容\" />
+              <el-empty description="暂无收藏内容" />
             </div>
 
             <!-- 账户设置 -->
-            <div v-show=\"activeTab === 'settings'\" class=\"tab-content\">
-              <div class=\"section-header\">
+            <div v-show="activeTab === 'settings'" class="tab-content">
+              <div class="section-header">
                 <h3>账户设置</h3>
               </div>
-              <el-form label-width=\"120px\">
-                <el-form-item label=\"邮件通知\">
-                  <el-switch v-model=\"settings.emailNotifications\" />
+              <el-form label-width="120px">
+                <el-form-item label="邮件通知">
+                  <el-switch v-model="settings.emailNotifications" />
                 </el-form-item>
-                <el-form-item label=\"系统通知\">
-                  <el-switch v-model=\"settings.systemNotifications\" />
+                <el-form-item label="系统通知">
+                  <el-switch v-model="settings.systemNotifications" />
                 </el-form-item>
-                <el-form-item label=\"隐私设置\">
-                  <el-radio-group v-model=\"settings.privacy\">
-                    <el-radio value=\"public\">公开</el-radio>
-                    <el-radio value=\"private\">仅好友可见</el-radio>
+                <el-form-item label="隐私设置">
+                  <el-radio-group v-model="settings.privacy">
+                    <el-radio value="public">公开</el-radio>
+                    <el-radio value="private">仅好友可见</el-radio>
                   </el-radio-group>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type=\"primary\">保存设置</el-button>
+                  <el-button type="primary">保存设置</el-button>
                 </el-form-item>
               </el-form>
             </div>
@@ -191,7 +191,7 @@
   </div>
 </template>
 
-<script setup lang=\"ts\">
+<script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useContentStore } from '@/stores/content'
 import { User, ChatDotRound, Shop, Star, Setting } from '@element-plus/icons-vue'
@@ -298,7 +298,7 @@ const getStatusText = (status: string) => {
 }
 </script>
 
-<style scoped lang=\"scss\">
+<style scoped lang="scss">
 .profile-page {
   min-height: 100vh;
   padding: 40px 0;

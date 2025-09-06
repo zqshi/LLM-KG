@@ -97,12 +97,6 @@ const routes: RouteRecordRaw[] = [
             meta: { title: '投票管理', icon: 'DataBoard', permission: 'content:poll:view' }
           },
           {
-            path: 'list',
-            name: 'ContentList',
-            component: () => import('@/views/content/List.vue'),
-            meta: { title: '内容列表', icon: 'Document', permission: 'content:view', hideInMenu: true }
-          },
-          {
             path: 'dashboard',
             name: 'ContentDashboard',
             component: () => import('@/views/content/Dashboard.vue'),
@@ -314,11 +308,18 @@ const routes: RouteRecordRaw[] = [
             component: () => import('@/views/portal-config/VersionControl.vue'),
             meta: { title: '版本管理', icon: 'Clock', permission: 'portal:version:view' }
           },
+
           {
-            path: 'audit-logs',
-            name: 'PortalAuditLogs',
-            component: () => import('@/views/portal-config/AuditLogs.vue'),
-            meta: { title: '操作日志', icon: 'Document', permission: 'portal:audit:view' }
+            path: 'preview',
+            name: 'PortalPreview',
+            component: () => import('@/views/portal-config/PreviewPage.vue'),
+            meta: { title: '门户预览', icon: 'View', permission: 'portal:preview:view', hideInMenu: true }
+          },
+          {
+            path: 'performance',
+            name: 'PortalPerformance',
+            component: () => import('@/views/portal-config/PerformanceDashboard.vue'),
+            meta: { title: '性能监控', icon: 'Monitor', permission: 'portal:performance:view' }
           }
         ]
       },
@@ -361,6 +362,10 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/audit/logs',
+    redirect: '/system/logs'
+  },
+  {
+    path: '/portal-config/audit-logs',
     redirect: '/system/logs'
   },
   {

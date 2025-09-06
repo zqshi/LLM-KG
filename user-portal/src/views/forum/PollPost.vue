@@ -235,7 +235,6 @@
               </div>
             </div>
           </div>
-        </div>
 
           <!-- 奖励信息 -->
           <div v-if="pollPost.poll.hasRewards" class="bg-gradient-to-r from-orange-100 to-yellow-100 rounded-xl p-6 mb-6">
@@ -293,7 +292,6 @@
               <PollStatistics :poll-id="pollPost.id" />
             </div>
           </div>
-      </div>
 
           <!-- 评论区域 -->
           <div class="bg-white rounded-xl shadow-sm p-6">

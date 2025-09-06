@@ -1,5 +1,5 @@
 import { request } from './request'
-import type { BizType, AuditTask, AuditPolicy } from '@/types'
+import type { BizType, AuditPolicy } from '@/types'
 
 /**
  * 审核节点配置接口

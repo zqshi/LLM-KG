@@ -106,6 +106,7 @@
               <el-option label="名言管理" value="QUOTATION" />
               <el-option label="运营管理" value="OPERATION" />
               <el-option label="系统配置" value="SYSTEM" />
+              <el-option label="门户配置" value="PORTAL" />
             </el-select>
           </el-form-item>
           <el-form-item label="操作类型">
@@ -138,6 +139,13 @@
                 <el-option label="数据备份" value="BACKUP_DATA" />
                 <el-option label="清理缓存" value="CLEAR_CACHE" />
               </el-option-group>
+              <!-- 门户配置操作 -->
+              <el-option-group label="门户配置">
+                <el-option label="性能监控" value="PERFORMANCE_MONITOR" />
+                <el-option label="导航配置" value="UPDATE_NAVIGATION" />
+                <el-option label="版本管理" value="VERSION_CONTROL" />
+                <el-option label="门户预览" value="PORTAL_PREVIEW" />
+              </el-option-group>
             </el-select>
           </el-form-item>
           <el-form-item label="目标类型">
@@ -153,6 +161,8 @@
               <el-option label="商品" value="GOODS" />
               <el-option label="名言" value="QUOTATION" />
               <el-option label="配置" value="SYSTEM_CONFIG" />
+              <el-option label="导航" value="NAVIGATION" />
+              <el-option label="性能监控" value="PERFORMANCE" />
             </el-select>
           </el-form-item>
           <el-form-item label="风险等级">
@@ -414,7 +424,8 @@ const getModuleText = (module: AuditModule) => {
     FLEA_MARKET: '跳蚤市场',
     QUOTATION: '名言管理',
     OPERATION: '运营管理',
-    SYSTEM: '系统配置'
+    SYSTEM: '系统配置',
+    PORTAL: '门户配置'
   }
   return map[module] || module
 }
@@ -429,7 +440,8 @@ const getModuleColor = (module: AuditModule) => {
     FLEA_MARKET: 'success',
     QUOTATION: 'info',
     OPERATION: 'warning',
-    SYSTEM: 'primary'
+    SYSTEM: 'primary',
+    PORTAL: 'success'
   }
   return map[module] || 'info'
 }
@@ -458,7 +470,12 @@ const getOperationTypeText = (type: GlobalOperationType) => {
     // 系统操作
     UPDATE_SYSTEM_CONFIG: '系统配置',
     BACKUP_DATA: '数据备份',
-    CLEAR_CACHE: '清理缓存'
+    CLEAR_CACHE: '清理缓存',
+    // 门户配置操作
+    PERFORMANCE_MONITOR: '性能监控',
+    UPDATE_NAVIGATION: '导航配置',
+    VERSION_CONTROL: '版本管理',
+    PORTAL_PREVIEW: '门户预览'
   }
   return map[type] || type
 }
@@ -484,7 +501,9 @@ const getTargetTypeText = (type: GlobalTargetType) => {
     BANNER: 'Banner',
     GOODS: '商品',
     QUOTATION: '名言',
-    SYSTEM_CONFIG: '配置'
+    SYSTEM_CONFIG: '配置',
+    NAVIGATION: '导航',
+    PERFORMANCE: '性能监控'
   }
   return map[type] || type
 }

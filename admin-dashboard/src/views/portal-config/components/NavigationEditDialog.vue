@@ -57,13 +57,13 @@
           </el-radio>
           <el-radio value="external" class="type-radio">
             <div class="radio-content">
-              <i class="el-icon-top-right" class="type-icon"></i>
+              <i class="el-icon-top-right type-icon"></i>
               <span>外部链接</span>
             </div>
           </el-radio>
           <el-radio value="parent" class="type-radio">
             <div class="radio-content">
-              <i class="el-icon-folder" class="type-icon"></i>
+              <i class="el-icon-folder type-icon"></i>
               <span>父级菜单</span>
             </div>
           </el-radio>

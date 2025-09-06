@@ -176,6 +176,8 @@ export type GlobalOperationType =
   // 系统配置操作
   | 'UPDATE_SYSTEM_CONFIG' | 'BACKUP_DATA' | 'RESTORE_DATA' | 'CLEAR_CACHE'
   | 'UPDATE_ALERT_CONFIG' | 'HANDLE_ALERT'
+  // 门户配置操作
+  | 'PERFORMANCE_MONITOR' | 'UPDATE_NAVIGATION' | 'VERSION_CONTROL' | 'PORTAL_PREVIEW'
 
 // 兼容现有RBAC模块的操作类型
 export type OperationType = Extract<GlobalOperationType, 
@@ -186,7 +188,7 @@ export type OperationType = Extract<GlobalOperationType,
 // 全局审计模块枚举
 export type AuditModule = 
   | 'RBAC' | 'CONTENT' | 'NEWS' | 'BANNER' | 'AUDIT' 
-  | 'FLEA_MARKET' | 'QUOTATION' | 'OPERATION' | 'SYSTEM'
+  | 'FLEA_MARKET' | 'QUOTATION' | 'OPERATION' | 'SYSTEM' | 'PORTAL'
 
 // 全局审计目标类型
 export type GlobalTargetType = 
@@ -195,6 +197,7 @@ export type GlobalTargetType =
   | 'NEWS_SOURCE' | 'NEWS' | 'BANNER' | 'GOODS'
   | 'QUOTATION' | 'RECOMMENDATION' | 'RANKING'
   | 'AUDIT_POLICY' | 'SENSITIVE_WORD' | 'SYSTEM_CONFIG'
+  | 'NAVIGATION' | 'PERFORMANCE'
 
 // 风险等级枚举
 export type RiskLevel = 'low' | 'medium' | 'high'

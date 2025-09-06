@@ -11,7 +11,7 @@ export class FleaMarketAuditNode extends AuditNode {
       bizType: 'flea_goods',
       nodeId: 'flea_market_audit_node',
       nodeName: '跳蚤市场审核节点',
-      endpoint: '/api/flea-market/audit-callback',
+      endpoint: '/flea-market/audit-callback',
       enabled: true,
       retryCount: 3,
       timeout: 30000,
@@ -211,7 +211,7 @@ export class FleaMarketAuditNode extends AuditNode {
    */
   private async getSellerReputation(sellerId: number): Promise<{ level: 'low' | 'normal' | 'high', score: number }> {
     try {
-      const response = await request.get(`/api/flea-market/sellers/${sellerId}/reputation`)
+      const response = await request.get(`/flea-market/sellers/${sellerId}/reputation`)
       return response.data
     } catch (error) {
       console.error('获取卖家信誉失败:', error)
@@ -251,7 +251,7 @@ export class FleaMarketAuditNode extends AuditNode {
    */
   private async validateCategory(content: any): Promise<boolean> {
     try {
-      const response = await request.get(`/api/flea-market/categories/${content.categoryId}/validate`, {
+      const response = await request.get(`/flea-market/categories/${content.categoryId}/validate`, {
         params: { title: content.title, description: content.description }
       })
       return response.data.valid
@@ -298,7 +298,7 @@ export class FleaMarketAuditNode extends AuditNode {
    */
   private async getCategoryPriceRange(categoryId: number): Promise<{ min: number, max: number } | null> {
     try {
-      const response = await request.get(`/api/flea-market/categories/${categoryId}/price-range`)
+      const response = await request.get(`/flea-market/categories/${categoryId}/price-range`)
       return response.data
     } catch (error) {
       return null
@@ -323,7 +323,7 @@ export class FleaMarketAuditNode extends AuditNode {
    */
   private async publishGoods(bizId: string, callbackData: AuditCallbackData): Promise<void> {
     try {
-      await request.post(`/api/flea-market/goods/${bizId}/publish`, {
+      await request.post(`/flea-market/goods/${bizId}/publish`, {
         auditTime: new Date().toISOString(),
         auditorId: callbackData.auditorId,
         processTime: callbackData.processTime
@@ -339,7 +339,7 @@ export class FleaMarketAuditNode extends AuditNode {
    */
   private async rejectGoods(bizId: string, reason?: string, detail?: string): Promise<void> {
     try {
-      await request.post(`/api/flea-market/goods/${bizId}/reject`, {
+      await request.post(`/flea-market/goods/${bizId}/reject`, {
         reason,
         detail,
         rejectTime: new Date().toISOString()
@@ -406,7 +406,7 @@ export class FleaMarketAuditNode extends AuditNode {
    */
   private async recordAuditHistory(callbackData: AuditCallbackData): Promise<void> {
     try {
-      await request.post('/api/flea-market/audit-history', {
+      await request.post('/flea-market/audit-history', {
         taskId: callbackData.taskId,
         status: callbackData.status,
         reason: callbackData.reason,
@@ -428,7 +428,7 @@ export class FleaMarketAuditNode extends AuditNode {
     try {
       const taskInfo = await this.getTaskInfo(callbackData.taskId)
       if (taskInfo) {
-        await request.post(`/api/flea-market/sellers/${taskInfo.submitterId}/update-reputation`, {
+        await request.post(`/flea-market/sellers/${taskInfo.submitterId}/update-reputation`, {
           auditResult: callbackData.status,
           reason: callbackData.reason
         })

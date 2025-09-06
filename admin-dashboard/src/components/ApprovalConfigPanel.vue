@@ -94,7 +94,7 @@
                   :value="option.value"
                 >
                   <span class="priority-option">
-                    <el-tag :type="option.type" size="small">{{ option.label }}</el-tag>
+                    <el-tag :type="option.type as any" size="small">{{ option.label }}</el-tag>
                     <span class="option-desc">{{ option.desc }}</span>
                   </span>
                 </el-option>
@@ -475,8 +475,7 @@ import {
   Plus,
   Delete
 } from '@element-plus/icons-vue'
-import { bannerApi } from '@/api/banner'
-import type { ApprovalRecommendation, ApprovalTemplate } from '@/api/banner'
+import { bannerApi, type ApprovalTemplate } from '@/api/banner'
 
 // 组件 Props
 interface Props {
@@ -574,7 +573,7 @@ const priorityOptions = [
 ]
 
 // 模板数据
-const approvalTemplates = ref([
+const approvalTemplates = ref<ApprovalTemplate[]>([
   {
     id: 1,
     name: '标准Banner审批',
@@ -584,9 +583,9 @@ const approvalTemplates = ref([
     stepCount: 3,
     successRate: 95,
     steps: [
-      { name: '内容初审', approver: '内容审核员', timeLimit: '2小时' },
-      { name: '设计审核', approver: '设计主管', timeLimit: '4小时' },
-      { name: '运营审批', approver: '运营总监', timeLimit: '2小时' }
+      { name: '内容初审', approver: '内容审核员', timeLimit: '2小时', type: 'manual', description: '审核内容是否符合规范' },
+      { name: '设计审核', approver: '设计主管', timeLimit: '4小时', type: 'manual', description: '审核设计质量' },
+      { name: '运营审批', approver: '运营总监', timeLimit: '2小时', type: 'manual', description: '最终运营审批' }
     ]
   },
   {
@@ -598,8 +597,8 @@ const approvalTemplates = ref([
     stepCount: 2,
     successRate: 88,
     steps: [
-      { name: '自动检测', approver: '系统自动', timeLimit: '10分钟' },
-      { name: '主管审批', approver: '部门主管', timeLimit: '2小时' }
+      { name: '自动检测', approver: '系统自动', timeLimit: '10分钟', type: 'auto', description: '系统自动检测' },
+      { name: '主管审批', approver: '部门主管', timeLimit: '2小时', type: 'manual', description: '部门主管审批' }
     ]
   },
   {
@@ -611,11 +610,11 @@ const approvalTemplates = ref([
     stepCount: 5,
     successRate: 98,
     steps: [
-      { name: '内容审核', approver: '内容审核员', timeLimit: '4小时' },
-      { name: '法务审核', approver: '法务专员', timeLimit: '8小时' },
-      { name: '设计审核', approver: '设计总监', timeLimit: '4小时' },
-      { name: '运营审批', approver: '运营总监', timeLimit: '4小时' },
-      { name: '最终确认', approver: 'CEO', timeLimit: '4小时' }
+      { name: '内容审核', approver: '内容审核员', timeLimit: '4小时', type: 'manual', description: '审核内容合规性' },
+      { name: '法务审核', approver: '法务专员', timeLimit: '8小时', type: 'manual', description: '法务风险评估' },
+      { name: '设计审核', approver: '设计总监', timeLimit: '4小时', type: 'manual', description: '设计质量审核' },
+      { name: '运营审批', approver: '运营总监', timeLimit: '4小时', type: 'manual', description: '运营策略审批' },
+      { name: '最终确认', approver: 'CEO', timeLimit: '4小时', type: 'manual', description: 'CEO最终确认' }
     ]
   }
 ])
@@ -676,7 +675,7 @@ const generateRecommendation = async () => {
   try {
     // 调用真实API获取智能推荐
     const response = await bannerApi.getApprovalRecommendation(props.bannerData)
-    recommendation.value = response.data.data
+    recommendation.value = response.data
     ElMessage.success('智能推荐生成成功')
   } catch (error) {
     console.error('获取智能推荐失败:', error)
@@ -868,7 +867,7 @@ watch([configMode, smartConfig, templateConfig, customConfig, selectedTemplate],
 const loadTemplates = async () => {
   try {
     const response = await bannerApi.getApprovalTemplates()
-    approvalTemplates.value = response.data.data
+    approvalTemplates.value = response.data
   } catch (error) {
     console.error('加载模板失败:', error)
     // 使用默认模板数据
@@ -879,7 +878,7 @@ const loadTemplates = async () => {
 const loadApprovers = async () => {
   try {
     const response = await bannerApi.getApprovers()
-    approverList.value = response.data.data
+    approverList.value = response.data
   } catch (error) {
     console.error('加载审批人员失败:', error)
     // 使用默认数据

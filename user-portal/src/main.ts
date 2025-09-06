@@ -2,7 +2,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import 'element-plus/dist/index.css'
+import ArcoVue from '@arco-design/web-vue'
+import '@arco-design/web-vue/dist/arco.css'
 import './styles/index.css'
 
 // 导入 ECharts 核心模块
@@ -36,6 +37,7 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+app.use(ArcoVue)
 
 // 注册 VChart 组件
 app.component('VChart', VChart)

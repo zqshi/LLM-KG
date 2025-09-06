@@ -872,7 +872,7 @@ const likeQuotation = async (id: number) => {
 const loadLeaders = async () => {
   try {
     // 获取所有用户作为领导选择
-    const response = await userApi.getList({ page: 1, pageSize: 1000 })
+    const response = await userApi.getUsers({ page: 1, pageSize: 1000 })
     leaders.value = response.data.list
   } catch (error) {
     console.error('加载领导列表失败:', error)

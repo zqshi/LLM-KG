@@ -71,7 +71,7 @@
                 <el-option
                   v-for="quotation in publishedQuotations"
                   :key="quotation.id"
-                  :label="`${quotation.content.substring(0, 30)}... - ${quotation.leader?.name}`"
+                  :label="`${(quotation.content ?? '').slice(0, 30)}... - ${quotation.leader?.name || ''}`"
                   :value="quotation.id"
                 />
               </el-select>
@@ -151,7 +151,7 @@
                       class="quote-preview"
                     >
                       <span class="quote-index">{{ index + 1 }}.</span>
-                      <span class="quote-text">{{ quotation.content.substring(0, 40) }}...</span>
+                      <span class="quote-text">{{ (quotation.content ?? '').slice(0, 40) }}...</span>
                       <span class="quote-author">{{ quotation.leader?.name }}</span>
                     </div>
                     <div v-if="playlist.quotations.length > 3" class="more-quotes">
@@ -218,7 +218,7 @@
                   {{ index + 1 }}
                 </div>
                 <div class="popular-content">
-                  <p class="popular-text">{{ quotation.content.substring(0, 50) }}...</p>
+                  <p class="popular-text">{{ (quotation.content ?? '').slice(0, 50) }}...</p>
                   <div class="popular-meta">
                     <span class="author">{{ quotation.leader?.name }}</span>
                     <div class="stats">
@@ -413,7 +413,7 @@ import {
   Star
 } from '@element-plus/icons-vue'
 import { useQuotationStore } from '@/stores/quotation'
-import { userApi } from '@/api'
+import { userApi, quotationApi } from '@/api'
 import type { Quotation, User, QuotationPlaylist, DailyQuoteConfig } from '@/types'
 
 // Store
@@ -478,10 +478,11 @@ const filteredQuotations = computed(() => {
 
   if (quotationSearchKeyword.value) {
     const keyword = quotationSearchKeyword.value.toLowerCase()
-    filtered = filtered.filter(q => 
-      q.content.toLowerCase().includes(keyword) ||
-      q.leader?.name.toLowerCase().includes(keyword)
-    )
+    filtered = filtered.filter(q => {
+      const contentLower = (q.content ?? '').toLowerCase()
+      const leaderLower = (q.leader?.name ?? '').toLowerCase()
+      return contentLower.includes(keyword) || leaderLower.includes(keyword)
+    })
   }
 
   if (quotationFilterLeader.value) {
@@ -508,10 +509,11 @@ const loadPublishedQuotations = async () => {
 const loadPopularQuotations = async () => {
   popularLoading.value = true
   try {
-    const response = await quotationStore.quotationApi.getPopularQuotations(10)
+    const response = await quotationApi.getPopularQuotations(10)
     popularQuotations.value = response.data
   } catch (error) {
     console.error('加载热门名言失败:', error)
+    ElMessage.error('加载热门名言失败')
   } finally {
     popularLoading.value = false
   }
@@ -519,10 +521,11 @@ const loadPopularQuotations = async () => {
 
 const loadLeaders = async () => {
   try {
-    const response = await userApi.getList({ page: 1, pageSize: 1000 })
+    const response = await userApi.getUsers({ page: 1, pageSize: 1000 })
     leaders.value = response.data.list
   } catch (error) {
     console.error('加载领导列表失败:', error)
+    ElMessage.error('加载领导列表失败')
   }
 }
 

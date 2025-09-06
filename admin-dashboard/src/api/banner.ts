@@ -1,6 +1,5 @@
 import { request } from './request'
 import { auditNodeUtils } from './auditNodeFactory'
-import type { BizType } from '@/types'
 
 /**
  * Banner状态枚举
@@ -168,25 +167,25 @@ export const bannerApi = {
    * 获取Banner列表
    */
   getBanners: (params?: BannerQueryParams) =>
-    request.get<BannerListResponse>('/api/banner', { params }),
+    request.get<BannerListResponse>('/banner', { params }),
 
   /**
    * 获取Banner详情
    */
   getBanner: (id: number) =>
-    request.get<Banner>(`/api/banner/${id}`),
+    request.get<Banner>(`/banner/${id}`),
 
   /**
    * 创建Banner（包含审核逻辑）
    */
   createBanner: async (data: BannerForm, submitterId: number, submitterName: string) => {
     // 先保存Banner为草稿状态
-    const createResponse = await request.post<Banner>('/api/banner', {
+    const createResponse = await request.post<Banner>('/banner', {
       ...data,
       status: 'draft'
     })
 
-    const banner = createResponse.data.data
+    const banner = createResponse.data
     
     // 如果配置了立即提交审核
     if (data.auditOptions?.submitForAuditImmediately) {
@@ -204,13 +203,13 @@ export const bannerApi = {
    * 更新Banner
    */
   updateBanner: (id: number, data: BannerForm) =>
-    request.put<Banner>(`/api/banner/${id}`, data),
+    request.put<Banner>(`/banner/${id}`, data),
 
   /**
    * 删除Banner
    */
   deleteBanner: (id: number) =>
-    request.delete(`/api/banner/${id}`),
+    request.delete(`/banner/${id}`),
 
   /**
    * 提交Banner审核
@@ -218,8 +217,8 @@ export const bannerApi = {
   submitForAudit: async (bannerId: number, submitterId: number, submitterName: string, auditOptions?: any) => {
     try {
       // 获取Banner详情
-      const bannerResponse = await request.get<Banner>(`/api/banner/${bannerId}`)
-      const banner = bannerResponse.data.data
+      const bannerResponse = await request.get<Banner>(`/banner/${bannerId}`)
+      const banner = bannerResponse.data
 
       // 使用工厂工具方法提交审核
       const taskId = await auditNodeUtils.submitForAudit('banner', {
@@ -243,7 +242,7 @@ export const bannerApi = {
       })
 
       // 更新Banner状态为待审核并保存任务ID
-      await request.patch(`/api/banner/${bannerId}/status`, {
+      await request.patch(`/banner/${bannerId}/status`, {
         status: 'pending',
         auditTaskId: taskId
       })
@@ -259,39 +258,39 @@ export const bannerApi = {
    * 手动通过Banner审核（管理员操作）
    */
   approveBanner: (id: number, remark?: string) =>
-    request.post(`/api/banner/${id}/approve`, { remark }),
+    request.post(`/banner/${id}/approve`, { remark }),
 
   /**
    * 手动拒绝Banner审核（管理员操作）
    */
   rejectBanner: (id: number, reason: string, detail?: string) =>
-    request.post(`/api/banner/${id}/reject`, { reason, detail }),
+    request.post(`/banner/${id}/reject`, { reason, detail }),
 
   /**
    * 发布Banner
    */
   publishBanner: (id: number) =>
-    request.post(`/api/banner/${id}/publish`),
+    request.post(`/banner/${id}/publish`),
 
   /**
    * 下线Banner
    */
   offlineBanner: (id: number) =>
-    request.post(`/api/banner/${id}/offline`),
+    request.post(`/banner/${id}/offline`),
 
   /**
    * 获取Banner审核记录
    */
   getAuditRecords: (bannerId: number) =>
-    request.get(`/api/banner/${bannerId}/audit-records`),
+    request.get(`/banner/${bannerId}/audit-records`),
 
   /**
    * 获取Banner审核状态
    */
   getAuditStatus: async (bannerId: number) => {
     const banner = await bannerApi.getBanner(bannerId)
-    if (banner.data.data.auditTaskId) {
-      return await auditNodeUtils.getTaskStatus('banner', banner.data.data.auditTaskId)
+    if (banner.data.auditTaskId) {
+      return await auditNodeUtils.getTaskStatus('banner', banner.data.auditTaskId)
     }
     return null
   },
@@ -307,7 +306,7 @@ export const bannerApi = {
       detail?: string
     }
   }) =>
-    request.post('/api/banner/batch', data),
+    request.post('/banner/batch', data),
 
   /**
    * 上传Banner图片
@@ -317,7 +316,7 @@ export const bannerApi = {
     formData.append('file', file)
     formData.append('type', 'banner')
     
-    return request.post<{ url: string }>('/api/upload', formData, {
+    return request.post<{ url: string }>('/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -334,7 +333,7 @@ export const bannerApi = {
       priority: 'high' | 'normal' | 'low'
       estimatedTime: string
       description: string
-    }>('/api/banner/audit-node-info'),
+    }>('/banner/audit-node-info'),
 
   /**
    * 获取智能审批推荐
@@ -345,13 +344,13 @@ export const bannerApi = {
     linkUrl?: string
     description?: string
   }) =>
-    request.post<ApprovalRecommendation>('/api/banner/approval-recommendation', bannerData),
+    request.post<ApprovalRecommendation>('/banner/approval-recommendation', bannerData),
 
   /**
    * 获取审批模板列表
    */
   getApprovalTemplates: (keyword?: string) =>
-    request.get<ApprovalTemplate[]>('/api/banner/approval-templates', {
+    request.get<ApprovalTemplate[]>('/banner/approval-templates', {
       params: { keyword }
     }),
 
@@ -364,7 +363,7 @@ export const bannerApi = {
       name: string
       department: string
       role?: string
-    }>>('/api/banner/approvers', {
+    }>>('/banner/approvers', {
       params: { department }
     }),
 
@@ -377,7 +376,7 @@ export const bannerApi = {
       errors?: string[]
       warnings?: string[]
       estimatedTime?: string
-    }>('/api/banner/validate-approval-config', config)
+    }>('/banner/validate-approval-config', config)
 }
 
 /**

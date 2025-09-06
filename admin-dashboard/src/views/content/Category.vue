@@ -10,10 +10,6 @@
           <el-icon><Plus /></el-icon>
           发布新帖
         </el-button>
-        <el-button @click="goAll">
-          <el-icon><List /></el-icon>
-          查看全部内容
-        </el-button>
       </div>
     </div>
 
@@ -125,7 +121,7 @@ import { storeToRefs } from 'pinia'
 import { useContentStore } from '@/stores/content'
 import { useAuthStore } from '@/stores/auth'
 import type { Content } from '@/types'
-import { Plus, List, Search, Refresh, ArrowDown } from '@element-plus/icons-vue'
+import { Plus, Search, Refresh, ArrowDown } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const contentStore = useContentStore()
@@ -167,9 +163,6 @@ const rowAction = (cmd: string, row: Content) => {
 
 const createPost = () => {
   router.push({ name: 'ContentCreate', query: { module: 'forum', category: displayName.value } })
-}
-const goAll = () => {
-  router.push({ name: 'ContentList', query: { module: 'forum', category: displayName.value, from: 'category' } })
 }
 
 onMounted(async () => {
