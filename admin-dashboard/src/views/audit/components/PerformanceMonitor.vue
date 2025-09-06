@@ -359,26 +359,79 @@ import * as echarts from 'echarts'
 import { auditAsyncProcessor } from '@/api/auditAsyncProcessor'
 import { auditDatabaseOptimizer } from '@/api/auditDatabaseOptimizer'
 
+// 类型定义
+interface Metrics {
+  averageResponseTime: number
+  throughput: number
+  errorRate: number
+}
+
+interface QueuePerformance {
+  counter_tasks_completed?: number
+  counter_tasks_failed?: number
+  [key: string]: any
+}
+
+interface QueueStatus {
+  size: number
+  processing: boolean
+  workers: number
+  performance: QueuePerformance
+}
+
+interface DatabaseMetrics {
+  connectionPoolSize: number
+  activeConnections: number
+  queuedQueries: number
+  averageQueryTime: number
+  slowQueries: number
+  cacheHitRatio: number
+  indexEfficiency: number
+  tableScansRatio: number
+}
+
+interface SlowQuery {
+  query: string
+  averageTime: number
+  frequency: number
+  [key: string]: any
+}
+
+interface OptimizationSuggestion {
+  type: string
+  description: string
+  estimatedImpact: string
+  priority: 'high' | 'medium' | 'low'
+  [key: string]: any
+}
+
+interface DatabaseReport {
+  summary: any
+  indexRecommendations: any[]
+  connectionPoolOptimization: any
+  [key: string]: any
+}
+
 // 响应式数据
 const refreshing = ref(false)
 const selectedTimeRange = ref('6h')
 const showReportDialog = ref(false)
 const activeReportTab = ref('queries')
 
-const metrics = reactive({
+const metrics = reactive<Metrics>({
   averageResponseTime: 0,
   throughput: 0,
   errorRate: 0
 })
 
-const queueStatus = reactive({
+const queueStatus = reactive<QueueStatus>({
   size: 0,
   processing: false,
   workers: 0,
   performance: {}
 })
 
-const databaseMetrics = reactive({
+const databaseMetrics = reactive<DatabaseMetrics>({
   connectionPoolSize: 0,
   activeConnections: 0,
   queuedQueries: 0,
@@ -389,12 +442,12 @@ const databaseMetrics = reactive({
   tableScansRatio: 0
 })
 
-const slowQueries = ref([])
-const optimizationSuggestions = ref([])
-const databaseReport = ref(null)
+const slowQueries = ref<SlowQuery[]>([])
+const optimizationSuggestions = ref<OptimizationSuggestion[]>([])
+const databaseReport = ref<DatabaseReport | null>(null)
 
-let chartInstance = null
-let refreshTimer = null
+let chartInstance: echarts.ECharts | null = null
+let refreshTimer: number | null = null
 
 // 生命周期
 onMounted(async () => {
@@ -513,9 +566,10 @@ function getQueueEfficiency() {
 
 function initChart() {
   const chartDom = document.getElementById('response-time-chart')
-  chartInstance = echarts.init(chartDom)
-  
-  updateChartData()
+  if (chartDom) {
+    chartInstance = echarts.init(chartDom)
+    updateChartData()
+  }
 }
 
 function updateChartData() {

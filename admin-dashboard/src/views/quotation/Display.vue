@@ -1,17 +1,15 @@
 <template>
   <div class="quotation-display">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-title">
-        <h2>展示配置</h2>
-        <p class="header-description">配置名言在门户首页的展示规则，最大化其影响力</p>
-      </div>
-      <div class="header-actions">
+    <UnifiedPageHeader
+      title="展示配置"
+      description="配置名言在门户首页的展示规则，最大化其影响力"
+    >
+      <template #actions>
         <el-button type="primary" :icon="Plus" @click="showCreatePlaylistDialog = true">
           创建精选集
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <el-row :gutter="20">
       <!-- 左侧：展示配置 -->
@@ -246,7 +244,7 @@
           
           <div class="leader-ranking">
             <div 
-              v-for="(leader, index) in quotationStats.topLeaders.slice(0, 5)"
+              v-for="(leader, index) in quotationStats.topLeaders?.slice(0, 5) || []"
               :key="leader.leaderId"
               class="leader-item"
             >
@@ -258,7 +256,7 @@
               <div class="leader-bar">
                 <div 
                   class="bar-fill"
-                  :style="{ width: `${(leader.count / quotationStats.topLeaders[0]?.count) * 100}%` }"
+                  :style="{ width: `${quotationStats.topLeaders?.length ? (leader.count / quotationStats.topLeaders[0]?.count) * 100 : 0}%` }"
                 ></div>
               </div>
             </div>
@@ -401,6 +399,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Plus,
@@ -466,11 +465,11 @@ const {
 
 // 计算属性
 const totalShowCount = computed(() => {
-  return quotationStats.popularQuotations.reduce((sum, q) => sum + q.showCount, 0)
+  return quotationStats.popularQuotations?.reduce((sum, q) => sum + q.showCount, 0) || 0
 })
 
 const totalLikeCount = computed(() => {
-  return quotationStats.popularQuotations.reduce((sum, q) => sum + q.likeCount, 0)
+  return quotationStats.popularQuotations?.reduce((sum, q) => sum + q.likeCount, 0) || 0
 })
 
 const filteredQuotations = computed(() => {
@@ -559,7 +558,7 @@ const editPlaylist = (playlist: QuotationPlaylist) => {
   Object.assign(playlistForm, {
     name: playlist.name,
     description: playlist.description || '',
-    quotationIds: [...playlist.quotationIds],
+    quotationIds: playlist.quotationIds ? [...playlist.quotationIds] : [],
     startTime: playlist.startTime || '',
     endTime: playlist.endTime || ''
   })

@@ -1,40 +1,41 @@
 // SCSS 变量定义文件
 // 用于在 SCSS 文件中使用的变量和 mixins
 
-// 颜色系统
-$color-primary: #1890ff;
-$color-primary-hover: #40a9ff;
-$color-primary-active: #096dd9;
-$color-primary-light: #e6f7ff;
+// 颜色系统 - 与design-system.css保持一致
+// 主色调
+$color-primary: #2563eb;
+$color-primary-hover: #3b82f6;
+$color-primary-active: #1d4ed8;
+$color-primary-light: #dbeafe;
 
-$color-success: #52c41a;
-$color-success-hover: #73d13d;
-$color-success-light: #f6ffed;
+$color-success: #10b981;
+$color-success-hover: #34d399;
+$color-success-light: #d1fae5;
 
-$color-warning: #faad14;
-$color-warning-hover: #ffc53d;
-$color-warning-light: #fffbe6;
+$color-warning: #f59e0b;
+$color-warning-hover: #fbbf24;
+$color-warning-light: #fef3c7;
 
-$color-danger: #ff4d4f;
-$color-danger-hover: #ff7875;
-$color-danger-light: #fff2f0;
+$color-danger: #ef4444;
+$color-danger-hover: #f87171;
+$color-danger-light: #fee2e2;
 
-$color-info: #1890ff;
+$color-info: #3b82f6;
 
 // 文本颜色
-$color-text-primary: #262626;
-$color-text-secondary: #595959;
-$color-text-tertiary: #8c8c8c;
-$color-text-disabled: #bfbfbf;
-$color-text-placeholder: #d9d9d9;
+$color-text-primary: #111827;
+$color-text-secondary: #374151;
+$color-text-tertiary: #6b7280;
+$color-text-disabled: #9ca3af;
+$color-text-placeholder: #d1d5db;
 
 // 边框和背景
-$color-border-primary: #d9d9d9;
-$color-border-light: #f0f0f0;
-$color-border-lighter: #fafafa;
-$color-bg-page: #fafafa;
+$color-border-primary: #d1d5db;
+$color-border-light: #e5e7eb;
+$color-border-lighter: #f3f4f6;
+$color-bg-page: #f9fafb;
 $color-bg-card: #ffffff;
-$color-bg-section: #f8f9fa;
+$color-bg-section: #f3f4f6;
 
 // 间距系统
 $spacing-xs: 4px;

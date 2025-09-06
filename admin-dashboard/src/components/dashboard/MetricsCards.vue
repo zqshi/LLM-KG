@@ -265,13 +265,22 @@ const handleCardClick = (type: string) => {
 }
 
 .metrics-card-enhanced {
-  height: 140px;
-  cursor: pointer;
+  height: 160px;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
   transition: all var(--transition-medium);
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
   position: relative;
+  cursor: pointer;
 }
 
-/* 使用全局的 data-display-card 样式 */
+.metrics-card-enhanced:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
 
 .metrics-content {
   display: flex;
@@ -307,37 +316,37 @@ const handleCardClick = (type: string) => {
 .metrics-icon {
   width: 64px;
   height: 64px;
-  border-radius: var(--radius-xl);
+  border-radius: var(--border-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 .metrics-icon.primary {
-  background: var(--gradient-primary);
+  background: var(--color-primary);
 }
 
 .metrics-icon.success {
-  background: var(--gradient-success);
+  background: var(--color-success);
 }
 
 .metrics-icon.warning {
-  background: var(--gradient-warning);
+  background: var(--color-warning);
 }
 
 .metrics-icon.danger {
-  background: var(--gradient-danger);
+  background: var(--color-danger);
 }
 
 /* 趋势样式使用全局 data-trend */
 
 .metrics-badge {
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background: var(--color-success-light);
@@ -354,9 +363,9 @@ const handleCardClick = (type: string) => {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 12px;
+  font-size: var(--text-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
+  border-radius: var(--border-radius-sm);
 }
 
 .metrics-indicator.success {
@@ -413,12 +422,25 @@ const handleCardClick = (type: string) => {
   justify-content: center;
 }
 
-/* 使用全局 data-value 和 data-label 样式 */
+.data-value {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  margin-bottom: var(--spacing-xxs);
+  color: var(--color-text-primary);
+}
+
+.data-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
 
 .metrics-change {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--color-text-tertiary);
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
+  margin-top: var(--spacing-xs);
 }
 
 .update-time-hint {

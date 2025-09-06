@@ -264,7 +264,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { 
+import {
   SuccessFilled, 
   CircleCloseFilled, 
   Loading, 
@@ -339,7 +339,7 @@ interface Props {
   /** Banner基本信息 */
   bannerInfo?: BannerInfo
   /** 展示模式 */
-  viewMode?: 'steps' | 'diagram' | 'auto'
+  viewMode?: 'auto' | 'steps' | 'diagram'
   /** 是否显示模式切换开关 */
   showModeSwitch?: boolean
   /** 是否显示Banner信息 */
@@ -365,18 +365,18 @@ interface Emits {
 const emit = defineEmits<Emits>()
 
 // 响应式数据
-const currentViewMode = ref<'steps' | 'diagram'>('steps')
+const currentViewMode = ref<'auto' | 'steps' | 'diagram'>(props.viewMode)
 const isFullscreen = ref(false)
 
 // 计算属性
-const computedViewMode = computed(() => {
+const computedViewMode = computed<'steps' | 'diagram'>(() => {
   if (props.viewMode === 'auto') {
     // 自动模式：根据屏幕大小和数据量智能选择
     if (!props.workflowData.steps?.length) return 'steps'
     if (props.workflowData.steps.length <= 3) return 'steps'
     return window.innerWidth > 1200 ? 'diagram' : 'steps'
   }
-  return props.viewMode
+  return props.viewMode as 'steps' | 'diagram'
 })
 
 // 状态工具函数
@@ -418,8 +418,8 @@ const getActiveStep = () => {
   return approvedCount
 }
 
-const getStepStatus = (step: WorkflowStep) => {
-  const statusMap = {
+const getStepStatus = (step: WorkflowStep): 'success' | 'wait' | 'error' | 'finish' | 'process' => {
+  const statusMap: Record<string, 'success' | 'wait' | 'error' | 'finish' | 'process'> = {
     pending: 'wait',
     processing: 'process',
     approved: 'finish',
@@ -646,6 +646,7 @@ onUnmounted(() => {
     window.removeEventListener('resize', handleResize)
     if (resizeObserver) {
       resizeObserver.disconnect()
+      resizeObserver = null
     }
   }
 })

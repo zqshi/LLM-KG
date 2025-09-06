@@ -299,9 +299,12 @@ import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox, ElTable } from 'element-plus'
 import {
   Plus, Edit, Delete, Search, View, DocumentCopy, More, User, Sort,
-  ArrowDown, ArrowUp, Rank, Link as LinkIcon
+  ArrowDown, ArrowUp, Rank, Link as LinkIcon, Menu
 } from '@element-plus/icons-vue'
 import Sortable from 'sortablejs'
+
+// 统一组件导入
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 // 导入API和类型
 import { portalConfigApi } from '@/api/navigation'

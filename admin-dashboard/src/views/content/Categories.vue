@@ -187,75 +187,209 @@
     </div>
 
     <!-- 版块编辑对话框 -->
-    <el-dialog v-model="categoryDialogVisible" :title="isEdit ? '编辑版块' : '新增版块'" width="600px"
-      @close="handleDialogClose">
-      <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryFormRules" label-width="100px">
+    <el-dialog v-model="categoryDialogVisible" :title="isEdit ? '编辑版块' : '新增版块'" width="680px"
+      @close="handleDialogClose" class="modern-dialog">
+      <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryFormRules" label-width="120px" class="modern-form">
         <el-form-item label="版块名称" prop="name">
-          <el-input v-model="categoryForm.name" placeholder="请输入版块名称" />
-        </el-form-item>
-
-        <el-form-item label="版块标识" prop="code">
-          <el-input v-model="categoryForm.code" placeholder="请输入版块标识（英文）" :disabled="isEdit" />
-        </el-form-item>
-
-        <el-form-item label="版块描述" prop="description">
-          <el-input v-model="categoryForm.description" type="textarea" :rows="3" placeholder="请输入版块描述" />
-        </el-form-item>
-
-        <el-form-item label="版块图标" prop="icon">
-          <el-input v-model="categoryForm.icon" placeholder="请输入图标名称">
-            <template #prepend>
-              <el-icon v-if="categoryForm.icon">
-                <component :is="categoryForm.icon" />
-              </el-icon>
-              <el-icon v-else>
-                <Picture />
-              </el-icon>
+          <el-input 
+            v-model="categoryForm.name" 
+            placeholder="请输入版块名称" 
+            class="modern-input"
+            clearable
+            maxlength="20"
+            show-word-limit>
+            <template #prefix>
+              <el-icon class="input-icon"><FolderOpened /></el-icon>
             </template>
           </el-input>
         </el-form-item>
 
+        <el-form-item label="版块标识" prop="code">
+          <el-input 
+            v-model="categoryForm.code" 
+            placeholder="请输入版块标识（英文）" 
+            :disabled="isEdit" 
+            class="modern-input"
+            clearable>
+            <template #prefix>
+              <el-icon class="input-icon"><Key /></el-icon>
+            </template>
+            <template #suffix v-if="!isEdit">
+              <el-tooltip content="只能包含字母、数字和下划线" placement="top">
+                <el-icon class="help-icon"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </template>
+          </el-input>
+        </el-form-item>
+
+        <el-form-item label="版块描述" prop="description">
+          <el-input 
+            v-model="categoryForm.description" 
+            type="textarea" 
+            :rows="4" 
+            placeholder="请输入版块描述，将在版块列表中展示" 
+            class="modern-textarea"
+            maxlength="200"
+            show-word-limit
+            resize="none" />
+        </el-form-item>
+
+        <el-form-item label="版块图标" prop="icon">
+          <div class="icon-selector">
+            <el-input 
+              v-model="categoryForm.icon" 
+              placeholder="请输入图标名称"
+              class="modern-input">
+              <template #prepend>
+                <div class="icon-preview">
+                  <el-icon v-if="categoryForm.icon" class="preview-icon">
+                    <component :is="categoryForm.icon" />
+                  </el-icon>
+                  <el-icon v-else class="preview-icon placeholder">
+                    <Picture />
+                  </el-icon>
+                </div>
+              </template>
+            </el-input>
+            <div class="icon-suggestions">
+              <el-button 
+                v-for="icon in commonIcons" 
+                :key="icon"
+                size="small"
+                :type="categoryForm.icon === icon ? 'primary' : ''"
+                @click="categoryForm.icon = icon"
+                class="icon-btn">
+                <el-icon><component :is="icon" /></el-icon>
+              </el-button>
+            </div>
+          </div>
+        </el-form-item>
+
         <el-form-item label="排序权重" prop="sortOrder">
-          <el-input-number v-model="categoryForm.sortOrder" :min="0" :max="9999" placeholder="数字越小排序越靠前"
+          <el-input-number 
+            v-model="categoryForm.sortOrder" 
+            :min="0" 
+            :max="9999" 
+            placeholder="数字越小排序越靠前"
+            class="modern-input-number"
+            controls-position="right"
             style="width: 100%" />
+          <div class="form-tip">
+            <el-icon class="tip-icon"><InfoFilled /></el-icon>
+            数字越小，版块在列表中排序越靠前
+          </div>
         </el-form-item>
 
         <el-form-item label="版块权限" prop="isPublic">
-          <el-radio-group v-model="categoryForm.isPublic">
-            <el-radio :value="true">公开版块</el-radio>
-            <el-radio :value="false">私有版块</el-radio>
-          </el-radio-group>
-          <div class="form-help">私有版块需要特定权限才能访问</div>
+          <div class="radio-group-modern">
+            <el-radio-group v-model="categoryForm.isPublic" class="modern-radio-group">
+              <el-radio :value="true" class="modern-radio">
+                <div class="radio-content">
+                  <el-icon class="radio-icon"><Unlock /></el-icon>
+                  <div class="radio-text">
+                    <div class="radio-title">公开版块</div>
+                    <div class="radio-desc">所有用户都可以访问</div>
+                  </div>
+                </div>
+              </el-radio>
+              <el-radio :value="false" class="modern-radio">
+                <div class="radio-content">
+                  <el-icon class="radio-icon"><Lock /></el-icon>
+                  <div class="radio-text">
+                    <div class="radio-title">私有版块</div>
+                    <div class="radio-desc">需要特定权限才能访问</div>
+                  </div>
+                </div>
+              </el-radio>
+            </el-radio-group>
+          </div>
         </el-form-item>
 
         <el-form-item label="审核模式" prop="auditMode">
-          <el-radio-group v-model="categoryForm.auditMode">
-            <el-radio value="none">无需审核</el-radio>
-            <el-radio value="pre">先审后发</el-radio>
-            <el-radio value="post">先发后审</el-radio>
-            <el-radio value="sample">抽样审核</el-radio>
+          <el-radio-group v-model="categoryForm.auditMode" class="audit-mode-group">
+            <el-radio value="none" class="audit-option">
+              <div class="audit-content">
+                <el-icon class="audit-icon success"><CircleCheck /></el-icon>
+                <span>无需审核</span>
+              </div>
+            </el-radio>
+            <el-radio value="pre" class="audit-option">
+              <div class="audit-content">
+                <el-icon class="audit-icon warning"><Clock /></el-icon>
+                <span>先审后发</span>
+              </div>
+            </el-radio>
+            <el-radio value="post" class="audit-option">
+              <div class="audit-content">
+                <el-icon class="audit-icon info"><View /></el-icon>
+                <span>先发后审</span>
+              </div>
+            </el-radio>
+            <el-radio value="sample" class="audit-option">
+              <div class="audit-content">
+                <el-icon class="audit-icon primary"><DataLine /></el-icon>
+                <span>抽样审核</span>
+              </div>
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
         <el-form-item label="版块状态" prop="isActive">
-          <el-switch v-model="categoryForm.isActive" active-text="启用" inactive-text="禁用" />
+          <div class="switch-container">
+            <el-switch 
+              v-model="categoryForm.isActive" 
+              class="modern-switch"
+              size="large"
+              active-text="启用" 
+              inactive-text="禁用"
+              :active-icon="Select"
+              :inactive-icon="Close" />
+            <div class="switch-desc">
+              {{ categoryForm.isActive ? '版块将在用户端显示' : '版块将隐藏，用户无法访问' }}
+            </div>
+          </div>
         </el-form-item>
 
         <el-form-item label="发帖权限">
-          <el-checkbox-group v-model="categoryForm.postPermissions">
-            <el-checkbox value="all">所有用户</el-checkbox>
-            <el-checkbox value="member">注册用户</el-checkbox>
-            <el-checkbox value="vip">VIP用户</el-checkbox>
-            <el-checkbox value="moderator">仅版主</el-checkbox>
-          </el-checkbox-group>
+          <div class="permissions-grid">
+            <el-checkbox-group v-model="categoryForm.postPermissions" class="modern-checkbox-group">
+              <div class="permission-item" v-for="perm in permissionOptions" :key="perm.value">
+                <el-checkbox :value="perm.value" class="modern-checkbox">
+                  <div class="checkbox-content">
+                    <el-icon :class="`perm-icon ${perm.type}`">
+                      <component :is="perm.icon" />
+                    </el-icon>
+                    <div class="checkbox-text">
+                      <div class="checkbox-title">{{ perm.label }}</div>
+                      <div class="checkbox-desc">{{ perm.desc }}</div>
+                    </div>
+                  </div>
+                </el-checkbox>
+              </div>
+            </el-checkbox-group>
+          </div>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="categoryDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleCategorySave" :loading="saveLoading">
-          确定
-        </el-button>
+        <div class="dialog-footer-modern">
+          <el-button 
+            @click="categoryDialogVisible = false" 
+            class="cancel-btn"
+            size="large">
+            <el-icon><Close /></el-icon>
+            取消
+          </el-button>
+          <el-button 
+            type="primary" 
+            @click="handleCategorySave" 
+            :loading="saveLoading"
+            class="confirm-btn"
+            size="large">
+            <el-icon v-if="!saveLoading"><Check /></el-icon>
+            {{ isEdit ? '更新版块' : '创建版块' }}
+          </el-button>
+        </div>
       </template>
     </el-dialog>
 
@@ -305,9 +439,16 @@ import type { FormInstance, FormRules } from 'element-plus'
 import draggable from 'vuedraggable'
 import {
   Plus, FolderOpened, Select, Document, User as UserIcon,
-  MoreFilled, Rank, Picture
+  MoreFilled, Rank, Picture, Key, QuestionFilled, InfoFilled,
+  Unlock, Lock, CircleCheck, Clock, View, DataLine, Close, Check,
+  UserFilled, Star, Shield
 } from '@element-plus/icons-vue'
 import { contentApi } from '@/api/content'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+// 统一组件导入
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
+import UnifiedStatsCard from '@/components/UnifiedStatsCard.vue'
 
 interface Category {
   id: number
@@ -350,6 +491,44 @@ const categoryList = ref<Category[]>([])
 const currentModerators = ref<User[]>([])
 const availableUsers = ref<User[]>([])
 const router = useRouter()
+
+// 常用图标选项
+const commonIcons = [
+  'FolderOpened', 'Document', 'Monitor', 'Briefcase', 'OfficeBuilding', 
+  'Trophy', 'Star', 'Bell', 'Setting', 'User', 'DataBoard', 'ChatDotRound'
+]
+
+// 权限选项
+const permissionOptions = [
+  { 
+    value: 'all', 
+    label: '所有用户', 
+    desc: '包括游客和注册用户', 
+    icon: 'User', 
+    type: 'success' 
+  },
+  { 
+    value: 'member', 
+    label: '注册用户', 
+    desc: '仅已注册的用户可以发帖', 
+    icon: 'UserFilled', 
+    type: 'primary' 
+  },
+  { 
+    value: 'vip', 
+    label: 'VIP用户', 
+    desc: '需要VIP等级的用户', 
+    icon: 'Star', 
+    type: 'warning' 
+  },
+  { 
+    value: 'moderator', 
+    label: '仅版主', 
+    desc: '只有版主可以发帖', 
+    icon: 'Shield', 
+    type: 'danger' 
+  }
+]
 const latestPosts = ref<Record<number, { id: number; title: string; createdAt: string }[]>>({})
 const currentCategory = ref<Category | null>(null)
 
@@ -956,4 +1135,410 @@ onMounted(() => {
 .latest-item .title:hover { text-decoration: underline; color:#409EFF; }
 .latest-item .time { color:#909399; font-size:12px; }
 .latest-empty { color:#909399; font-size:12px; }
+
+/* 现代化表单样式 */
+.modern-dialog {
+  .el-dialog {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .el-dialog__header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 24px;
+    margin: 0;
+  }
+  
+  .el-dialog__title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .el-dialog__headerbtn .el-dialog__close {
+    color: white;
+    font-size: 20px;
+  }
+  
+  .el-dialog__body {
+    padding: 32px 24px 24px;
+    background: #fafbfc;
+  }
+}
+
+.modern-form {
+  .el-form-item {
+    margin-bottom: 28px;
+  }
+  
+  .el-form-item__label {
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.8;
+  }
+  
+  .el-form-item__content {
+    line-height: 1.8;
+  }
+}
+
+.modern-input {
+  .el-input__wrapper {
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.2s ease;
+    padding: 8px 12px;
+    
+    &:hover {
+      border-color: #cbd5e1;
+    }
+    
+    &.is-focus {
+      border-color: #2f81f7;
+      box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.1);
+    }
+  }
+  
+  .input-icon {
+    color: #6b7280;
+    margin-right: 8px;
+  }
+  
+  .help-icon {
+    color: #9ca3af;
+    cursor: help;
+    
+    &:hover {
+      color: #6b7280;
+    }
+  }
+}
+
+.modern-textarea {
+  .el-textarea__inner {
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.2s ease;
+    padding: 12px;
+    line-height: 1.6;
+    
+    &:hover {
+      border-color: #cbd5e1;
+    }
+    
+    &:focus {
+      border-color: #2f81f7;
+      box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.1);
+    }
+  }
+}
+
+.modern-input-number {
+  .el-input-number__wrapper {
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    
+    &:hover {
+      border-color: #cbd5e1;
+    }
+    
+    &.is-focus {
+      border-color: #2f81f7;
+      box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.1);
+    }
+  }
+}
+
+.form-tip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 13px;
+  
+  .tip-icon {
+    color: #3b82f6;
+    font-size: 14px;
+  }
+}
+
+.icon-selector {
+  .icon-preview {
+    width: 40px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border-radius: 6px;
+    
+    .preview-icon {
+      font-size: 18px;
+      color: #374151;
+      
+      &.placeholder {
+        color: #9ca3af;
+      }
+    }
+  }
+  
+  .icon-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.radio-group-modern {
+  .modern-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .modern-radio {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s ease;
+    background: white;
+    
+    &:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    
+    &.is-checked {
+      border-color: #2f81f7;
+      background: linear-gradient(90deg, rgba(47, 129, 247, 0.05) 0%, rgba(47, 129, 247, 0.02) 100%);
+    }
+    
+    .el-radio__input {
+      display: none;
+    }
+    
+    .el-radio__label {
+      padding-left: 0;
+    }
+  }
+  
+  .radio-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .radio-icon {
+    font-size: 20px;
+    color: #6b7280;
+  }
+  
+  .radio-text {
+    flex: 1;
+  }
+  
+  .radio-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2px;
+  }
+  
+  .radio-desc {
+    color: #6b7280;
+    font-size: 13px;
+  }
+}
+
+.audit-mode-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  
+  .audit-option {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: all 0.2s ease;
+    background: white;
+    
+    &:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    &.is-checked {
+      border-color: #2f81f7;
+      background: linear-gradient(135deg, rgba(47, 129, 247, 0.05) 0%, rgba(47, 129, 247, 0.02) 100%);
+    }
+    
+    .el-radio__input {
+      display: none;
+    }
+    
+    .el-radio__label {
+      padding-left: 0;
+    }
+  }
+  
+  .audit-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .audit-icon {
+    font-size: 24px;
+    
+    &.success { color: #10b981; }
+    &.warning { color: #f59e0b; }
+    &.info { color: #3b82f6; }
+    &.primary { color: #8b5cf6; }
+  }
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  
+  .modern-switch {
+    .el-switch__core {
+      border-radius: 16px;
+      height: 32px;
+      
+      &::after {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+  
+  .switch-desc {
+    color: #6b7280;
+    font-size: 13px;
+    flex: 1;
+  }
+}
+
+.permissions-grid {
+  .modern-checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .permission-item {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    background: white;
+    
+    &:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    
+    .modern-checkbox {
+      width: 100%;
+      margin: 0;
+      
+      .el-checkbox__input {
+        display: none;
+      }
+      
+      .el-checkbox__label {
+        padding: 16px;
+        width: 100%;
+        display: block;
+      }
+      
+      &.is-checked {
+        .permission-item {
+          border-color: #2f81f7;
+          background: linear-gradient(90deg, rgba(47, 129, 247, 0.05) 0%, rgba(47, 129, 247, 0.02) 100%);
+        }
+      }
+    }
+  }
+  
+  .checkbox-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .perm-icon {
+    font-size: 20px;
+    
+    &.success { color: #10b981; }
+    &.primary { color: #3b82f6; }
+    &.warning { color: #f59e0b; }
+    &.danger { color: #ef4444; }
+  }
+  
+  .checkbox-text {
+    flex: 1;
+  }
+  
+  .checkbox-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2px;
+  }
+  
+  .checkbox-desc {
+    color: #6b7280;
+    font-size: 12px;
+  }
+}
+
+.dialog-footer-modern {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  
+  .cancel-btn {
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 500;
+  }
+  
+  .confirm-btn {
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #2f81f7 0%, #1d4ed8 100%);
+    border: none;
+    
+    &:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(47, 129, 247, 0.3);
+    }
+  }
+}
 </style>

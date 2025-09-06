@@ -4,14 +4,13 @@
     <PageHeader 
       title="快捷入口管理" 
       description="配置用户门户首页的快捷入口面板，支持自定义图标、名称和跳转地址"
+      :icon="Grid"
     >
       <template #actions>
         <el-button type="success" @click="handlePreview" :icon="View" plain>
           预览效果
         </el-button>
-        <el-button type="primary" @click="handleCreateEntry" :icon="Plus">
-          新建快捷入口
-        </el-button>
+        <el-button type="primary" size="small" @click="handleCreateEntry"><Plus size="16" /> 创建入口</el-button>
         <el-button type="warning" @click="handleCreateSnapshot" :icon="DocumentCopy" plain>
           创建快照
         </el-button>
@@ -19,14 +18,15 @@
     </PageHeader>
 
     <!-- 统计数据展示 -->
-    <div class="stats-section">
+    <ContentCard title="统计数据">
+      <div class="stats-section">
       <el-row :gutter="16">
         <el-col :span="6">
           <StatsCard
             label="总入口数"
             :value="stats.totalEntries"
-            icon="Grid"
-            iconColor="#667eea"
+            :icon="Grid"
+            type="primary"
             :trend="stats.entriesTrend"
             description="当前配置的快捷入口总数"
             clickable
@@ -37,8 +37,8 @@
           <StatsCard
             label="启用入口"
             :value="stats.activeEntries"
-            icon="Check"
-            iconColor="#52c41a"
+            :icon="Check"
+            type="success"
             :trend="stats.activeTrend"
             description="用户可见的启用入口数"
             clickable
@@ -49,8 +49,8 @@
           <StatsCard
             label="总点击数"
             :value="stats.totalClicks"
-            icon="Mouse"
-            iconColor="#fa8c16"
+            :icon="Mouse"
+            type="warning"
             suffix="次"
             :trend="stats.clicksTrend"
             description="所有入口的累计点击数"
@@ -62,8 +62,8 @@
           <StatsCard
             label="热门入口"
             :value="stats.hotEntries"
-            icon="Fire"
-            iconColor="#f5222d"
+            :icon="StarFilled"
+            type="danger"
             description="本周点击量最高的入口数"
             clickable
             @click="handleStatsClick('hot')"
@@ -72,77 +72,68 @@
       </el-row>
     </div>
 
-    <!-- 过滤和搜索栏 -->
-    <div class="filter-section">
-      <el-card shadow="never" class="filter-card">
-        <el-row :gutter="16" align="middle">
-          <el-col :span="8">
-            <el-input
-              v-model="filters.keyword"
-              placeholder="搜索入口名称或地址..."
-              :prefix-icon="Search"
-              clearable
-              @input="handleSearch"
-            />
-          </el-col>
-          <el-col :span="4">
-            <el-select
-              v-model="filters.status"
-              placeholder="状态筛选"
-              clearable
-              @change="applyFilters"
-            >
-              <el-option label="全部状态" value="" />
-              <el-option label="启用" value="enabled" />
-              <el-option label="禁用" value="disabled" />
-            </el-select>
-          </el-col>
-          <el-col :span="4">
-            <el-select
-              v-model="filters.type"
-              placeholder="类型筛选"
-              clearable
-              @change="applyFilters"
-            >
-              <el-option label="全部类型" value="" />
-              <el-option label="内部链接" value="internal" />
-              <el-option label="外部链接" value="external" />
-              <el-option label="应用跳转" value="app" />
-            </el-select>
-          </el-col>
-          <el-col :span="4">
-            <el-select
-              v-model="filters.sortBy"
-              placeholder="排序方式"
-              @change="applyFilters"
-            >
-              <el-option label="按创建时间" value="createTime" />
-              <el-option label="按点击量" value="clicks" />
-              <el-option label="按名称" value="name" />
-              <el-option label="按排序值" value="sortOrder" />
-            </el-select>
-          </el-col>
-          <el-col :span="4" class="text-right">
-            <el-button-group>
-              <el-button 
-                :type="viewMode === 'grid' ? 'primary' : ''" 
-                :icon="Grid" 
-                @click="setViewMode('grid')"
-              />
-              <el-button 
-                :type="viewMode === 'list' ? 'primary' : ''" 
-                :icon="List" 
-                @click="setViewMode('list')"
-              />
-            </el-button-group>
-            <el-button :icon="Refresh" circle @click="refreshData" class="ml-2" />
-          </el-col>
-        </el-row>
-      </el-card>
-    </div>
+    </ContentCard>
+
+    <!-- 统一过滤区域 -->
+    <UnifiedFilterSection
+      :show-view-mode="true"
+      :view-mode="viewMode"
+      :refreshing="loading"
+      :active-filters="activeFilterTags"
+      @view-mode-change="setViewMode"
+      @refresh="refreshData"
+      @remove-filter="removeFilter"
+      @clear-all-filters="clearAllFilters"
+    >
+      <template #controls>
+        <el-input
+          v-model="filters.keyword"
+          placeholder="搜索入口名称或地址..."
+          :prefix-icon="Search"
+          clearable
+          style="width: 300px"
+          @input="handleSearch"
+        />
+        <el-select
+          v-model="filters.status"
+          placeholder="状态筛选"
+          clearable
+          style="width: 120px"
+          @change="applyFilters"
+        >
+          <el-option label="全部" value="" />
+          <el-option label="启用" value="1" />
+          <el-option label="禁用" value="0" />
+        </el-select>
+        <el-select
+          v-model="filters.type"
+          placeholder="类型筛选"
+          clearable
+          style="width: 120px"
+          @change="applyFilters"
+        >
+          <el-option label="全部类型" value="" />
+          <el-option label="内部链接" value="internal" />
+          <el-option label="外部链接" value="external" />
+          <el-option label="应用跳转" value="app" />
+        </el-select>
+        <el-select
+          v-model="filters.sortBy"
+          placeholder="排序方式"
+          style="width: 140px"
+          @change="applyFilters"
+        >
+          <el-option label="按创建时间" value="createTime" />
+          <el-option label="按点击量" value="clicks" />
+          <el-option label="按名称" value="name" />
+          <el-option label="按排序值" value="sortOrder" />
+        </el-select>
+      </template>
+    </UnifiedFilterSection>
 
     <!-- 快捷入口列表/网格 -->
-    <div class="entries-section" v-loading="loading">
+    <ContentCard title="快捷入口管理">
+      <div class="entries-section" v-loading="loading">
       <!-- 网格视图 -->
       <div v-if="viewMode === 'grid'" class="entries-grid">
         <draggable
@@ -219,10 +210,10 @@
                   </p>
                   <div class="entry-meta">
                     <el-tag 
-                      :type="getTypeTagType(entry.type)" 
-                      size="small" 
-                      effect="plain"
-                    >
+            :type="getTypeTagType(entry.type) as FilterTagType"
+            size="small"
+            effect="plain"
+          >
                       {{ getTypeLabel(entry.type) }}
                     </el-tag>
                     <span class="entry-url">{{ getDisplayUrl(entry.url) }}</span>
@@ -232,10 +223,10 @@
                 <!-- 状态指示器 -->
                 <div class="entry-status">
                   <el-tag 
-                    :type="entry.enabled ? 'success' : 'info'" 
-                    size="small"
-                    class="status-tag"
-                  >
+            :type="entry.enabled ? 'success' : 'info' as FilterTagType"
+            size="small"
+            class="status-tag"
+          >
                     {{ entry.enabled ? '启用' : '禁用' }}
                   </el-tag>
                 </div>
@@ -386,6 +377,7 @@
         </el-button>
       </el-empty>
     </div>
+  </ContentCard>
 
     <!-- 入口编辑对话框 -->
     <EntryEditDialog
@@ -404,24 +396,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { ElMessage, ElMessageBox, ElDropdown, ElDropdownMenu, ElDropdownItem, ElButton, ElInput, ElSelect, ElOption, ElIcon } from 'element-plus'
 import {
-  View, Plus, DocumentCopy, Search, Grid, List, Refresh, More, Edit, Delete,
-  Switch, DataAnalysis, Rank, Link, Fire, Check, Mouse
+  Grid, Plus, View, DocumentCopy, Search, Check, Mouse, StarFilled, Rank, More, Edit, Switch, DataAnalysis, Delete, Link, List, Refresh
 } from '@element-plus/icons-vue'
-import draggable from 'vuedraggable'
-
-// 组件导入
-import PageHeader from '@/components/PageHeader.vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import ContentCard from '@/components/common/ContentCard.vue'
 import StatsCard from '@/components/StatsCard.vue'
+import UnifiedFilterSection from '@/components/UnifiedFilterSection.vue'
+import draggable from 'vuedraggable'
 import EntryEditDialog from './components/EntryEditDialog.vue'
 import EntryPreviewDialog from './components/EntryPreviewDialog.vue'
 
-// API导入
-import { portalConfigApi } from '@/api/navigation'
+// 修正API导入
+import { entryPanelApi } from '@/api/navigation'
 
-// 类型定义
+type EntryType = 'internal' | 'external' | 'app'
+
+type FilterTagType = 'primary' | 'success' | 'warning' | 'danger' | 'info'
+
+interface FilterTag {
+  key: string
+  label: string
+  type?: FilterTagType
+}
+
+// 确保EntryItem接口只定义一次
 interface EntryItem {
   id: number
   name: string
@@ -430,15 +431,17 @@ interface EntryItem {
   iconType: 'icon' | 'image'
   iconName?: string
   iconUrl?: string
-  iconBgColor: string
-  iconColor: string
-  type: 'internal' | 'external' | 'app'
+  iconBgColor?: string
+  iconColor?: string
+  type: EntryType
   enabled: boolean
   clickCount: number
   sortOrder: number
   createdAt: string
   updatedAt: string
 }
+
+
 
 // 响应式数据
 const loading = ref(false)
@@ -456,6 +459,40 @@ const filters = reactive({
   status: '',
   type: '',
   sortBy: 'createTime'
+})
+
+// 激活的筛选标签
+const activeFilterTags = computed(() => {
+  const tags: FilterTag[] = []
+  
+  if (filters.keyword) {
+    tags.push({ key: 'keyword', label: `关键词: ${filters.keyword}`, type: 'info' as FilterTagType })
+  }
+  if (filters.status) {
+    tags.push({
+      key: 'status', 
+      label: `状态: ${filters.status === 'enabled' ? '启用' : '禁用'}`, 
+      type: filters.status === 'enabled' ? 'success' as FilterTagType : 'danger' as FilterTagType
+    })
+  }
+  if (filters.type) {
+    const typeLabels = { internal: '内部链接', external: '外部链接', app: '应用跳转' }
+    tags.push({
+      key: 'type', 
+      label: `类型: ${typeLabels[filters.type as keyof typeof typeLabels]}`, 
+      type: 'primary' as FilterTagType
+    })
+  }
+  if (filters.sortBy !== 'createTime') {
+    const sortLabels = { clicks: '点击量', name: '名称', sortOrder: '排序值', createTime: '创建时间' }
+    tags.push({
+      key: 'sortBy', 
+      label: `排序: ${sortLabels[filters.sortBy as keyof typeof sortLabels]}`, 
+      type: 'info' as FilterTagType
+    })
+  }
+  
+  return tags
 })
 
 // 统计数据
@@ -528,7 +565,7 @@ onMounted(() => {
 const loadEntries = async () => {
   try {
     loading.value = true
-    const response = await portalConfigApi.entryPanel.getPanels()
+    const response = await entryPanelApi.getPanels()
     
     // 模拟数据转换
     entries.value = [
@@ -627,13 +664,16 @@ const handleSaveEntry = (entryData: Partial<EntryItem>) => {
     }
   } else {
     // 创建新入口
-    const newEntry: EntryItem = {
-      id: Date.now(), // 临时ID
-      ...entryData as EntryItem,
-      clickCount: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+    // 移除entryData中的id属性以避免重复指定
+      const { id, ...restData } = entryData as EntryItem;
+      const newEntry: EntryItem = {
+        id: Date.now(), // 临时ID
+        ...restData,
+        description: restData.description || '',
+        clickCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
     entries.value.push(newEntry)
     ElMessage.success('入口创建成功')
   }
@@ -729,6 +769,33 @@ const handleStatsClick = (type: string) => {
   ElMessage.info(`${type}统计详情功能开发中...`)
 }
 
+// 筛选器相关方法
+const removeFilter = (key: string) => {
+  switch (key) {
+    case 'keyword':
+      filters.keyword = ''
+      break
+    case 'status':
+      filters.status = ''
+      break
+    case 'type':
+      filters.type = ''
+      break
+    case 'sortBy':
+      filters.sortBy = 'createTime'
+      break
+  }
+  applyFilters()
+}
+
+const clearAllFilters = () => {
+  filters.keyword = ''
+  filters.status = ''
+  filters.type = ''
+  filters.sortBy = 'createTime'
+  applyFilters()
+}
+
 const handlePreview = () => {
   previewDialogVisible.value = true
 }
@@ -775,318 +842,83 @@ const formatDate = (dateString: string) => {
 }
 </script>
 
-<style lang="scss" scoped>
-@import "@/styles/variables.scss";
-
+<style scoped>
 .entry-panel-management {
-  min-height: 100vh;
-  background: $color-bg-page;
+  padding: var(--spacing-xl);
+  background: var(--color-bg-page);
+  min-height: calc(100vh - 60px);
 }
 
-// 统计数据区域
+/* 统计数据区域 */
 .stats-section {
-  margin-bottom: $spacing-lg;
+  margin-bottom: var(--spacing-lg);
 }
 
-// 过滤区域
-.filter-section {
-  margin-bottom: $spacing-lg;
-  
-  .filter-card {
-    border-radius: $radius-lg;
-    border: none;
-    box-shadow: $shadow-card;
-  }
+/* 内容区域 */
+.entries-section {
+  margin-top: var(--spacing-lg);
+  animation: fadeIn var(--transition-medium) var(--ease-out-cubic);
 }
 
-// 入口网格视图
-.entries-grid {
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: $spacing-md;
-    min-height: 200px;
-  }
-  
-  .entry-card {
-    @include card-style;
-    padding: 0;
-    cursor: pointer;
-    transition: all $transition-medium;
-    
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: $shadow-card-hover;
-    }
-    
-    .entry-header {
-      @include flex-between;
-      padding: $spacing-md $spacing-md 0;
-      
-      .drag-handle {
-        color: $color-text-tertiary;
-        cursor: grab;
-        
-        &:active {
-          cursor: grabbing;
-        }
-      }
-    }
-    
-    .entry-content {
-      padding: $spacing-md;
-      
-      .entry-icon-container {
-        text-align: center;
-        margin-bottom: $spacing-md;
-        
-        .entry-icon {
-          width: 64px;
-          height: 64px;
-          border-radius: $radius-lg;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: $shadow-card;
-          transition: transform $transition-medium;
-          
-          &:hover {
-            transform: scale(1.05);
-          }
-          
-          .icon-image {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-          }
-        }
-      }
-      
-      .entry-info {
-        text-align: center;
-        
-        .entry-name {
-          font-size: 16px;
-          font-weight: 600;
-          color: $color-text-primary;
-          margin-bottom: $spacing-xs;
-          @include text-ellipsis;
-        }
-        
-        .entry-description {
-          font-size: 12px;
-          color: $color-text-tertiary;
-          margin-bottom: $spacing-sm;
-          @include text-ellipsis-multiline(2);
-          min-height: 32px;
-        }
-        
-        .entry-meta {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: $spacing-sm;
-          flex-wrap: wrap;
-          
-          .entry-url {
-            font-size: 11px;
-            color: $color-text-tertiary;
-            @include text-ellipsis;
-            max-width: 150px;
-          }
-        }
-      }
-      
-      .entry-status {
-        text-align: center;
-        margin-top: $spacing-sm;
-        
-        .status-tag {
-          border-radius: $radius-md;
-        }
-      }
-    }
-    
-    .entry-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      border-top: 1px solid $color-border-light;
-      
-      .stat-item {
-        padding: $spacing-sm;
-        text-align: center;
-        border-right: 1px solid $color-border-light;
-        
-        &:last-child {
-          border-right: none;
-        }
-        
-        .stat-label {
-          display: block;
-          font-size: 11px;
-          color: $color-text-tertiary;
-          margin-bottom: 2px;
-        }
-        
-        .stat-value {
-          display: block;
-          font-size: 12px;
-          font-weight: 500;
-          color: $color-text-secondary;
-        }
-      }
-    }
-  }
-  
-  // 添加入口卡片
-  .add-entry-card {
-    @include card-style;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    cursor: pointer;
-    border: 2px dashed $color-border-primary;
-    background: $color-bg-section;
-    transition: all $transition-medium;
-    
-    &:hover {
-      border-color: $color-primary;
-      background: lighten($color-primary, 45%);
-      transform: translateY(-2px);
-      
-      .add-icon {
-        color: $color-primary;
-        transform: scale(1.1);
-      }
-    }
-    
-    .add-content {
-      text-align: center;
-      
-      .add-icon {
-        color: $color-text-tertiary;
-        margin-bottom: $spacing-sm;
-        transition: all $transition-medium;
-      }
-      
-      .add-text {
-        display: block;
-        color: $color-text-secondary;
-        font-size: 14px;
-      }
-    }
-  }
+/* 网格视图样式 */
+.entries-grid .grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  min-height: 200px;
 }
 
-// 列表视图
-.entries-list {
-  .unified-table {
-    background: white;
-    border-radius: $radius-lg;
-    overflow: hidden;
-    box-shadow: $shadow-card;
-    
-    :deep(.el-table__header th) {
-      background: $color-bg-section;
-      color: $color-text-primary;
-      font-weight: 600;
-      border-bottom: 1px solid $color-border-light;
-    }
-    
-    :deep(.el-table__body tr:hover) {
-      background: $color-bg-section;
-    }
-    
-    .drag-column {
-      .drag-handle {
-        color: $color-text-tertiary;
-        cursor: grab;
-        
-        &:active {
-          cursor: grabbing;
-        }
-      }
-    }
-    
-    .table-entry-info {
-      display: flex;
-      align-items: center;
-      gap: $spacing-sm;
-      
-      .table-entry-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: $radius-md;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        
-        .table-icon-image {
-          width: 20px;
-          height: 20px;
-          object-fit: contain;
-        }
-      }
-      
-      .table-entry-content {
-        flex: 1;
-        min-width: 0;
-        
-        .table-entry-name {
-          font-weight: 500;
-          color: $color-text-primary;
-          @include text-ellipsis;
-        }
-        
-        .table-entry-description {
-          font-size: 12px;
-          color: $color-text-tertiary;
-          @include text-ellipsis;
-          margin-top: 2px;
-        }
-      }
-    }
-    
-    .table-url {
-      @include text-ellipsis;
-    }
-    
-    .click-count, .sort-order, .update-time {
-      font-size: 13px;
-      color: $color-text-secondary;
-    }
-  }
+.entry-card {
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-// 响应式设计
-@include respond-below(md) {
-  .entries-grid .grid-container {
-    grid-template-columns: 1fr;
-    gap: $spacing-sm;
-  }
-  
-  .filter-section {
-    :deep(.el-row) {
-      flex-direction: column;
-      gap: $spacing-sm;
-    }
-    
-    :deep(.el-col) {
-      width: 100% !important;
-    }
-  }
+.entry-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
 }
 
-// 拖拽样式
+.add-entry-card {
+  background: #f7f8fa;
+  border-radius: 8px;
+  border: 2px dashed #dcdfe6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-height: 300px;
+}
+
+.add-entry-card:hover {
+  border-color: #4096ff;
+  background: #ecf5ff;
+  transform: translateY(-2px);
+}
+
+/* 列表视图样式 */
+.unified-table {
+  background: var(--color-bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* 拖拽样式 */
 .ghost-item {
   opacity: 0.5;
   transform: rotate(2deg);
 }
 
 .chosen-item {
-  border: 2px solid $color-primary;
+  border: 2px solid var(--color-primary);
 }
 
 .drag-item {
@@ -1094,12 +926,199 @@ const formatDate = (dateString: string) => {
   z-index: 999;
 }
 
-// 工具类
-.ml-2 {
-  margin-left: 8px;
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .entries-grid .grid-container {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
 }
 
-.text-right {
-  text-align: right;
+/* 深色主题支持 */
+:root[data-theme="dark"] .entry-card {
+  background: var(--gradient-card);
+  border-color: var(--color-border-light);
+}
+
+:root[data-theme="dark"] .unified-table {
+  background: var(--gradient-card);
+}
+
+/* 其他样式补充 */
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.drag-handle {
+  cursor: move;
+  color: #909399;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.entry-content {
+  margin-bottom: var(--spacing-md);
+}
+
+.entry-icon-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.entry-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.entry-info {
+  text-align: center;
+}
+
+.entry-name {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entry-description {
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.entry-url {
+  font-size: 12px;
+  color: #909399;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entry-status {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.status-tag {
+  min-width: 60px;
+}
+
+.entry-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #909399;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-label {
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-weight: 500;
+  color: #303133;
+}
+
+.add-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.add-icon {
+  color: #4096ff;
+  margin-bottom: 16px;
+}
+
+.add-text {
+  font-size: 14px;
+  color: #606266;
+}
+
+.table-entry-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.table-entry-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.table-icon-image {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.table-entry-content {
+  max-width: 200px;
+}
+
+.table-entry-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.table-entry-description {
+  font-size: 12px;
+  color: #606266;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.drag-column {
+  display: flex;
+  justify-content: center;
 }
 </style>

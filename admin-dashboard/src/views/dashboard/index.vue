@@ -1,24 +1,49 @@
 <template>
   <div class="dashboard" :class="{ mobile: isMobile }">
-    <!-- 页面头部 -->
-    <div class="page-header">
+    <!-- 现代化页面头部 -->
+    <div class="page-header modern-card">
       <div class="header-content">
-        <h1 class="page-title">
-          <el-icon class="title-icon"><Monitor /></el-icon>
-          全局仪表盘
-        </h1>
-        <p class="page-subtitle">
-          欢迎回来，{{ currentUser?.name || '管理员' }}！
-          {{ getWelcomeMessage() }}
-        </p>
+        <div class="welcome-section">
+          <div class="avatar-section">
+            <el-avatar :size="64" class="user-avatar-large">
+              {{ currentUser?.name?.charAt(0) || 'U' }}
+            </el-avatar>
+            <div class="online-indicator"></div>
+          </div>
+          <div class="welcome-text">
+            <h1 class="page-title">
+              <span class="greeting">{{ getGreeting() }}</span>
+              <span class="username">{{ currentUser?.name || '管理员' }}</span>
+            </h1>
+            <p class="page-subtitle">
+              <el-icon class="time-icon"><Clock /></el-icon>
+              {{ getCurrentDateTime() }}
+            </p>
+            <p class="welcome-message">
+              {{ getWelcomeMessage() }}
+            </p>
+          </div>
+        </div>
       </div>
       <div class="header-actions">
+        <div class="quick-stats">
+          <div class="stat-item">
+            <div class="stat-value">{{ dashboardStore.metrics?.todayActive || 0 }}</div>
+            <div class="stat-label">今日活跃</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ dashboardStore.metrics?.pendingTasks || 0 }}</div>
+            <div class="stat-label">待办任务</div>
+          </div>
+        </div>
         <el-button 
           type="primary" 
           :icon="Refresh"
           @click="handleRefreshAll"
           :loading="isRefreshing"
-          class="refresh-btn"
+          class="modern-button primary refresh-btn"
+          size="large"
+          style="--el-button-primary-bg-color: var(--color-primary); --el-button-primary-border-color: var(--color-primary); --el-button-primary-hover-bg-color: var(--color-primary-hover); --el-button-primary-active-bg-color: var(--color-primary-active);"
         >
           刷新数据
         </el-button>
@@ -39,14 +64,15 @@
     <!-- 仪表盘内容 -->
     <div v-else class="dashboard-content">
       <!-- 核心指标卡片 -->
-      <MetricsCards
-        :metrics="dashboardStore.metrics"
-        :loading="dashboardStore.loading.metrics"
-        :error="dashboardStore.error.metrics"
-        @card-click="handleMetricCardClick"
-        @refresh="handleMetricsRefresh"
-        class="metrics-section"
-      />
+      <div class="metrics-section fade-in">
+        <MetricsCards
+          :metrics="dashboardStore.metrics"
+          :loading="dashboardStore.loading.metrics"
+          :error="dashboardStore.error.metrics"
+          @card-click="handleMetricCardClick"
+          @refresh="handleMetricsRefresh"
+        />
+      </div>
 
       <!-- 数据概览卡片区域 -->
       <div class="overview-cards-section">
@@ -108,45 +134,36 @@
       </div>
 
       <!-- 功能区域 -->
-      <div class="function-section">
+      <div class="function-section slide-up">
         <el-row :gutter="24">
-          <!-- 待办任务 -->
-          <el-col :span="12" :xs="24" :sm="24" :md="12" v-if="false">
-            <PendingTasks
-              :pending-tasks="dashboardStore.pendingTasks"
-              :loading="dashboardStore.loading.tasks"
-              :error="dashboardStore.error.tasks"
-              @refresh="handleTasksRefresh"
-              @task-click="handleTaskClick"
-              @task-action="handleTaskAction"
-              @view-all="handleViewAllTasks"
-            />
-          </el-col>
-
           <!-- 快捷操作 -->
           <el-col :span="12" :xs="24" :sm="24" :md="12">
-            <QuickActions
-              :quick-actions="dashboardStore.filteredQuickActions"
-              :loading="dashboardStore.loading.overview"
-              :error="dashboardStore.error.overview"
-              @action-click="handleQuickActionClick"
-              @customize="handleCustomizeActions"
-            />
+            <div class="modern-card function-card">
+              <QuickActions
+                :quick-actions="dashboardStore.filteredQuickActions"
+                :loading="dashboardStore.loading.overview"
+                :error="dashboardStore.error.overview"
+                @action-click="handleQuickActionClick"
+                @customize="handleCustomizeActions"
+              />
+            </div>
           </el-col>
 
           <!-- 最新反馈 -->
           <el-col :span="12" :xs="24" :sm="24" :md="12">
-            <RecentFeedback
-              :feedback-list="dashboardStore.recentFeedback"
-              :loading="dashboardStore.loading.overview"
-              :error="dashboardStore.error.overview"
-              @feedback-click="handleFeedbackClick"
-              @mark-all-read="handleMarkAllFeedbackRead"
-              @mark-read="handleMarkFeedbackRead"
-              @reply="handleFeedbackReply"
-              @action="handleFeedbackAction"
-              @view-all="handleViewAllFeedback"
-            />
+            <div class="modern-card function-card">
+              <RecentFeedback
+                :feedback-list="dashboardStore.recentFeedback"
+                :loading="dashboardStore.loading.overview"
+                :error="dashboardStore.error.overview"
+                @feedback-click="handleFeedbackClick"
+                @mark-all-read="handleMarkAllFeedbackRead"
+                @mark-read="handleMarkFeedbackRead"
+                @reply="handleFeedbackReply"
+                @action="handleFeedbackAction"
+                @view-all="handleViewAllFeedback"
+              />
+            </div>
           </el-col>
         </el-row>
       </div>
@@ -264,17 +281,23 @@
       </template>
     </el-dialog>
 
-    <!-- 全局加载遮罩 -->
-    <div v-if="isInitialLoading" class="initial-loading">
+    <!-- 现代化全局加载遮罩 -->
+    <div v-if="isInitialLoading" class="initial-loading modern-loading">
       <div class="loading-content">
-        <el-icon class="is-loading" size="48"><Loading /></el-icon>
-        <p class="loading-text">正在加载仪表盘数据...</p>
+        <div class="loading-animation">
+          <div class="loading-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>
+        <h3 class="loading-title">正在加载仪表盘</h3>
+        <p class="loading-text">请稍候，我们正在为您准备最新的数据...</p>
         <div class="loading-progress">
-          <el-progress 
-            :percentage="loadingProgress" 
-            :show-text="false" 
-            :stroke-width="4"
-          />
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: loadingProgress + '%' }"></div>
+          </div>
+          <span class="progress-text">{{ loadingProgress }}%</span>
         </div>
       </div>
     </div>
@@ -414,12 +437,31 @@ const taskStatus = computed(() => {
 })
 
 // 方法
+const getGreeting = () => {
+  const hour = new Date().getHours()
+  if (hour < 6) return '晚上好'
+  if (hour < 12) return '早上好'
+  if (hour < 18) return '下午好'
+  return '晚上好'
+}
+
 const getWelcomeMessage = () => {
   const hour = new Date().getHours()
-  if (hour < 6) return '晚上好，辛苦了！'
-  if (hour < 12) return '早上好，新的一天开始了！'
-  if (hour < 18) return '下午好，工作进展顺利吗？'
-  return '晚上好，今天辛苦了！'
+  if (hour < 6) return '辛苦了！深夜时分依然在为工作奔波'
+  if (hour < 12) return '新的一天开始了，让我们一起加油！'
+  if (hour < 18) return '工作进展如何？记得适当休息哦'
+  return '今天的工作快结束了，辛苦了！'
+}
+
+const getCurrentDateTime = () => {
+  return new Date().toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
 const simulateLoadingProgress = () => {
@@ -714,18 +756,326 @@ onUnmounted(() => {
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-xl);
-  background: linear-gradient(135deg, var(--color-bg-card) 0%, #f8f9fa 100%);
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-xl);
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-2xl);
+  background: linear-gradient(135deg, var(--color-bg-white) 0%, var(--color-bg-secondary) 100%);
+  border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-card);
-  border: 1px solid var(--color-border-light);
-  gap: var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(47, 129, 247, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(100px, -100px);
 }
 
 .header-content {
   flex: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.welcome-section {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md) 0;
+}
+
+.avatar-section {
+  position: relative;
+  margin-right: var(--spacing-xl);
+}
+
+.user-avatar-large {
+  border: 2px solid var(--color-bg-secondary);
+}
+
+.online-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  border: 2px solid var(--color-bg-white);
+}
+
+.welcome-text {
+  padding: var(--spacing-sm) 0;
+}
+
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #722ed1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.username {
+  margin-left: var(--spacing-xs);
+}
+
+.page-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin: var(--spacing-xs) 0;
+  display: flex;
+  align-items: center;
+}
+
+.time-icon {
+  margin-right: var(--spacing-xs);
+}
+
+.welcome-message {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  padding: var(--spacing-md) 0;
+}
+
+.quick-stats {
+  display: flex;
+  margin-right: var(--spacing-lg);
+}
+
+.stat-item {
+  margin: 0 var(--spacing-lg);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.modern-button {
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-medium);
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.6s;
+}
+
+.refresh-btn:hover::before {
+  left: 100%;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(47, 129, 247, 0.3);
+}
+
+.permission-error {
+  margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-content {
+  padding: var(--spacing-md) 0;
+}
+
+.metrics-section {
+  margin-bottom: var(--spacing-2xl);
+  animation: fadeIn var(--transition-medium);
+}
+
+.overview-cards-section {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.function-section {
+  margin-bottom: var(--spacing-2xl);
+  animation: slideUp var(--transition-medium);
+}
+
+.function-card {
+  height: 100%;
+}
+
+.detail-modal {
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.initial-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-index-loading);
+}
+
+.loading-content {
+  text-align: center;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--color-bg-white);
+}
+
+.loading-animation {
+  margin-bottom: var(--spacing-lg);
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  margin: 0 var(--spacing-xs);
+  animation: pulse var(--transition-medium) infinite alternate;
+}
+
+.dot:nth-child(2) {
+  animation-delay: var(--transition-fast);
+}
+
+.dot:nth-child(3) {
+  animation-delay: calc(var(--transition-fast) * 2);
+}
+
+.loading-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.loading-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--spacing-md);
+}
+
+.loading-progress {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.progress-bar {
+  height: 6px;
+  background-color: var(--color-bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xs);
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--color-primary);
+  transition: width var(--transition-fast);
+}
+
+.progress-text {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-align: right;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--spacing-sm));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(var(--spacing-md));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .page-title {
@@ -1343,6 +1693,361 @@ onUnmounted(() => {
   .dialog-footer {
     flex-direction: column;
     gap: var(--spacing-sm);
+  }
+}
+
+/* ===== 新增现代化样式 ===== */
+
+/* 欢迎区域样式 */
+.welcome-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+  z-index: 2;
+  position: relative;
+}
+
+.avatar-section {
+  position: relative;
+}
+
+.user-avatar-large {
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-xl);
+  border: 4px solid white;
+  box-shadow: var(--shadow-lg);
+}
+
+.online-indicator {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: var(--color-success);
+  border: 2px solid white;
+  border-radius: 50%;
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.welcome-text {
+  flex: 1;
+}
+
+.greeting {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-normal);
+  margin-right: var(--spacing-sm);
+}
+
+.username {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-2xl);
+}
+
+.page-title {
+  margin: 0 0 var(--spacing-xs) 0;
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+  margin: var(--spacing-xs) 0 var(--spacing-sm) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.time-icon {
+  color: var(--color-primary);
+}
+
+.welcome-message {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  margin: 0;
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-relaxed);
+}
+
+/* 头部操作区域 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+  z-index: 2;
+  position: relative;
+}
+
+.quick-stats {
+  display: flex;
+  gap: var(--spacing-lg);
+}
+
+.stat-item {
+  text-align: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(47, 129, 247, 0.1);
+  backdrop-filter: blur(8px);
+  min-width: 80px;
+}
+
+.stat-value {
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-top: var(--spacing-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.refresh-btn {
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  padding: var(--spacing-md) var(--spacing-2xl);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.refresh-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.6s;
+}
+
+.refresh-btn:hover::before {
+  left: 100%;
+}
+
+.refresh-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(47, 129, 247, 0.3);
+}
+
+/* 指标和功能区域 */
+.metrics-section {
+  margin-bottom: var(--spacing-2xl);
+  animation-delay: 0.1s;
+}
+
+.function-card {
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* 现代化加载样式 */
+.modern-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.98) 100%);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  text-align: center;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.loading-animation {
+  margin-bottom: var(--spacing-xl);
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  animation: dotPulse 1.4s infinite both;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+.dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.loading-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.loading-text {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  margin: 0 0 var(--spacing-xl) 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.loading-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 20px 20px;
+  animation: progressStripe 1s linear infinite;
+}
+
+@keyframes progressStripe {
+  0% { background-position: 0 0; }
+  100% { background-position: 20px 0; }
+}
+
+.progress-text {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-lg);
+    min-height: auto;
+    padding: var(--spacing-xl);
+  }
+  
+  .welcome-section {
+    gap: var(--spacing-md);
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  
+  .quick-stats {
+    justify-content: center;
+  }
+  
+  .user-avatar-large {
+    width: 48px;
+    height: 48px;
+    font-size: var(--text-base);
+  }
+  
+  .username {
+    font-size: var(--text-xl);
+  }
+  
+  .function-section .el-col {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: var(--spacing-lg);
+  }
+  
+  .welcome-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .quick-stats {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .stat-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    min-width: auto;
   }
 }
 </style>

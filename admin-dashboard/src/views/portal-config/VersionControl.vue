@@ -1,34 +1,27 @@
 <template>
   <div class="version-control">
-    <div class="page-header">
-      <div class="header-content">
-        <h2 class="page-title">
-          <el-icon><Clock /></el-icon>
-          版本管理
-        </h2>
-        <p class="page-description">管理门户配置的版本历史，支持版本对比、回滚和快照创建</p>
-      </div>
-      <div class="header-actions">
+    <PageHeader
+      title="版本管理"
+      description="管理门户配置的版本历史，支持版本对比、回滚和快照创建"
+      :icon="Clock"
+    >
+      <template #actions>
         <el-button type="primary" @click="showSnapshotDialog = true">
           <el-icon><Camera /></el-icon>
           创建快照
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
-    <div class="version-list">
-      <el-card>
-        <template #header>
-          <div class="card-header">
-            <span>版本历史</span>
-            <el-button type="text" @click="refreshVersions">
-              <el-icon><Refresh /></el-icon>
-              刷新
-            </el-button>
-          </div>
-        </template>
+    <ContentCard title="版本历史">
+      <template #extra>
+        <el-button type="text" @click="refreshVersions">
+          <el-icon><Refresh /></el-icon>
+          刷新
+        </el-button>
+      </template>
 
-        <el-table :data="versions" v-loading="loading">
+      <el-table :data="versions" v-loading="loading">
           <el-table-column prop="version_number" label="版本号" width="120">
             <template #default="{ row }">
               <el-tag type="primary">{{ row.version_number }}</el-tag>
@@ -60,9 +53,8 @@
               <el-button size="small" type="danger" @click="deleteVersion(row)">删除</el-button>
             </template>
           </el-table-column>
-        </el-table>
-      </el-card>
-    </div>
+      </el-table>
+    </ContentCard>
 
     <!-- 快照创建对话框 -->
     <el-dialog v-model="showSnapshotDialog" title="创建配置快照" width="500px">
@@ -92,6 +84,8 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Clock, Camera, Refresh } from '@element-plus/icons-vue'
+import PageHeader from '@/components/common/PageHeader.vue'
+import ContentCard from '@/components/common/ContentCard.vue'
 
 // 响应式数据
 const loading = ref(false)
@@ -223,55 +217,8 @@ const formatDate = (dateStr: string) => {
 
 <style lang="scss" scoped>
 .version-control {
-  padding: 24px;
-  background: #f5f7fa;
+  padding: var(--spacing-xl);
+  background: var(--color-bg-page);
   min-height: calc(100vh - 60px);
-
-  .page-header {
-    background: #fff;
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .header-content {
-      .page-title {
-        font-size: 24px;
-        font-weight: 600;
-        color: #303133;
-        margin: 0 0 8px 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        .el-icon {
-          color: #409eff;
-        }
-      }
-
-      .page-description {
-        color: #606266;
-        font-size: 14px;
-        margin: 0;
-      }
-    }
-  }
-
-  .version-list {
-    .el-card {
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-
-      .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 600;
-      }
-    }
-  }
 }
 </style>

@@ -1,76 +1,56 @@
 <template>
   <div class="global-audit-logs-page">
-    <div class="page-header">
-      <h2>全局审计日志</h2>
-      <p class="page-description">记录系统所有业务模块操作，支持跨模块查询和导出</p>
+    <UnifiedPageHeader
+      title="全局审计日志"
+      description="记录系统所有业务模块操作，支持跨模块查询和导出"
+      :icon="Document"
+    >
+      <template #extra>
+        <div class="header-time">
+          <el-icon class="time-icon"><Clock /></el-icon>
+          <span>{{ currentTime }}</span>
+        </div>
+      </template>
+    </UnifiedPageHeader>
 
-      <!-- 统计卡片 -->
-      <el-row :gutter="16" class="stats-row">
-        <el-col :span="6">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon total">
-                <el-icon>
-                  <DocumentChecked />
-                </el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-value">{{ logStats.total }}</div>
-                <div class="stats-label">总操作数</div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
+    <!-- 统计卡片 -->
+    <el-row :gutter="16" class="stats-row">
+      <el-col :span="6">
+        <StatsCard
+          :value="logStats.total"
+          label="总操作数"
+          :icon="DocumentChecked"
+          type="primary"
+        />
+      </el-col>
 
-        <el-col :span="6">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon today">
-                <el-icon>
-                  <Calendar />
-                </el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-value">{{ logStats.today }}</div>
-                <div class="stats-label">今日操作</div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
+      <el-col :span="6">
+        <StatsCard
+    :value="logStats.today"
+    label="今日操作"
+    :icon="Calendar"
+    type="info"
+  />
+      </el-col>
 
-        <el-col :span="6">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon risk">
-                <el-icon>
-                  <WarningFilled />
-                </el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-value">{{ logStats.riskOperations }}</div>
-                <div class="stats-label">风险操作</div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
+      <el-col :span="6">
+        <StatsCard
+    :value="logStats.riskOperations"
+    label="风险操作"
+    :icon="WarningFilled"
+    type="warning"
+  />
+      </el-col>
 
-        <el-col :span="6">
-          <el-card class="stats-card">
-            <div class="stats-content">
-              <div class="stats-icon users">
-                <el-icon>
-                  <User />
-                </el-icon>
-              </div>
-              <div class="stats-info">
-                <div class="stats-value">{{ logStats.activeOperators }}</div>
-                <div class="stats-label">活跃操作员</div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-    </div>
+      <el-col :span="6">
+        <StatsCard
+    :value="logStats.activeOperators"
+    label="活跃操作员"
+    :icon="User"
+    type="success"
+  />
+      </el-col>
+    </el-row>
 
     <el-card class="main-card">
       <template #header>
@@ -88,8 +68,12 @@
       </template>
 
       <!-- 搜索栏 -->
-      <div class="search-bar">
-        <el-form :inline="true" :model="searchForm" class="demo-form-inline">
+      <div class="search-bar modern-search">
+        <div class="search-header">
+          <el-icon><Search /></el-icon>
+          <span>高级搜索</span>
+        </div>
+        <el-form :inline="true" :model="searchForm" class="modern-search-form">
           <el-form-item label="操作人">
             <el-select v-model="searchForm.operatorId" placeholder="选择操作人" clearable filterable style="width: 150px">
               <el-option v-for="user in userOptions" :key="user.id" :label="user.name" :value="user.id" />
@@ -327,9 +311,11 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Download, Refresh, Search, DocumentChecked, Calendar,
-  WarningFilled, User
+  WarningFilled, User, Document, Clock
 } from '@element-plus/icons-vue'
 import { globalAuditApi } from '@/api'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
+import StatsCard from '@/components/StatsCard.vue'
 import type {
   GlobalAuditLog, GlobalOperationType, AuditModule, GlobalTargetType,
   GlobalAuditLogQueryParams, RiskLevel
@@ -343,8 +329,18 @@ const selectedLog = ref<GlobalAuditLog | null>(null)
 const dateRange = ref<[string, string] | null>(null)
 const historyCollapsed = ref<string[]>([])
 
+// 定义批量操作历史记录类型
+interface BatchOperationHistoryItem {
+  timestamp: string;
+  operatorName: string;
+  action: BatchOperationType;
+  taskCount: number;
+  success: boolean;
+  note: string;
+}
+
 // 批量操作历史记录
-const batchOperationHistory = ref([
+const batchOperationHistory = ref<BatchOperationHistoryItem[]>([
   {
     timestamp: '2024-01-15 14:30:00',
     operatorName: '张三',
@@ -412,6 +408,18 @@ const tableData = computed(() => {
   return mockData.value.slice(start, end)
 })
 const userOptions = computed(() => mockUsers.value)
+
+// 当前时间显示
+const currentTime = computed(() => {
+  return new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+})
 
 // 业务模块映射
 const getModuleText = (module: AuditModule) => {
@@ -527,8 +535,11 @@ const getRiskLevelType = (level: RiskLevel) => {
   return map[level]
 }
 
+// 定义批量操作类型联合类型
+type BatchOperationType = 'batch_approve' | 'batch_reject' | 'batch_transfer'
+
 // 批量操作标签映射
-const getBatchOperationTag = (action: string) => {
+const getBatchOperationTag = (action: BatchOperationType) => {
   const tags = {
     batch_approve: 'success',
     batch_reject: 'danger',
@@ -537,7 +548,7 @@ const getBatchOperationTag = (action: string) => {
   return tags[action] || 'info'
 }
 
-const getBatchOperationLabel = (action: string) => {
+const getBatchOperationLabel = (action: BatchOperationType) => {
   const labels = {
     batch_approve: '批量通过',
     batch_reject: '批量拒绝',
@@ -731,70 +742,168 @@ onMounted(() => {
 
 <style scoped>
 .global-audit-logs-page {
-  padding: 20px;
+  padding: var(--spacing-xl);
+  background: var(--color-bg-page);
+  min-height: calc(100vh - 60px);
 }
 
 .page-header {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-3xl);
+  background: var(--gradient-card);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-light);
 }
 
-.page-header h2 {
-  margin: 0 0 8px 0;
+.page-title-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+}
+
+.page-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
   font-size: 24px;
-  font-weight: 600;
-  color: #303133;
+  box-shadow: var(--shadow-floating);
+}
+
+.title-text h2 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.page-description {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--line-height-normal);
+}
+
+.header-time {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+}
+
+.time-icon {
+  color: var(--color-primary);
 }
 
 .stats-row {
-  margin: 20px 0;
+  margin: var(--spacing-3xl) 0;
 }
 
 .stats-card {
-  min-height: 80px;
-  transition: all 0.3s ease;
+  min-height: 100px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  background: var(--gradient-card);
+  transition: all var(--transition-medium);
+  overflow: hidden;
+  position: relative;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
 }
 
 .stats-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
 }
 
 .stats-content {
   display: flex;
   align-items: center;
-  min-height: 80px;
-  padding: 8px 0;
+  min-height: 100px;
+  padding: var(--spacing-lg) var(--spacing-xl);
 }
 
 .stats-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
-  color: #fff;
+  margin-right: var(--spacing-xl);
+  color: white;
+  font-size: var(--text-xl);
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.stats-icon::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(45deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(255,255,255,0.2) 100%);
+  z-index: -1;
 }
 
 .stats-icon.total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
 }
 
 .stats-icon.today {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: var(--gradient-info);
 }
 
 .stats-icon.risk {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  background: var(--gradient-warning);
 }
 
 .stats-icon.users {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: var(--gradient-success);
 }
 
 .stats-info {
   flex: 1;
+}
+
+.stats-value {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-xs);
+}
+
+.stats-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .stats-value {
@@ -911,13 +1020,69 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
+.main-card {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  background: var(--color-bg-card);
+  transition: all var(--transition-medium);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  font-size: var(--text-lg);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.modern-search {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  border: 1px solid var(--color-border-light);
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-lg);
+}
+
+.modern-search-form {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-border-light);
+}
+
 /* 统计卡片响应式：中屏两列，小屏一列，避免挤压导致内容裁切 */
 @media (max-width: 992px) {
   .stats-row .el-col {
     width: 50% !important;
     max-width: 50% !important;
     flex: 0 0 50% !important;
-    margin-bottom: 12px;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .page-title-section {
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .header-time {
+    align-self: flex-start;
   }
 }
 
@@ -929,11 +1094,30 @@ onMounted(() => {
   }
 
   .stats-content {
-    min-height: 64px;
+    min-height: 80px;
+    padding: var(--spacing-md);
   }
 
   .stats-value {
-    font-size: 20px;
+    font-size: var(--text-xl);
+  }
+
+  .title-with-icon {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+  }
+
+  .page-icon {
+    align-self: center;
+  }
+
+  .modern-search-form {
+    padding: var(--spacing-lg);
+  }
+
+  .global-audit-logs-page {
+    padding: var(--spacing-lg);
   }
 }
 </style>

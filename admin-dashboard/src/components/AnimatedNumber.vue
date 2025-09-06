@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 interface Props {
   value: number
@@ -17,9 +17,16 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const displayValue = ref(0)
+let animationId: number | null = null
 
 const animateNumber = (start: number, end: number, duration: number) => {
   if (start === end) return
+  
+  // 取消之前的动画
+  if (animationId !== null) {
+    cancelAnimationFrame(animationId)
+    animationId = null
+  }
   
   const range = end - start
   const startTime = Date.now()
@@ -35,13 +42,14 @@ const animateNumber = (start: number, end: number, duration: number) => {
     displayValue.value = Math.round((start + range * easeOutCubic) * Math.pow(10, props.decimals)) / Math.pow(10, props.decimals)
     
     if (progress < 1) {
-      requestAnimationFrame(step)
+      animationId = requestAnimationFrame(step)
     } else {
       displayValue.value = end
+      animationId = null
     }
   }
   
-  requestAnimationFrame(step)
+  animationId = requestAnimationFrame(step)
 }
 
 watch(() => props.value, (newValue, oldValue) => {
@@ -50,5 +58,12 @@ watch(() => props.value, (newValue, oldValue) => {
 
 onMounted(() => {
   animateNumber(0, props.value, props.duration)
+})
+
+onUnmounted(() => {
+  if (animationId !== null) {
+    cancelAnimationFrame(animationId)
+    animationId = null
+  }
 })
 </script>

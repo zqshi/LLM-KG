@@ -1,12 +1,10 @@
 <template>
   <div class="quotation-list">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-title">
-        <h2>名言管理</h2>
-        <p class="header-description">管理公司领导的思想精华，传播企业文化价值观</p>
-      </div>
-      <div class="header-actions">
+    <PageHeader
+      title="名言管理"
+      description="管理公司领导的思想精华，传播企业文化价值观"
+    >
+      <template #actions>
         <el-button type="primary" :icon="Plus" @click="showCreateDialog = true">
           新增名言
         </el-button>
@@ -21,8 +19,8 @@
         >
           批量操作（{{ selectedIds.length }}）
         </el-button>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 筛选区域 -->
     <el-card class="filter-card" shadow="never">
@@ -121,68 +119,51 @@
     <div class="stats-row">
       <el-row :gutter="16">
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-content">
-              <div class="stat-value">{{ quotationStats.totalCount }}</div>
-              <div class="stat-label">总名言数</div>
-            </div>
-            <el-icon class="stat-icon" color="#409eff">
-              <ChatDotRound />
-            </el-icon>
-          </el-card>
+          <StatCard
+            :value="quotationStats.totalCount"
+            label="总名言数"
+            :icon="ChatDotRound"
+            type="primary"
+          />
         </el-col>
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-content">
-              <div class="stat-value">{{ quotationStats.publishedCount }}</div>
-              <div class="stat-label">已发布</div>
-            </div>
-            <el-icon class="stat-icon" color="#67c23a">
-              <CircleCheck />
-            </el-icon>
-          </el-card>
+          <StatCard
+            :value="quotationStats.publishedCount"
+            label="已发布"
+            :icon="CircleCheck"
+            type="success"
+          />
         </el-col>
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-content">
-              <div class="stat-value">{{ quotationStats.pendingCount }}</div>
-              <div class="stat-label">待审核</div>
-            </div>
-            <el-icon class="stat-icon" color="#e6a23c">
-              <Clock />
-            </el-icon>
-          </el-card>
+          <StatCard
+            :value="quotationStats.pendingCount"
+            label="待审核"
+            :icon="Clock"
+            type="warning"
+          />
         </el-col>
         <el-col :span="6">
-          <el-card class="stat-card">
-            <div class="stat-content">
-              <div class="stat-value">{{ quotationStats.todayPublished }}</div>
-              <div class="stat-label">今日发布</div>
-            </div>
-            <el-icon class="stat-icon" color="#f56c6c">
-              <Star />
-            </el-icon>
-          </el-card>
+          <StatCard
+            :value="quotationStats.todayPublished"
+            label="今日发布"
+            :icon="Star"
+            type="danger"
+          />
         </el-col>
       </el-row>
     </div>
 
     <!-- 名言列表 -->
-    <el-card class="list-card">
-      <template #header>
-        <div class="card-header">
-          <span>名言列表</span>
-          <div class="header-right">
-            <el-button 
-              v-if="hasSelected"
-              size="small"
-              @click="clearSelected"
-            >
-              取消选择
-            </el-button>
-            <span class="total-count">共 {{ pagination.total }} 条</span>
-          </div>
-        </div>
+    <ContentCard title="名言列表">
+      <template #extra>
+        <el-button 
+          v-if="hasSelected"
+          size="small"
+          @click="clearSelected"
+        >
+          取消选择
+        </el-button>
+        <span class="total-count">共 {{ pagination.total }} 条</span>
       </template>
       
       <el-table
@@ -273,7 +254,7 @@
           @current-change="handleCurrentChange"
         />
       </div>
-    </el-card>
+    </ContentCard>
 
     <!-- 新增/编辑名言对话框 -->
     <el-dialog
@@ -587,6 +568,9 @@ import { useQuotationStore } from '@/stores/quotation'
 import { useAuthStore } from '@/stores/auth'
 import { userApi } from '@/api'
 import type { Quotation, QuotationForm, User } from '@/types'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
+import StatsCard from '@/components/StatsCard.vue'
+import ContentCard from '@/components/common/ContentCard.vue'
 
 // Store
 const quotationStore = useQuotationStore()
@@ -716,14 +700,14 @@ const getStatusText = (status: string) => {
   return statusMap[status] || status
 }
 
-const getStatusTagType = (status: string) => {
-  const typeMap: Record<string, string> = {
+const getStatusTagType = (status: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' => {
+  const typeMap: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     draft: 'info',
     pending_review: 'warning',
     published: 'success',
     archived: 'danger'
   }
-  return typeMap[status] || 'info'
+  return typeMap[status] || 'primary'
 }
 
 const formatDateTime = (dateTime: string) => {

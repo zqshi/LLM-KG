@@ -1,12 +1,10 @@
 <template>
   <div class="audit-center">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-left">
-        <h1 class="page-title">统一审核中心</h1>
-        <p class="page-description">集中处理全平台内容审核任务，提升审核效率与质量</p>
-      </div>
-      <div class="header-right">
+    <UnifiedPageHeader
+      title="统一审核中心"
+      description="集中处理全平台内容审核任务，提升审核效率与质量"
+    >
+      <template #actions>
         <el-button type="primary" @click="refreshData">
           <el-icon>
             <Refresh />
@@ -25,89 +23,57 @@
           </el-icon>
           性能监控
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 数据看板 -->
     <el-row :gutter="16" class="dashboard-row">
       <el-col :span="6">
-        <el-card class="metric-card pending">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon>
-                <Clock />
-              </el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-value">{{ dashboardStats.pendingTotal }}</div>
-              <div class="metric-label">待审核总量</div>
-              <div class="metric-trend">
-                <span class="trend-up">+{{ dashboardStats.todayNew }}</span>
-                <span class="trend-text">今日新增</span>
-              </div>
-            </div>
-          </div>
-        </el-card>
+        <StatsCard
+          :value="dashboardStats.pendingTotal"
+          label="待审核总量"
+          :icon="Clock"
+          type="primary"
+          :trend="dashboardStats.todayNew"
+          trend-label="今日新增"
+          trend-type="up"
+        />
       </el-col>
 
       <el-col :span="6">
-        <el-card class="metric-card processed">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon>
-                <Check />
-              </el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-value">{{ dashboardStats.todayProcessed }}</div>
-              <div class="metric-label">今日已处理</div>
-              <div class="metric-trend">
-                <span class="trend-up">{{ dashboardStats.avgProcessTime }}分钟</span>
-                <span class="trend-text">平均处理时长</span>
-              </div>
-            </div>
-          </div>
-        </el-card>
+        <StatsCard
+          :value="dashboardStats.todayProcessed"
+          label="今日已处理"
+          :icon="Check"
+          type="info"
+          :trend="`${dashboardStats.avgProcessTime}分钟`"
+          trend-label="平均处理时长"
+          trend-type="neutral"
+        />
       </el-col>
 
       <el-col :span="6">
-        <el-card class="metric-card approved">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon>
-                <CircleCheck />
-              </el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-value">{{ dashboardStats.approvalRate }}%</div>
-              <div class="metric-label">审核通过率</div>
-              <div class="metric-trend">
-                <span class="trend-up">{{ dashboardStats.todayApproved }}</span>
-                <span class="trend-text">今日通过</span>
-              </div>
-            </div>
-          </div>
-        </el-card>
+        <StatCard
+          :value="`${dashboardStats.approvalRate}%`"
+          label="审核通过率"
+          :icon="CircleCheck"
+          type="success"
+          :trend="dashboardStats.todayApproved"
+          trend-label="今日通过"
+          trend-type="up"
+        />
       </el-col>
 
       <el-col :span="6">
-        <el-card class="metric-card rejected">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon>
-                <Close />
-              </el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-value">{{ dashboardStats.todayRejected }}</div>
-              <div class="metric-label">今日拒绝</div>
-              <div class="metric-trend">
-                <span class="trend-down">{{ dashboardStats.rejectionRate }}%</span>
-                <span class="trend-text">拒绝率</span>
-              </div>
-            </div>
-          </div>
-        </el-card>
+        <StatCard
+          :value="dashboardStats.todayRejected"
+          label="今日拒绝"
+          :icon="Close"
+          type="danger"
+          :trend="`${dashboardStats.rejectionRate}%`"
+          trend-label="拒绝率"
+          trend-type="down"
+        />
       </el-col>
     </el-row>
 
@@ -125,20 +91,15 @@
     <el-row :gutter="16" class="main-content">
       <!-- 左侧：任务列表 -->
       <el-col :span="12">
-        <el-card class="task-list-card">
-          <template #header>
-            <div class="card-header">
-              <span class="card-title">待审核任务</span>
-              <div class="header-actions">
-                <el-button type="primary" size="small" @click="handleBatchApprove"
-                  :disabled="selectedTasks.length === 0">
-                  批量通过 ({{ selectedTasks.length }})
-                </el-button>
-                <el-button type="danger" size="small" @click="handleBatchReject" :disabled="selectedTasks.length === 0">
-                  批量拒绝
-                </el-button>
-              </div>
-            </div>
+        <ContentCard title="待审核任务">
+          <template #extra>
+            <el-button type="primary" size="small" @click="handleBatchApprove"
+              :disabled="selectedTasks.length === 0">
+              批量通过 ({{ selectedTasks.length }})
+            </el-button>
+            <el-button type="danger" size="small" @click="handleBatchReject" :disabled="selectedTasks.length === 0">
+              批量拒绝
+            </el-button>
           </template>
 
           <!-- 筛选器 -->
@@ -235,7 +196,7 @@
                 @current-change="() => auditStore.loadTasks()" />
             </div>
           </div>
-        </el-card>
+        </ContentCard>
       </el-col>
 
       <!-- 右侧：增强任务详情 -->
@@ -321,6 +282,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+
+// 定义审核员类型
+interface Auditor {
+  id: number;
+  name: string;
+}
 import { storeToRefs } from 'pinia'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -342,13 +309,16 @@ import SmartTaskAssignmentPanel from './components/SmartTaskAssignmentPanel.vue'
 import EnhancedTaskDetailPanel from './components/EnhancedTaskDetailPanel.vue'
 import BatchOperationPanel from './components/BatchOperationPanel.vue'
 import PerformanceMonitor from './components/PerformanceMonitor.vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
+import StatsCard from '@/components/StatsCard.vue'
+import ContentCard from '@/components/common/ContentCard.vue'
 
 // Store
 const auditStore = useAuditStore()
 
 // 响应式数据
-const selectedTask = ref(null)
-const auditors = ref([])
+const selectedTask = ref<null | any>(null)
+const auditors = ref<Auditor[]>([])
 
 // 弹窗控制
 const rejectDialogVisible = ref(false)
@@ -402,7 +372,7 @@ const handleSelectionChange = (selection: any[]) => {
 }
 
 const handleSearch = () => {
-  pagination.current = 1
+  pagination.value.current = 1
   auditStore.loadTasks()
 }
 
@@ -473,7 +443,7 @@ const confirmReject = async () => {
   }
 
   try {
-    await auditStore.rejectTask(selectedTask.value.taskId, rejectForm.reason, rejectForm.detail)
+    await auditStore.rejectTask(selectedTask.value?.taskId, rejectForm.reason, rejectForm.detail)
     rejectDialogVisible.value = false
   } catch (error) {
     ElMessage.error('操作失败')
@@ -492,7 +462,7 @@ const confirmTransfer = async () => {
   }
 
   try {
-    await auditStore.transferTask(selectedTask.value.taskId, transferForm.assigneeId, transferForm.reason)
+    await auditStore.transferTask(selectedTask.value?.taskId, transferForm.assigneeId, transferForm.reason)
     transferDialogVisible.value = false
   } catch (error) {
     ElMessage.error('操作失败')
@@ -501,7 +471,7 @@ const confirmTransfer = async () => {
 
 // 工具方法
 const getBizTypeLabel = (bizType: string) => {
-  const labels = {
+  const labels: { [key: string]: string } = {
     forum_post: '论坛帖子',
     flea_goods: '跳蚤市场',
     news: '资讯文章',
@@ -523,7 +493,7 @@ const getBizTypeTag = (bizType: string): 'primary' | 'success' | 'warning' | 'in
 }
 
 const getPriorityLabel = (priority: string) => {
-  const labels = {
+  const labels: { [key: string]: string } = {
     high: '高',
     normal: '普通',
     low: '低'

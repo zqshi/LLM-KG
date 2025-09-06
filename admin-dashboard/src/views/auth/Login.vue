@@ -152,7 +152,7 @@ const handleLogin = async () => {
   backdrop-filter: blur(10px);
   border-radius: var(--radius-xl);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
-  padding: var(--spacing-xxl);
+  padding: var(--spacing-4xl);
   position: relative;
   z-index: 1;
   animation: slideInUp 0.6s ease-out;

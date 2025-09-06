@@ -5,6 +5,7 @@ import router from './router'
 import { setupRouterGuards } from './router/guards'
 import { useAuthStore } from './stores/auth'
 import 'element-plus/dist/index.css'
+import './styles/design-system.css'
 import './styles/index.css'
 
 // 导入 ECharts 核心模块和组件
