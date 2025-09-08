@@ -11,18 +11,18 @@
         <div class="card-subtitle">{{ subtitle }}</div>
       </div>
       <div class="card-actions" v-if="showActions">
-        <el-button 
+        <Button 
           size="small" 
           :icon="Refresh" 
           circle 
-          @click.stop="handleRefresh"
+          @click="handleRefresh"
           :loading="loading"
         />
-        <el-button 
+        <Button 
           size="small" 
           :icon="ArrowRight" 
           circle 
-          @click.stop="handleViewDetail"
+          @click="handleViewDetail"
         />
       </div>
     </div>
@@ -71,9 +71,9 @@
           <WarningFilled />
         </el-icon>
         <span class="error-text">{{ error }}</span>
-        <el-button size="small" type="text" @click.stop="handleRefresh">
+        <Button size="small" type="text" @click="handleRefresh">
           重试
-        </el-button>
+        </Button>
       </div>
     </div>
 
@@ -90,6 +90,7 @@ import { computed } from 'vue'
 import { 
   Refresh, ArrowRight, TrendCharts, WarningFilled 
 } from '@element-plus/icons-vue'
+import Button from '@/components/common/Button.vue'
 
 // Props 定义
 interface Metric {

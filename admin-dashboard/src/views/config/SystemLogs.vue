@@ -1,8 +1,10 @@
 <template>
   <div class="system-logs-page">
-    <div class="page-header">
-      <h1 class="page-title">系统日志</h1>
-      <div class="page-actions">
+    <UnifiedPageHeader 
+      title="系统日志" 
+      description="查看和管理系统运行日志，支持导出和清理功能"
+    >
+      <template #actions>
         <el-button @click="handleExport">
           <el-icon><Download /></el-icon>
           导出日志
@@ -11,8 +13,8 @@
           <el-icon><Delete /></el-icon>
           清理日志
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 日志统计 -->
     <el-row :gutter="16" class="stats-row">
@@ -494,6 +496,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted, onUnmounted } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import type { SystemLog, User, PaginationParams } from '@/types'
 import {
   Download, Delete, DocumentChecked, Calendar,

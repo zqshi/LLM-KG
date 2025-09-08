@@ -1,9 +1,10 @@
 <template>
   <div class="reports-page">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>举报处理</h2>
-      <div class="header-actions">
+    <UnifiedPageHeader 
+      title="举报处理" 
+      description="处理用户对商品、用户和评论的举报"
+    >
+      <template #actions>
         <el-button 
           type="primary"
           :icon="Refresh"
@@ -21,8 +22,8 @@
         >
           批量处理 ({{ selectedReports.length }})
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 筛选器 -->
     <el-card class="filter-card" data-testid="reports-filter">
@@ -380,6 +381,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Search, Loading } from '@element-plus/icons-vue'
 import { fleaMarketApi } from '@/api/fleaMarket'
 import type { FleaReport, FleaReportQueryParams } from '@/types'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 // 响应式数据
 const loading = ref(false)

@@ -1,12 +1,16 @@
 <template>
   <div class="poll-manager">
-    <div class="page-header">
-      <h2>投票帖管理</h2>
-      <el-button type="primary" @click="handleCreatePoll">
-        <el-icon><Plus /></el-icon>
-        创建投票帖
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="投票帖管理" 
+      description="管理投票帖，创建、编辑和查看投票结果"
+    >
+      <template #actions>
+        <el-button type="primary" @click="handleCreatePoll">
+          <el-icon><Plus /></el-icon>
+          创建投票帖
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 投票帖统计 -->
     <el-row :gutter="16" class="stats-row">
@@ -233,6 +237,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import type { PollPostListItem, PollQueryParams } from '@/types/poll'
 import PollAdminAPI from '@/api/poll'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import CreatePollDialog from './components/CreatePollDialog.vue'
 import PollStatisticsDialog from './components/PollStatisticsDialog.vue'
 import {

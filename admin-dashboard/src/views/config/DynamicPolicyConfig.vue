@@ -1,9 +1,9 @@
 <template>
   <div class="dynamic-policy-config">
-    <div class="page-header">
-      <h1 class="page-title">动态策略配置</h1>
-      <p class="page-description">实时调整审核策略，响应业务需求变化</p>
-    </div>
+    <UnifiedPageHeader 
+      title="动态策略配置" 
+      description="实时调整审核策略，响应业务需求变化"
+    />
 
     <!-- 策略状态监控 -->
     <el-card class="monitoring-card">
@@ -400,6 +400,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import {
   Monitor,
   Refresh,

@@ -1,9 +1,8 @@
 <template>
   <div class="version-control">
-    <PageHeader
+    <UnifiedPageHeader
       title="版本管理"
       description="管理门户配置的版本历史，支持版本对比、回滚和快照创建"
-      :icon="Clock"
     >
       <template #actions>
         <el-button type="primary" @click="showSnapshotDialog = true">
@@ -11,7 +10,7 @@
           创建快照
         </el-button>
       </template>
-    </PageHeader>
+    </UnifiedPageHeader>
 
     <ContentCard title="版本历史">
       <template #extra>
@@ -84,7 +83,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Clock, Camera, Refresh } from '@element-plus/icons-vue'
-import PageHeader from '@/components/common/PageHeader.vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import ContentCard from '@/components/common/ContentCard.vue'
 
 // 响应式数据
@@ -217,8 +216,6 @@ const formatDate = (dateStr: string) => {
 
 <style lang="scss" scoped>
 .version-control {
-  padding: var(--spacing-xl);
-  background: var(--color-bg-page);
-  min-height: calc(100vh - 60px);
+  padding: 20px;
 }
 </style>

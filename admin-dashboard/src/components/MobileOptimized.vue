@@ -46,7 +46,7 @@
     <!-- 移动端底部操作栏 -->
     <div v-if="isMobile && showBottomActions" class="mobile-bottom-actions">
       <slot name="bottom-actions">
-        <el-button 
+        <Button 
           v-for="action in bottomActions" 
           :key="action.key"
           :type="action.type"
@@ -56,7 +56,7 @@
           class="bottom-action-btn"
         >
           {{ action.label }}
-        </el-button>
+        </Button>
       </slot>
     </div>
 
@@ -83,10 +83,10 @@
       
       <template #footer v-if="showDialogFooter">
         <div class="dialog-footer">
-          <el-button @click="closeDialog">取消</el-button>
-          <el-button type="primary" @click="handleDialogConfirm" :loading="dialogLoading">
+          <Button @click="closeDialog">取消</Button>
+          <Button type="primary" @click="handleDialogConfirm" :loading="dialogLoading">
             确认
-          </el-button>
+          </Button>
         </div>
       </template>
     </el-dialog>
@@ -95,7 +95,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useBreakpoints } from '@vueuse/core'
+import Button from '@/components/common/Button.vue'
+// 临时注释掉 useBreakpoints 导入，因为缺少 @vueuse/core 依赖
+// import { useBreakpoints } from '@vueuse/core'
 
 interface Tab {
   key: string
@@ -106,7 +108,7 @@ interface Tab {
 interface BottomAction {
   key: string
   label: string
-  type?: 'primary' | 'success' | 'warning' | 'danger' | 'info'
+  type?: 'primary' | 'secondary' | 'text'
   icon?: string
   loading?: boolean
   handler: () => void
@@ -141,16 +143,22 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-// 响应式断点
-const breakpoints = useBreakpoints({
-  mobile: 768,
-  tablet: 1024,
-  desktop: 1200
-})
+// 临时使用 window.innerWidth 替代 useBreakpoints
+const isMobile = ref(window.innerWidth < 768)
+const isTablet = ref(window.innerWidth >= 768 && window.innerWidth < 1200)
+const isDesktop = ref(window.innerWidth >= 1200)
 
-const isMobile = breakpoints.smaller('mobile')
-const isTablet = breakpoints.between('mobile', 'desktop')
-const isDesktop = breakpoints.greater('desktop')
+// 监听窗口大小变化
+onMounted(() => {
+  const handleResize = () => {
+    isMobile.value = window.innerWidth < 768
+    isTablet.value = window.innerWidth >= 768 && window.innerWidth < 1200
+    isDesktop.value = window.innerWidth >= 1200
+  }
+
+  window.addEventListener('resize', handleResize)
+  return () => window.removeEventListener('resize', handleResize)
+})
 
 // 标签页状态
 const activeTab = ref(props.defaultTab || (props.tabs[0]?.key ?? ''))

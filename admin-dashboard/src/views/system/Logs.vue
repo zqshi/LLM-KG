@@ -3,7 +3,6 @@
     <UnifiedPageHeader
       title="全局审计日志"
       description="记录系统所有业务模块操作，支持跨模块查询和导出"
-      :icon="Document"
     >
       <template #extra>
         <div class="header-time">
@@ -311,7 +310,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Download, Refresh, Search, DocumentChecked, Calendar,
-  WarningFilled, User, Document, Clock
+  WarningFilled, User, Clock
 } from '@element-plus/icons-vue'
 import { globalAuditApi } from '@/api'
 import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
@@ -742,9 +741,7 @@ onMounted(() => {
 
 <style scoped>
 .global-audit-logs-page {
-  padding: var(--spacing-xl);
-  background: var(--color-bg-page);
-  min-height: calc(100vh - 60px);
+  padding: 20px;
 }
 
 .page-header {

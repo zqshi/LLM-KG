@@ -1,9 +1,21 @@
 <template>
   <div class="roles-page">
-    <div class="page-header">
-      <h2>角色管理</h2>
-      <p class="page-description">管理系统角色，为角色分配权限，支持数据权限范围设置</p>
-    </div>
+    <UnifiedPageHeader 
+      title="角色管理" 
+      description="管理系统角色，为角色分配权限，支持数据权限范围设置"
+    >
+      <template #actions>
+        <el-button
+          type="primary"
+          :icon="Plus"
+          @click="handleCreate"
+          v-if="hasPermission('rbac:role:create')"
+        >
+          新建角色
+        </el-button>
+        <el-button :icon="Refresh" @click="refreshData" :loading="loading">刷新</el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <el-card class="main-card">
       <!-- 搜索栏 -->
@@ -28,23 +40,6 @@
             <el-button @click="handleReset" :icon="Refresh">重置</el-button>
           </el-form-item>
         </el-form>
-      </div>
-
-      <!-- 操作栏 -->
-      <div class="action-bar">
-        <div class="left-actions">
-          <el-button
-            type="primary"
-            :icon="Plus"
-            @click="handleCreate"
-            v-if="hasPermission('rbac:role:create')"
-          >
-            新建角色
-          </el-button>
-        </div>
-        <div class="right-actions">
-          <el-button :icon="Refresh" @click="refreshData" :loading="loading">刷新</el-button>
-        </div>
       </div>
 
       <!-- 角色表格 -->
@@ -330,6 +325,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, Plus, Menu, Operation, Link } from '@element-plus/icons-vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { useRbacStore } from '@/stores/rbac'
 import { useAuthStore } from '@/stores/auth'
 import type { Role, RoleForm, RoleQueryParams, Permission, DataScopeType } from '@/types'

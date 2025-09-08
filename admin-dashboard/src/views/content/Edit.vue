@@ -1,6 +1,9 @@
 <template>
   <div class="content-edit">
-    <h2>编辑内容</h2>
+    <UnifiedPageHeader 
+      title="编辑内容" 
+      description="编辑已有的内容信息和设置"
+    />
     <el-card>
       <div class="content">
         <el-result
@@ -18,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 // 占位组件，后续完善
 </script>
 

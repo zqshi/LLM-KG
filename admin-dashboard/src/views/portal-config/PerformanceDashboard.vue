@@ -1,8 +1,10 @@
 <template>
   <div class="performance-dashboard">
-    <div class="dashboard-header">
-      <h2>性能监控仪表板</h2>
-      <div class="header-actions">
+    <UnifiedPageHeader 
+      title="性能监控仪表板" 
+      description="监控门户系统的性能指标和运行状态"
+    >
+      <template #actions>
         <el-button @click="refreshMetrics" :loading="loading" type="primary">
           <el-icon><Refresh /></el-icon>
           刷新数据
@@ -11,8 +13,8 @@
           <el-icon><Download /></el-icon>
           导出报告
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 关键指标卡片 -->
     <div class="metrics-cards">
@@ -166,6 +168,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { 
   Refresh, Download, TrendCharts, Timer, Connection, 
   Monitor, Warning, ArrowUp, ArrowDown, Minus 

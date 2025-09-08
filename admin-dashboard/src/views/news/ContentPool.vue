@@ -1,9 +1,10 @@
 <template>
   <div class="content-pool">
-    <!-- 页面头部 -->
-    <div class="header">
-      <h2>资讯审核中心</h2>
-      <div class="header-actions">
+    <UnifiedPageHeader 
+      title="资讯审核中心" 
+      description="审核待发布资讯内容，管理资讯质量和发布流程"
+    >
+      <template #actions>
         <el-button type="primary" @click="refreshList">
           <el-icon><Refresh /></el-icon>
           刷新列表
@@ -16,8 +17,8 @@
           <el-icon><Close /></el-icon>
           批量拒绝 ({{ selectedArticles.length }})
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 审核统计仪表板 -->
     <el-row :gutter="20" class="stats-dashboard">
@@ -355,6 +356,7 @@ import {
   Search, 
   Warning 
 } from '@element-plus/icons-vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 interface NewsArticle {
   id: number

@@ -1,13 +1,15 @@
 <template>
   <div class="content-detail">
-    <el-page-header @back="$router.go(-1)" content="内容详情">
-      <template #extra>
-        <el-space>
-          <el-button type="primary" @click="handleEdit">编辑</el-button>
-          <el-button @click="handleDelete">删除</el-button>
-        </el-space>
+    <UnifiedPageHeader 
+      title="内容详情" 
+      description="查看内容的详细信息和状态"
+    >
+      <template #actions>
+        <el-button @click="$router.go(-1)">返回</el-button>
+        <el-button type="primary" @click="handleEdit">编辑</el-button>
+        <el-button @click="handleDelete">删除</el-button>
       </template>
-    </el-page-header>
+    </UnifiedPageHeader>
 
     <el-card class="detail-card" v-loading="loading">
       <div v-if="content">
@@ -28,6 +30,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 const route = useRoute()
 const router = useRouter()

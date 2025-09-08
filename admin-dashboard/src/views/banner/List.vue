@@ -1,12 +1,16 @@
 <template>
   <div class="banner-list">
-    <div class="header">
-      <h2>Banner管理</h2>
-      <el-button type="primary" @click="createBanner">
-        <el-icon><Plus /></el-icon>
-        创建Banner
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="Banner管理" 
+      description="管理网站横幅广告，支持创建、编辑和发布Banner内容"
+    >
+      <template #actions>
+        <el-button type="primary" @click="createBanner">
+          <el-icon><Plus /></el-icon>
+          创建Banner
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <div class="search-bar">
       <el-form :inline="true" :model="searchForm" class="demo-form-inline">
@@ -189,6 +193,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, SuccessFilled, CircleCloseFilled, Loading } from '@element-plus/icons-vue'
 import type { FormInstance, UploadProps } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { bannerApi, bannerStatusUtils, type Banner, type BannerForm, type BannerQueryParams } from '@/api/banner'
 import { useAuthStore } from '@/stores/auth'
 import UnifiedWorkflowViewer from '@/components/workflow/UnifiedWorkflowViewer.vue'

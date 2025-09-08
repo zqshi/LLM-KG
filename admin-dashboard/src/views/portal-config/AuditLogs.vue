@@ -1,27 +1,20 @@
 <template>
   <div class="audit-logs">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-content">
-        <div class="title-section">
-          <h2 class="page-title">
-            <i class="el-icon-document title-icon"></i>
-            审计日志
-          </h2>
-          <p class="page-description">记录门户配置的所有操作历史，确保系统安全性和可追溯性</p>
-        </div>
-        <div class="header-actions">
-          <el-button @click="exportLogs" class="action-btn">
-            <i class="el-icon-download" class="btn-icon"></i>
-            导出日志
-          </el-button>
-          <el-button @click="refreshLogs" class="action-btn">
-            <i class="el-icon-refresh" class="btn-icon"></i>
-            刷新
-          </el-button>
-        </div>
-      </div>
-    </div>
+    <UnifiedPageHeader 
+      title="审计日志" 
+      description="记录门户配置的所有操作历史，确保系统安全性和可追溯性"
+    >
+      <template #actions>
+        <el-button @click="exportLogs" class="action-btn">
+          <i class="el-icon-download" class="btn-icon"></i>
+          导出日志
+        </el-button>
+        <el-button @click="refreshLogs" class="action-btn">
+          <i class="el-icon-refresh" class="btn-icon"></i>
+          刷新
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 统计概览 -->
     <div class="stats-overview">
@@ -380,6 +373,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { ElMessage } from 'element-plus'
 import type { AuditLog } from '@/types/navigation'
 

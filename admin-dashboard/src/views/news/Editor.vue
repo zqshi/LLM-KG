@@ -1,23 +1,14 @@
 <template>
   <div class="news-editor-page">
-    <!-- 页面头部 -->
-    <div class="header">
-      <div class="header-left">
+    <UnifiedPageHeader 
+      :title="pageTitle" 
+      :description="isEditMode ? '编辑已有资讯内容' : '创建新的资讯内容'"
+    >
+      <template #actions>
         <el-button @click="goBack" type="info" plain>
           <el-icon><ArrowLeft /></el-icon>
           返回
         </el-button>
-        <div class="title-info">
-          <h2>{{ pageTitle }}</h2>
-          <div class="breadcrumb">
-            <el-breadcrumb separator="/">
-              <el-breadcrumb-item>资讯管理</el-breadcrumb-item>
-              <el-breadcrumb-item>{{ isEditMode ? '编辑资讯' : '新建资讯' }}</el-breadcrumb-item>
-            </el-breadcrumb>
-          </div>
-        </div>
-      </div>
-      <div class="header-right">
         <el-switch 
           v-model="autoSave" 
           active-text="自动保存" 
@@ -33,8 +24,8 @@
           </el-icon>
           <span>{{ saveStatusText }}</span>
         </div>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 编辑器组件 -->
     <ArticleEditor 
@@ -138,6 +129,7 @@ import {
   Clock
 } from '@element-plus/icons-vue'
 import ArticleEditor from './components/ArticleEditor.vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 interface ArticleForm {
   id?: number

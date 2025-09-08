@@ -1,8 +1,10 @@
 <template>
   <div class="homepage-page">
-    <div class="page-header">
-      <h1 class="page-title">首页管理</h1>
-      <div class="page-actions">
+    <UnifiedPageHeader 
+      title="首页管理" 
+      description="配置用户门户首页布局、Banner和推荐内容"
+    >
+      <template #actions>
         <el-button @click="handlePreview">
           <el-icon><View /></el-icon>
           预览首页
@@ -11,8 +13,8 @@
           <el-icon><Check /></el-icon>
           保存配置
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <el-row :gutter="20">
       <!-- 左侧配置面板 -->
@@ -370,6 +372,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import draggable from 'vuedraggable'
 import {

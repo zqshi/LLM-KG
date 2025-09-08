@@ -180,13 +180,13 @@ const getTypeLabel = (type: string) => {
   return labels[type as keyof typeof labels] || type
 }
 
-const getTypeTagType = (type: string) => {
+const getTypeTagType = (type: 'internal' | 'external' | 'app'): 'primary' | 'success' | 'warning' => {
   const types = {
     internal: 'primary',
     external: 'success',
     app: 'warning'
   }
-  return types[type as keyof typeof types] || 'info'
+  return types[type]
 }
 
 const handleEntryClick = (entry: EntryItem) => {
@@ -250,7 +250,8 @@ const handleApplyConfig = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/variables.scss";
+@use "@/styles/core/variables.scss" as var;
+@use "@/styles/core/mixins.scss" as *;
 
 .entry-preview-dialog {
   :deep(.el-dialog__body) {
@@ -261,19 +262,19 @@ const handleApplyConfig = () => {
 .preview-container {
   .preview-header {
     padding: 20px 24px;
-    border-bottom: 1px solid $color-border-light;
-    background: $color-bg-section;
+    border-bottom: 1px solid var.$color-border-light;
+    background: var.$color-bg-section;
     
     h3 {
       margin: 0 0 8px 0;
-      color: $color-text-primary;
+      color: var.$color-text-primary;
       font-size: 18px;
       font-weight: 600;
     }
     
     p {
       margin: 0;
-      color: $color-text-secondary;
+      color: var.$color-text-secondary;
       font-size: 14px;
     }
   }
@@ -284,8 +285,8 @@ const handleApplyConfig = () => {
   
   .portal-mockup {
     background: white;
-    border-radius: $radius-lg;
-    box-shadow: $shadow-card;
+    border-radius: var.$radius-lg;
+    box-shadow: var.$shadow-card;
     overflow: hidden;
     
     .portal-header {
@@ -314,14 +315,14 @@ const handleApplyConfig = () => {
         
         h2 {
           margin: 0 0 8px 0;
-          color: $color-text-primary;
+          color: var.$color-text-primary;
           font-size: 24px;
           font-weight: 700;
         }
         
         p {
           margin: 0;
-          color: $color-text-secondary;
+          color: var.$color-text-secondary;
           font-size: 16px;
         }
       }
@@ -330,10 +331,10 @@ const handleApplyConfig = () => {
         .section-title {
           font-size: 18px;
           font-weight: 600;
-          color: $color-text-primary;
+          color: var.$color-text-primary;
           margin-bottom: 20px;
           padding-bottom: 8px;
-          border-bottom: 2px solid $color-primary;
+          border-bottom: 2px solid var.$color-primary;
           display: inline-block;
         }
       }
@@ -347,28 +348,28 @@ const handleApplyConfig = () => {
     
     .preview-entry-card {
       background: white;
-      border: 1px solid $color-border-light;
-      border-radius: $radius-lg;
-      padding: 20px;
-      cursor: pointer;
-      transition: all $transition-medium;
-      text-align: center;
-      
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: $shadow-card-hover;
-        border-color: $color-primary;
+      border: 1px solid var.$color-border-light;
+border-radius: var.$radius-lg;
+padding: 20px;
+cursor: pointer;
+transition: all var.$transition-medium;
+text-align: center;
+
+&:hover {
+  transform: translateY(-4px);
+  box-shadow: var.$shadow-card-hover;
+  border-color: var.$color-primary;
       }
       
       .preview-entry-icon {
         width: 56px;
         height: 56px;
-        border-radius: $radius-lg;
+        border-radius: var.$radius-lg;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 12px;
-        box-shadow: $shadow-card;
+        box-shadow: var.$shadow-card;
         
         .preview-icon-image {
           width: 28px;
@@ -383,14 +384,14 @@ const handleApplyConfig = () => {
         .preview-entry-name {
           font-size: 16px;
           font-weight: 600;
-          color: $color-text-primary;
+          color: var.$color-text-primary;
           margin-bottom: 4px;
           @include text-ellipsis;
         }
         
         .preview-entry-description {
           font-size: 12px;
-          color: $color-text-tertiary;
+          color: var.$color-text-tertiary;
           @include text-ellipsis-multiline(2);
           min-height: 32px;
         }
@@ -406,7 +407,7 @@ const handleApplyConfig = () => {
   .no-entries {
     text-align: center;
     padding: 40px 20px;
-    color: $color-text-tertiary;
+    color: var.$color-text-tertiary;
   }
   
   .preview-footer {
@@ -414,8 +415,8 @@ const handleApplyConfig = () => {
     justify-content: space-between;
     align-items: center;
     padding: 16px 24px;
-    border-top: 1px solid $color-border-light;
-    background: $color-bg-section;
+    border-top: 1px solid var.$color-border-light;
+background: var.$color-bg-section;
     
     .preview-stats {
       display: flex;
@@ -428,11 +429,11 @@ const handleApplyConfig = () => {
         font-size: 14px;
         
         .stat-label {
-          color: $color-text-secondary;
+          color: var.$color-text-secondary;
         }
         
         .stat-value {
-          color: $color-text-primary;
+          color: var.$color-text-primary;
           font-weight: 500;
         }
       }
@@ -448,7 +449,7 @@ const handleApplyConfig = () => {
 .dialog-footer {
   text-align: right;
   padding: 16px 0 0 0;
-  border-top: 1px solid $color-border-light;
+  border-top: 1px solid var.$color-border-light;
 }
 
 // 响应式设计

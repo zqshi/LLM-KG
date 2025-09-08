@@ -1,14 +1,16 @@
 <template>
   <div class="content-dashboard">
-    <div class="page-header">
-      <h1 class="page-title">内容数据看板</h1>
-      <div class="page-actions">
+    <UnifiedPageHeader 
+      title="内容数据看板" 
+      description="查看内容管理的运营数据和统计信息"
+    >
+      <template #actions>
         <el-button @click="refreshData">
           <el-icon><Refresh /></el-icon>
           刷新数据
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 核心指标卡片 -->
     <el-row :gutter="20" class="metrics-cards">
@@ -217,6 +219,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { useRouter } from 'vue-router'
 import { useContentStore } from '@/stores/content'
 import type { ContentPreview } from '@/types'

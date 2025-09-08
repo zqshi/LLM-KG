@@ -12,9 +12,12 @@ onMounted(() => {
 })
 </script>
 
-<style>
+<style lang="scss">
+// 导入主样式入口文件
+@import './styles/main.scss';
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-family-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

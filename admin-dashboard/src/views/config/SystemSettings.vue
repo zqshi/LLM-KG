@@ -1,12 +1,16 @@
 <template>
   <div class="system-settings-page">
-    <div class="page-header">
-      <h1 class="page-title">系统设置</h1>
-      <el-button type="primary" @click="handleSave" :loading="saveLoading">
-        <el-icon><Check /></el-icon>
-        保存设置
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="系统设置" 
+      description="管理系统基本配置、安全设置和功能参数"
+    >
+      <template #actions>
+        <el-button type="primary" @click="handleSave" :loading="saveLoading">
+          <el-icon><Check /></el-icon>
+          保存设置
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <el-row :gutter="20">
       <el-col :span="18">
@@ -487,6 +491,7 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import {
   Check, Plus, Refresh, FolderAdd, SwitchButton, Message
 } from '@element-plus/icons-vue'

@@ -1,6 +1,6 @@
 <template>
   <div class="quotation-list">
-    <PageHeader
+    <UnifiedPageHeader
       title="名言管理"
       description="管理公司领导的思想精华，传播企业文化价值观"
     >
@@ -20,7 +20,7 @@
           批量操作（{{ selectedIds.length }}）
         </el-button>
       </template>
-    </PageHeader>
+    </UnifiedPageHeader>
 
     <!-- 筛选区域 -->
     <el-card class="filter-card" shadow="never">
@@ -92,7 +92,7 @@
                 style="width: 100%"
               >
                 <el-option
-                  v-for="tag in availableTags"
+                  v-for="tag in (availableTags.value as { tag: string; count: number; }[])"
                   :key="tag.tag"
                   :label="`${tag.tag}(${tag.count})`"
                   :value="tag.tag"
@@ -116,42 +116,40 @@
     </el-card>
 
     <!-- 统计卡片 -->
-    <div class="stats-row">
-      <el-row :gutter="16">
-        <el-col :span="6">
-          <StatCard
-            :value="quotationStats.totalCount"
-            label="总名言数"
-            :icon="ChatDotRound"
-            type="primary"
-          />
-        </el-col>
-        <el-col :span="6">
-          <StatCard
-            :value="quotationStats.publishedCount"
-            label="已发布"
-            :icon="CircleCheck"
-            type="success"
-          />
-        </el-col>
-        <el-col :span="6">
-          <StatCard
-            :value="quotationStats.pendingCount"
-            label="待审核"
-            :icon="Clock"
-            type="warning"
-          />
-        </el-col>
-        <el-col :span="6">
-          <StatCard
-            :value="quotationStats.todayPublished"
-            label="今日发布"
-            :icon="Star"
-            type="danger"
-          />
-        </el-col>
-      </el-row>
-    </div>
+    <el-row :gutter="16" class="stats-row">
+      <el-col :span="6">
+        <StatsCard
+          :value="(quotationStats.value || {}).totalCount || 0"
+          label="总名言数"
+          :icon="ChatDotRound"
+          type="primary"
+        />
+      </el-col>
+      <el-col :span="6">
+        <StatsCard
+          :value="(quotationStats.value || {}).publishedCount || 0"
+          label="已发布"
+          :icon="CircleCheck"
+          type="success"
+        />
+      </el-col>
+      <el-col :span="6">
+        <StatsCard
+          :value="(quotationStats.value || {}).pendingCount || 0"
+          label="待审核"
+          :icon="Clock"
+          type="warning"
+        />
+      </el-col>
+      <el-col :span="6">
+        <StatsCard
+          :value="(quotationStats.value || {}).todayPublished || 0"
+          label="今日发布"
+          :icon="Star"
+          type="danger"
+        />
+      </el-col>
+    </el-row>
 
     <!-- 名言列表 -->
     <ContentCard title="名言列表">
@@ -167,8 +165,8 @@
       </template>
       
       <el-table
-        v-loading="loading"
-        :data="quotationList"
+        v-loading="loading.value"
+        :data="quotationList.value"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
@@ -347,7 +345,7 @@
             style="width: 100%"
           >
             <el-option
-              v-for="tag in availableTags"
+              v-for="tag in (availableTags.value as { tag: string; count: number; }[])"
               :key="tag.tag"
               :label="tag.tag"
               :value="tag.tag"
@@ -362,14 +360,14 @@
           <el-button @click="showCreateDialog = false">取消</el-button>
           <el-button 
             type="info" 
-            :loading="submitLoading"
+            :loading="submitLoading.value"
             @click="submitForm('draft')"
           >
             保存草稿
           </el-button>
           <el-button 
             type="primary" 
-            :loading="submitLoading"
+            :loading="submitLoading.value"
             @click="submitForm('pending_review')"
           >
             提交审核
@@ -455,7 +453,7 @@
             style="width: 100%"
           >
             <el-option
-              v-for="tag in availableTags"
+              v-for="tag in (availableTags.value as { tag: string; count: number; }[])"
               :key="tag.tag"
               :label="tag.tag"
               :value="tag.tag"
@@ -644,8 +642,8 @@ const {
   queryParams
 } = quotationStore
 
-const hasSelected = computed(() => selectedQuotations.length > 0)
-const selectedIds = computed(() => selectedQuotations.map(q => q.id))
+const hasSelected = computed(() => (selectedQuotations.value || []).length > 0)
+const selectedIds = computed(() => selectedQuotations.value.map((q: any) => q.id))
 
 // 方法
 const handleSearch = async () => {
@@ -886,6 +884,8 @@ watch(showCreateDialog, (show) => {
 <style scoped>
 .quotation-list {
   padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
 /* 页面头部 */

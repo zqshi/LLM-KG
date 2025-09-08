@@ -463,7 +463,8 @@ const handleClose = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/styles/variables.scss";
+@use "@/styles/core/variables.scss" as var;
+@use 'sass:color';
 
 .entry-edit-dialog {
   :deep(.el-dialog__body) {
@@ -480,13 +481,13 @@ const handleClose = () => {
     .icon-preview {
       width: 48px;
       height: 48px;
-      border-radius: $radius-lg;
+      border-radius: var.$radius-lg;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: $shadow-card;
-      transition: all $transition-medium;
+      box-shadow: var.$shadow-card;
+      transition: all var.$transition-medium;
       
       &:hover {
         transform: scale(1.05);
@@ -508,7 +509,7 @@ const handleClose = () => {
           
           label {
             font-size: 12px;
-            color: $color-text-secondary;
+            color: var.$color-text-secondary;
             white-space: nowrap;
           }
         }
@@ -520,30 +521,30 @@ const handleClose = () => {
     .upload-area {
       width: 100px;
       height: 100px;
-      border: 2px dashed $color-border-primary;
-      border-radius: $radius-lg;
+      border: 2px dashed var.$color-border-primary;
+      border-radius: var.$radius-lg;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all $transition-medium;
+      transition: all var.$transition-medium;
       
       &:hover {
-        border-color: $color-primary;
-        background: lighten($color-primary, 45%);
+        border-color: var.$color-primary;
+        background: var(--color-primary-light);
       }
       
       .uploaded-icon {
         width: 64px;
         height: 64px;
         object-fit: contain;
-        border-radius: $radius-md;
+        border-radius: var.$radius-md;
       }
       
       .upload-placeholder {
         text-align: center;
-        color: $color-text-tertiary;
+        color: var.$color-text-tertiary;
         
         .upload-tip {
           font-size: 11px;
@@ -568,20 +569,20 @@ const handleClose = () => {
       align-items: center;
       justify-content: center;
       padding: 12px 8px;
-      border: 1px solid $color-border-light;
-      border-radius: $radius-md;
+      border: 1px solid var.$color-border-light;
+      border-radius: var.$radius-md;
       cursor: pointer;
-      transition: all $transition-medium;
+      transition: all var.$transition-medium;
       
       &:hover {
-        border-color: $color-primary;
-        background: lighten($color-primary, 45%);
+        border-color: var.$color-primary;
+        background: var(--color-primary-light);
       }
       
       &.active {
-        border-color: $color-primary;
-        background: lighten($color-primary, 40%);
-        color: $color-primary;
+        border-color: var.$color-primary;
+        background: var(--color-primary-dark);
+        color: var.$color-primary;
       }
       
       span {

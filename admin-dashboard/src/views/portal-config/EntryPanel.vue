@@ -1,21 +1,23 @@
 <template>
   <div class="entry-panel-management">
     <!-- 统一页面头部 -->
-    <PageHeader 
+    <UnifiedPageHeader 
       title="快捷入口管理" 
       description="配置用户门户首页的快捷入口面板，支持自定义图标、名称和跳转地址"
-      :icon="Grid"
     >
       <template #actions>
         <el-button type="success" @click="handlePreview" :icon="View" plain>
           预览效果
         </el-button>
-        <el-button type="primary" size="small" @click="handleCreateEntry"><Plus size="16" /> 创建入口</el-button>
+        <el-button type="primary" @click="handleCreateEntry">
+          <el-icon><Plus /></el-icon>
+          创建入口
+        </el-button>
         <el-button type="warning" @click="handleCreateSnapshot" :icon="DocumentCopy" plain>
           创建快照
         </el-button>
       </template>
-    </PageHeader>
+    </UnifiedPageHeader>
 
     <!-- 统计数据展示 -->
     <ContentCard title="统计数据">
@@ -401,7 +403,7 @@ import { ElMessage, ElMessageBox, ElDropdown, ElDropdownMenu, ElDropdownItem, El
 import {
   Grid, Plus, View, DocumentCopy, Search, Check, Mouse, StarFilled, Rank, More, Edit, Switch, DataAnalysis, Delete, Link, List, Refresh
 } from '@element-plus/icons-vue'
-import PageHeader from '@/components/common/PageHeader.vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import ContentCard from '@/components/common/ContentCard.vue'
 import StatsCard from '@/components/StatsCard.vue'
 import UnifiedFilterSection from '@/components/UnifiedFilterSection.vue'
@@ -844,9 +846,7 @@ const formatDate = (dateString: string) => {
 
 <style scoped>
 .entry-panel-management {
-  padding: var(--spacing-xl);
-  background: var(--color-bg-page);
-  min-height: calc(100vh - 60px);
+  padding: 20px;
 }
 
 /* 统计数据区域 */

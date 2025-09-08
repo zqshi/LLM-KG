@@ -1,12 +1,16 @@
 <template>
   <div class="audit-policy-page">
-    <div class="page-header">
-      <h1 class="page-title">审核策略配置</h1>
-      <el-button type="primary" @click="handleSave" :loading="saveLoading">
-        <el-icon><Check /></el-icon>
-        保存配置
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="审核策略配置" 
+      description="配置全局审核策略和分类审核规则，管理内容审核流程"
+    >
+      <template #actions>
+        <el-button type="primary" @click="handleSave" :loading="saveLoading">
+          <el-icon><Check /></el-icon>
+          保存配置
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <el-row :gutter="20">
       <!-- 左侧配置面板 -->
@@ -404,6 +408,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, onMounted } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import {
   Check, QuestionFilled, FolderOpened,
   Document, ChatDotRound, ShoppingCart, Trophy

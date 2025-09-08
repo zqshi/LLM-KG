@@ -1,27 +1,21 @@
 <template>
   <div class="navigation-management">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <el-row :gutter="20" align="middle">
-        <el-col :span="12">
-          <h2 class="page-title">导航菜单管理</h2>
-          <p class="page-description">管理前台门户的导航菜单结构，支持拖拽排序和权限控制</p>
-        </el-col>
-        <el-col :span="12" class="text-right">
-          <el-space>
-            <el-button type="success" @click="handlePreview" :icon="View" plain>
-              预览效果
-            </el-button>
-            <el-button type="primary" @click="handleCreateNavigation" :icon="Plus">
-              新增导航
-            </el-button>
-            <el-button type="warning" @click="handleCreateSnapshot" :icon="DocumentCopy" plain>
-              创建快照
-            </el-button>
-          </el-space>
-        </el-col>
-      </el-row>
-    </div>
+    <UnifiedPageHeader 
+      title="导航菜单管理" 
+      description="管理前台门户的导航菜单结构，支持拖拽排序和权限控制"
+    >
+      <template #actions>
+        <el-button type="success" @click="handlePreview" :icon="View" plain>
+          预览效果
+        </el-button>
+        <el-button type="primary" @click="handleCreateNavigation" :icon="Plus">
+          新增导航
+        </el-button>
+        <el-button type="warning" @click="handleCreateSnapshot" :icon="DocumentCopy" plain>
+          创建快照
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 操作栏 -->
     <div class="operation-bar">

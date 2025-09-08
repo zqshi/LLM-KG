@@ -22,13 +22,14 @@
     "clean": "rm -rf dist node_modules/.vite node_modules/.cache",
     "clear-cache": "node scripts/clear-cache.cjs",
     "clear-cache:menu": "node scripts/clear-cache.cjs --menu",
-    "clear-cache:auth": "node scripts/clear-cache.cjs --auth", 
+    "clear-cache:auth": "node scripts/clear-cache.cjs --auth",
     "clear-cache:all": "node scripts/clear-cache.cjs --all",
     "clear-cache:status": "node scripts/clear-cache.cjs --status",
     "pre-commit": "npm run format && npm run lint && npm run typecheck && npm run test:run",
     "ci": "npm ci && npm run pre-commit && npm run build"
   },
   "dependencies": {
+    "@vueuse/core": "^13.9.0",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {

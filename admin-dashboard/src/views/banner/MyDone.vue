@@ -1,12 +1,16 @@
 <template>
   <div class="my-done">
-    <div class="header">
-      <h2>我已办</h2>
-      <div class="stats">
-        <el-statistic title="本月已办" :value="doneStats.thisMonth" />
-        <el-statistic title="累计已办" :value="doneStats.total" />
-      </div>
-    </div>
+    <UnifiedPageHeader 
+      title="我已办" 
+      description="查看我已完成审批的Banner项目和处理结果"
+    >
+      <template #actions>
+        <div class="stats">
+          <el-statistic title="本月已办" :value="doneStats.thisMonth" />
+          <el-statistic title="累计已办" :value="doneStats.total" />
+        </div>
+      </template>
+    </UnifiedPageHeader>
 
     <div class="filter-bar">
       <el-form :inline="true" :model="filterForm" class="demo-form-inline">
@@ -179,6 +183,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 interface DoneItem {
   id: number

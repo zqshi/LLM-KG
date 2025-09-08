@@ -1,12 +1,16 @@
 <template>
   <div class="rankings-page">
-    <div class="page-header">
-      <h1 class="page-title">榜单管理</h1>
-      <el-button type="primary" @click="handleRefreshRankings">
-        <el-icon><Refresh /></el-icon>
-        刷新榜单
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="榜单管理" 
+      description="管理平台各类榜单数据，包括用户活跃榜和内容热门榜"
+    >
+      <template #actions>
+        <el-button type="primary" @click="handleRefreshRankings">
+          <el-icon><Refresh /></el-icon>
+          刷新榜单
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 榜单配置 -->
     <el-row :gutter="20">
@@ -250,6 +254,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { Refresh, View, Star, ChatDotRound } from '@element-plus/icons-vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 const activeTab = ref('users')
 const userRankingPeriod = ref('week')

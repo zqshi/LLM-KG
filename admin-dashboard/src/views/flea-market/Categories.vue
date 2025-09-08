@@ -1,12 +1,10 @@
 <template>
   <div class="categories-management">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">分类管理</h1>
-        <p class="page-subtitle">管理跳蚤市场商品分类</p>
-      </div>
-      <div class="page-actions">
+    <UnifiedPageHeader 
+      title="分类管理" 
+      description="管理跳蚤市场商品分类，维护分类层次结构"
+    >
+      <template #actions>
         <el-button type="primary" @click="handleAdd">
           <el-icon><Plus /></el-icon>
           新增分类
@@ -15,8 +13,8 @@
           <el-icon><Refresh /></el-icon>
           刷新
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 分类列表 -->
     <el-card class="categories-card">
@@ -137,6 +135,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useFleaMarketStore } from '@/stores/fleaMarket'
 import type { FleaCategory } from '@/types'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 // Store
 const fleaMarketStore = useFleaMarketStore()

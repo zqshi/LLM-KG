@@ -5,7 +5,7 @@
       placement="bottom-end"
       trigger="click"
     >
-      <el-button 
+      <Button 
         type="text" 
         class="theme-toggle__button"
         :title="currentThemeLabel"
@@ -16,13 +16,13 @@
         <span class="theme-toggle__label" v-if="showLabel">
           {{ currentThemeLabel }}
         </span>
-      </el-button>
+      </Button>
       
       <template #dropdown>
         <el-dropdown-menu class="theme-dropdown">
           <el-dropdown-item 
             command="light"
-            :class="{ 'is-active': themeStore.appliedTheme === 'light' }"
+            :class="{ 'is-active': themeStore.appliedTheme.value === 'light' }"
           >
             <el-icon><Sunny /></el-icon>
             <span>浅色主题</span>
@@ -30,7 +30,7 @@
           
           <el-dropdown-item 
             command="dark"
-            :class="{ 'is-active': themeStore.appliedTheme === 'dark' }"
+            :class="{ 'is-active': themeStore.appliedTheme.value === 'dark' }"
           >
             <el-icon><Moon /></el-icon>
             <span>深色主题</span>
@@ -38,7 +38,7 @@
           
           <el-dropdown-item 
             command="auto"
-            :class="{ 'is-active': themeStore.appliedTheme === 'auto' }"
+            :class="{ 'is-active': themeStore.appliedTheme.value === 'auto' }"
           >
             <el-icon><Monitor /></el-icon>
             <span>跟随系统</span>
@@ -52,6 +52,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Sunny, Moon, Monitor } from '@element-plus/icons-vue'
+import Button from '@/components/common/Button.vue'
 import { useThemeStore } from '@/stores/theme'
 import { useResponsive } from '@/composables/useResponsive'
 
@@ -70,7 +71,7 @@ const { isMobile } = useResponsive()
 
 // 当前主题图标
 const currentThemeIcon = computed(() => {
-  const theme = themeStore.appliedTheme
+  const theme = themeStore.appliedTheme.value
   switch (theme) {
     case 'light':
       return Sunny
@@ -79,20 +80,22 @@ const currentThemeIcon = computed(() => {
     case 'auto':
       return Monitor
     default:
-      return themeStore.systemPrefersDark ? Moon : Sunny
+      // 假设使用 systemTheme 替代 systemPrefersDark
+      return themeStore.systemTheme.value === 'dark' ? Moon : Sunny
   }
 })
 
 // 当前主题标签
 const currentThemeLabel = computed(() => {
-  const theme = themeStore.appliedTheme
+  const theme = themeStore.appliedTheme.value
   switch (theme) {
     case 'light':
       return '浅色主题'
     case 'dark':
       return '深色主题'
     case 'auto':
-      return `跟随系统${themeStore.systemPrefersDark ? '(深色)' : '(浅色)'}`
+      // 假设使用 systemTheme 替代 systemPrefersDark
+      return `跟随系统${themeStore.systemTheme.value === 'dark' ? '(深色)' : '(浅色)'}`
     default:
       return '主题设置'
   }

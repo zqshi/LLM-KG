@@ -1,0 +1,92 @@
+@use './core/variables.scss' as var;
+
+// 标准化组件样式
+
+// 按钮标准化
+.el-button {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+}
+
+// 卡片标准化
+.el-card,
+.content-card {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-medium);
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
+// 表格标准化
+.el-table {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+}
+
+.el-table__header-wrapper,
+.el-table__body-wrapper,
+.el-table__footer-wrapper {
+  border-color: var(--color-border-light);
+}
+
+// 输入框标准化
+.el-input__wrapper,
+.el-select__wrapper {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  padding: 0 var(--spacing-md);
+}
+
+// 标签标准化
+.el-tag {
+  border-radius: var(--radius-md);
+  padding: 0 var(--spacing-sm);
+  height: 24px;
+  line-height: 24px;
+  font-size: 14px;
+}
+
+// 对话框标准化
+.el-dialog {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-modal);
+}
+
+// 通用间距类
+.mt-xs { margin-top: var(--spacing-xs); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+.mb-xs { margin-bottom: var(--spacing-xs); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-xl { margin-bottom: var(--spacing-xl); }
+
+.ml-xs { margin-left: var(--spacing-xs); }
+.ml-sm { margin-left: var(--spacing-sm); }
+.ml-md { margin-left: var(--spacing-md); }
+.ml-lg { margin-left: var(--spacing-lg); }
+.ml-xl { margin-left: var(--spacing-xl); }
+
+.mr-xs { margin-right: var(--spacing-xs); }
+.mr-sm { margin-right: var(--spacing-sm); }
+.mr-md { margin-right: var(--spacing-md); }
+.mr-lg { margin-right: var(--spacing-lg); }
+.mr-xl { margin-right: var(--spacing-xl); }
+
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }

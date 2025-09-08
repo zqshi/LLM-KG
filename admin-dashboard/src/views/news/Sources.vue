@@ -1,8 +1,10 @@
 <template>
   <div class="news-sources">
-    <div class="header">
-      <h2>资讯源管理</h2>
-      <div class="header-actions">
+    <UnifiedPageHeader 
+      title="资讯源管理" 
+      description="管理资讯数据源，配置抓取规则和监控运行状态"
+    >
+      <template #actions>
         <el-button type="info" @click="exportSources">
           <el-icon><Download /></el-icon>
           导出配置
@@ -19,8 +21,8 @@
           <el-icon><Plus /></el-icon>
           添加资讯源
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <div class="search-bar">
       <el-form :inline="true" :model="searchForm" class="demo-form-inline">
@@ -346,6 +348,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Download, Upload, Refresh } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 interface NewsSource {
   id: number

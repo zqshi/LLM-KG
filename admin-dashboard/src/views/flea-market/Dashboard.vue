@@ -1,6 +1,9 @@
 <template>
   <div class="placeholder-page">
-    <h2>数据看板</h2>
+    <UnifiedPageHeader 
+      title="数据看板" 
+      description="查看跳蚤市场的运营数据和统计信息"
+    />
     <el-card>
       <div class="content">
         <el-result
@@ -18,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 // 占位组件，后续完善
 </script>
 

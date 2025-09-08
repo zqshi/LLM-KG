@@ -1,0 +1,248 @@
+/**
+ * SCSS 混入函数
+ * 提供常用的样式混入和工具函数
+ */
+
+// 响应式断点混入
+@mixin respond-above($breakpoint) {
+  @if $breakpoint == xs {
+    @media (min-width: 480px) { @content; }
+  }
+  @else if $breakpoint == sm {
+    @media (min-width: 640px) { @content; }
+  }
+  @else if $breakpoint == md {
+    @media (min-width: 768px) { @content; }
+  }
+  @else if $breakpoint == lg {
+    @media (min-width: 1024px) { @content; }
+  }
+  @else if $breakpoint == xl {
+    @media (min-width: 1280px) { @content; }
+  }
+  @else if $breakpoint == 2xl {
+    @media (min-width: 1536px) { @content; }
+  }
+}
+
+@mixin respond-below($breakpoint) {
+  @if $breakpoint == xs {
+    @media (max-width: 479px) { @content; }
+  }
+  @else if $breakpoint == sm {
+    @media (max-width: 639px) { @content; }
+  }
+  @else if $breakpoint == md {
+    @media (max-width: 767px) { @content; }
+  }
+  @else if $breakpoint == lg {
+    @media (max-width: 1023px) { @content; }
+  }
+  @else if $breakpoint == xl {
+    @media (max-width: 1279px) { @content; }
+  }
+  @else if $breakpoint == 2xl {
+    @media (max-width: 1535px) { @content; }
+  }
+}
+
+@mixin respond-between($min, $max) {
+  @media (min-width: $min) and (max-width: $max) {
+    @content;
+  }
+}
+
+// Flexbox 布局混入
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// 文字省略
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-ellipsis-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 清除浮动
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+// 绝对定位居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// 按钮重置
+@mixin button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  color: inherit;
+}
+
+// 输入框重置
+@mixin input-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  outline: none;
+  color: inherit;
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+}
+
+// 卡片样式
+@mixin card-base {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-medium);
+}
+
+@mixin card-hover {
+  &:hover {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+}
+
+// 按钮状态
+@mixin button-hover($color: var(--color-primary)) {
+  &:hover:not(:disabled) {
+    background-color: $color;
+    border-color: $color;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba($color, 0.2);
+  }
+}
+
+@mixin button-focus($color: var(--color-primary)) {
+  &:focus:not(:disabled) {
+    outline: 2px solid rgba($color, 0.2);
+    outline-offset: 2px;
+  }
+}
+
+@mixin button-active($color: var(--color-primary-active)) {
+  &:active:not(:disabled) {
+    background-color: $color;
+    border-color: $color;
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
+// 阴影级别
+@mixin shadow-level($level: 1) {
+  @if $level == 1 {
+    box-shadow: var(--shadow-sm);
+  }
+  @else if $level == 2 {
+    box-shadow: var(--shadow-md);
+  }
+  @else if $level == 3 {
+    box-shadow: var(--shadow-lg);
+  }
+  @else if $level == 4 {
+    box-shadow: var(--shadow-xl);
+  }
+  @else if $level == 5 {
+    box-shadow: var(--shadow-2xl);
+  }
+}
+
+// 动画混入
+@mixin fade-in($duration: var(--transition-medium)) {
+  animation: fadeIn $duration ease-in-out;
+}
+
+@mixin slide-up($duration: var(--transition-medium)) {
+  animation: slideUp $duration ease-out;
+}
+
+@mixin bounce-in($duration: var(--transition-slow)) {
+  animation: bounceIn $duration ease-out;
+}
+
+// 关键帧动画
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,16 +1,18 @@
 <template>
   <div class="audit-page">
-    <div class="page-header">
-      <h1 class="page-title">审核中心</h1>
-      <div class="page-stats">
+    <UnifiedPageHeader 
+      title="审核中心" 
+      description="审核待发布内容，管理内容质量和发布流程"
+    >
+      <template #actions>
         <el-badge :value="auditStats.pending" type="warning">
           <el-button type="primary" @click="handleQuickAudit">
             <el-icon><View /></el-icon>
             快速审核
           </el-button>
         </el-badge>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 审核统计 -->
     <el-row :gutter="16" class="audit-stats">
@@ -429,6 +431,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import type { AuditRecord, Content, PaginationParams } from '@/types'
 import {
   View, Clock, Select, Close, TrendCharts,

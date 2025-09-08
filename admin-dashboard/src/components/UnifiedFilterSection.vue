@@ -10,30 +10,30 @@
         <div class="filter-actions">
           <!-- View Mode Toggle (optional) -->
           <div v-if="showViewMode" class="view-mode-toggle">
-            <el-button-group>
+            <div class="button-group">
               <el-tooltip content="网格视图" placement="top">
-                <el-button 
-                  :type="viewMode === 'grid' ? 'primary' : ''" 
+                <Button 
+                  :type="viewMode === 'grid' ? 'primary' : 'secondary'" 
                   :icon="Grid"
                   size="default"
                   @click="$emit('view-mode-change', 'grid')"
                 />
               </el-tooltip>
               <el-tooltip content="列表视图" placement="top">
-                <el-button 
-                  :type="viewMode === 'list' ? 'primary' : ''" 
+                <Button 
+                  :type="viewMode === 'list' ? 'primary' : 'secondary'" 
                   :icon="List"
                   size="default"
                   @click="$emit('view-mode-change', 'list')"
                 />
               </el-tooltip>
-            </el-button-group>
+            </div>
           </div>
           
           <!-- Action Buttons -->
           <div class="action-buttons">
             <el-tooltip content="刷新数据" placement="top">
-              <el-button 
+              <Button 
                 :icon="Refresh" 
                 circle 
                 @click="$emit('refresh')"
@@ -43,7 +43,7 @@
             
             <!-- Toggle Advanced Filters -->
             <el-tooltip :content="showAdvanced ? '收起高级筛选' : '展开高级筛选'" placement="top">
-              <el-button 
+              <Button 
                 :icon="showAdvanced ? ArrowUp : ArrowDown"
                 circle
                 @click="toggleAdvanced"
@@ -68,14 +68,14 @@
             <slot name="advanced" />
           </div>
           <div class="advanced-filter-actions">
-            <el-button size="small" @click="$emit('reset-advanced')">
+            <Button size="small" @click="$emit('reset-advanced')">
               <el-icon><RefreshLeft /></el-icon>
               重置筛选
-            </el-button>
-            <el-button type="primary" size="small" @click="$emit('apply-advanced')">
+            </Button>
+            <Button type="primary" size="small" @click="$emit('apply-advanced')">
               <el-icon><Search /></el-icon>
               应用筛选
-            </el-button>
+            </Button>
           </div>
         </div>
       </el-collapse-transition>
@@ -99,15 +99,14 @@
           {{ filter.label }}
         </el-tag>
       </div>
-      <el-button 
-        link 
-        type="danger" 
+      <Button 
+        type="text" 
         size="small"
         @click="$emit('clear-all-filters')"
         v-if="activeFilters.length > 1"
       >
         清空所有
-      </el-button>
+      </Button>
     </div>
   </div>
 </template>
@@ -118,6 +117,7 @@ import {
   Grid, List, Refresh, ArrowUp, ArrowDown, 
   Filter, Search, RefreshLeft 
 } from '@element-plus/icons-vue'
+import Button from '@/components/common/Button.vue'
 
 interface FilterTag {
   key: string
@@ -207,6 +207,24 @@ const hasActiveFilters = computed(() => props.activeFilters.length > 0)
 
 .view-mode-toggle {
   display: flex;
+}
+
+.button-group {
+  display: flex;
+}
+
+.button-group > .btn {
+  border-radius: 0;
+}
+
+.button-group > .btn:first-child {
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.button-group > .btn:last-child {
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
 }
 
 .action-buttons {

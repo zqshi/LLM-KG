@@ -1,9 +1,9 @@
 <template>
   <div class="user-roles-page">
-    <div class="page-header">
-      <h2>用户授权</h2>
-      <p class="page-description">为用户分配角色，管理用户权限</p>
-    </div>
+    <UnifiedPageHeader 
+      title="用户授权" 
+      description="为用户分配角色，管理用户权限"
+    />
 
     <el-card class="main-card">
       <!-- 搜索栏 -->
@@ -304,6 +304,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus } from '@element-plus/icons-vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { useRbacStore } from '@/stores/rbac'
 import { useAuthStore } from '@/stores/auth'
 import type { User, Role, Permission, UserGroup, DataScopeType, PermissionType } from '@/types'

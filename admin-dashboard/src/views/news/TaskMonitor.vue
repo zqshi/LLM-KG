@@ -1,9 +1,10 @@
 <template>
   <div class="task-monitor">
-    <!-- 页面头部 -->
-    <div class="header">
-      <h2>任务监控中心</h2>
-      <div class="header-actions">
+    <UnifiedPageHeader 
+      title="任务监控中心" 
+      description="实时监控资讯抓取任务执行状态和运行情况"
+    >
+      <template #actions>
         <el-button type="primary" @click="refreshAll">
           <el-icon><Refresh /></el-icon>
           刷新数据
@@ -12,8 +13,8 @@
           <el-icon><VideoPlay /></el-icon>
           批量执行 ({{ selectedTasks.length }})
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 监控仪表板 -->
     <el-row :gutter="20" class="dashboard">
@@ -293,6 +294,7 @@ import {
   GridComponent
 } from 'echarts/components'
 import VChart from 'vue-echarts'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 use([
   CanvasRenderer,

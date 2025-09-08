@@ -1,9 +1,9 @@
 <template>
   <div class="users-page">
-    <div class="page-header">
-      <h2>用户管理</h2>
-      <p class="page-description">管理系统用户，支持创建、编辑、禁用用户和重置密码</p>
-    </div>
+    <UnifiedPageHeader 
+      title="用户管理" 
+      description="管理系统用户，支持创建、编辑、禁用用户和重置密码"
+    />
 
     <el-card class="main-card">
       <!-- 搜索栏 -->
@@ -284,6 +284,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
 import { Search, Refresh, Plus, Delete, Download } from '@element-plus/icons-vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { useRbacStore } from '@/stores/rbac'
 import { useAuthStore } from '@/stores/auth'
 import type { User, UserForm, UserQueryParams } from '@/types'

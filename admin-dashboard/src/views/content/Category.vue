@@ -1,17 +1,16 @@
 <template>
   <div class="category-home">
-    <div class="page-header">
-      <div class="left">
-        <h1 class="page-title">{{ displayName }}版块</h1>
-        <div class="desc">查看并管理该版块下的所有帖子</div>
-      </div>
-      <div class="right">
+    <UnifiedPageHeader 
+      :title="displayName + '版块'" 
+      description="查看并管理该版块下的所有帖子"
+    >
+      <template #actions>
         <el-button type="primary" @click="createPost">
           <el-icon><Plus /></el-icon>
           发布新帖
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <el-card class="info-card" shadow="never">
       <div class="stats">
@@ -118,6 +117,7 @@
 import { onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { useContentStore } from '@/stores/content'
 import { useAuthStore } from '@/stores/auth'
 import type { Content } from '@/types'

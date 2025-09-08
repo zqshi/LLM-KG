@@ -1,6 +1,9 @@
 <template>
   <div class="operation-dashboard">
-    <h2>运营数据看板</h2>
+    <UnifiedPageHeader 
+      title="运营数据看板" 
+      description="显示运营数据分析和统计信息"
+    />
     <el-card>
       <div class="content">
         <el-result
@@ -18,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 // 占位组件，后续完善
 </script>
 

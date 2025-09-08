@@ -1,6 +1,9 @@
 <template>
   <div class="placeholder-page">
-    <h2>系统配置</h2>
+    <UnifiedPageHeader 
+      title="系统配置" 
+      description="管理系统配置参数和功能设置"
+    />
     <el-card>
       <div class="content">
         <el-result
@@ -18,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 // 占位组件，后续完善
 </script>
 

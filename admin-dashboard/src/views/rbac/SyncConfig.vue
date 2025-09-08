@@ -1,31 +1,32 @@
 <template>
   <div class="sync-config-page">
-    <div class="page-header">
-      <h2>数据同步配置</h2>
-      <p class="page-description">配置与企业微信、LDAP、钉钉等外部系统的用户数据同步</p>
-    </div>
+    <UnifiedPageHeader 
+      title="数据同步配置" 
+      description="配置与企业微信、LDAP、钉钉等外部系统的用户数据同步"
+    >
+      <template #actions>
+        <el-button 
+          type="primary" 
+          :icon="Plus" 
+          @click="handleCreate"
+          v-if="hasPermission('rbac:sync:config')"
+        >
+          新建配置
+        </el-button>
+        <el-button 
+          :icon="Refresh" 
+          @click="refreshData"
+          :loading="loading"
+        >
+          刷新
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <el-card class="main-card">
       <template #header>
         <div class="card-header">
           <span>同步配置列表</span>
-          <div class="header-actions">
-            <el-button 
-              type="primary" 
-              :icon="Plus" 
-              @click="handleCreate"
-              v-if="hasPermission('rbac:sync:config')"
-            >
-              新建配置
-            </el-button>
-            <el-button 
-              :icon="Refresh" 
-              @click="refreshData"
-              :loading="loading"
-            >
-              刷新
-            </el-button>
-          </div>
         </div>
       </template>
 
@@ -405,6 +406,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
 import { Plus, Refresh, OfficeBuilding, Connection, DataBoard, Bell, Setting } from '@element-plus/icons-vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { useRbacStore } from '@/stores/rbac'
 import { useAuthStore } from '@/stores/auth'
 import type { SyncConfig, SyncType, SyncResult } from '@/types'

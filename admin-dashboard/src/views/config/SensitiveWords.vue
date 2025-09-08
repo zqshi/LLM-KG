@@ -1,8 +1,10 @@
 <template>
   <div class="sensitive-words-page">
-    <div class="page-header">
-      <h1 class="page-title">敏感词库管理</h1>
-      <div class="page-actions">
+    <UnifiedPageHeader 
+      title="敏感词库管理" 
+      description="管理系统敏感词库，支持批量导入导出和词条分类"
+    >
+      <template #actions>
         <el-button @click="handleImport">
           <el-icon><Upload /></el-icon>
           批量导入
@@ -15,8 +17,8 @@
           <el-icon><Plus /></el-icon>
           添加词条
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 词库统计 -->
     <el-row :gutter="16" class="stats-row">
@@ -551,6 +553,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted } from 'vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import type { PaginationParams } from '@/types'
 import type { FormInstance, FormRules } from 'element-plus'
 import {

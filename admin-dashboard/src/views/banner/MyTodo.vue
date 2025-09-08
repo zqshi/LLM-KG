@@ -1,12 +1,16 @@
 <template>
   <div class="my-todo">
-    <div class="header">
-      <h2>我的待办</h2>
-      <div class="stats">
-        <el-statistic title="待处理数量" :value="todoStats.pending" />
-        <el-statistic title="今日已处理" :value="todoStats.todayProcessed" />
-      </div>
-    </div>
+    <UnifiedPageHeader 
+      title="我的待办" 
+      description="查看和处理我需要审批的Banner项目"
+    >
+      <template #actions>
+        <div class="stats">
+          <el-statistic title="待处理数量" :value="todoStats.pending" />
+          <el-statistic title="今日已处理" :value="todoStats.todayProcessed" />
+        </div>
+      </template>
+    </UnifiedPageHeader>
 
     <div class="filter-bar">
       <el-form :inline="true" :model="filterForm" class="demo-form-inline">
@@ -222,6 +226,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check, Close, Clock, User, Warning } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 interface TodoItem {
   id: number

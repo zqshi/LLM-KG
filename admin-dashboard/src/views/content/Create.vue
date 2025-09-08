@@ -1,12 +1,16 @@
 <template>
   <div class="content-create">
-    <div class="page-header">
-      <h2>发布新帖</h2>
-      <el-button @click="goBack">
-        <el-icon><ArrowLeft /></el-icon>
-        返回
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="发布新帖" 
+      description="创建新的内容帖子和资源"
+    >
+      <template #actions>
+        <el-button @click="goBack">
+          <el-icon><ArrowLeft /></el-icon>
+          返回
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <el-card shadow="never">
       <el-form
@@ -133,6 +137,7 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElInput, type FormInstance } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { ArrowLeft, DocumentAdd, Document, Refresh } from '@element-plus/icons-vue'
 import { useContentStore } from '@/stores/content'
 import type { ContentForm } from '@/types'

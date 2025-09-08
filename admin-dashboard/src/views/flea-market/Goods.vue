@@ -1,12 +1,10 @@
 <template>
   <div class="goods-management">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">商品管理</h1>
-        <p class="page-subtitle">管理跳蚤市场中的所有商品信息</p>
-      </div>
-      <div class="page-actions">
+    <UnifiedPageHeader 
+      title="商品管理" 
+      description="管理跳蚤市场中的所有商品，审核商品信息和状态"
+    >
+      <template #actions>
         <el-button type="primary" @click="refreshData">
           <el-icon><Refresh /></el-icon>
           刷新
@@ -15,8 +13,8 @@
           <el-icon><Download /></el-icon>
           导出
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 搜索筛选区域 -->
     <el-card class="search-card">
@@ -306,6 +304,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useFleaMarketStore } from '@/stores/fleaMarket'
 import type { FleaGoods, FleaGoodsQueryParams } from '@/types'
 import GoodsDetailDialog from './components/GoodsDetailDialog.vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 // Store
 const fleaMarketStore = useFleaMarketStore()

@@ -1,12 +1,16 @@
 <template>
   <div class="recommendations-page">
-    <div class="page-header">
-      <h1 class="page-title">推荐管理</h1>
-      <el-button type="primary" @click="handleAdd">
-        <el-icon><Plus /></el-icon>
-        添加推荐
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="推荐管理" 
+      description="管理推荐内容，设置推荐位和优先级"
+    >
+      <template #actions>
+        <el-button type="primary" @click="handleAdd">
+          <el-icon><Plus /></el-icon>
+          添加推荐
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <div class="page-content">
       <el-table :data="recommendationList" style="width: 100%">
@@ -52,6 +56,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 const recommendationList = ref([
   {

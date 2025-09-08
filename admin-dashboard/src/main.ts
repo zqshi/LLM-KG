@@ -20,6 +20,7 @@ import {
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
+import type { Component } from 'vue'
 
 // 注册 ECharts 组件
 echarts.use([
@@ -43,7 +44,7 @@ app.use(pinia)
 app.use(router)
 
 // 注册 VChart 组件
-app.component('VChart', VChart)
+app.component('VChart', VChart as unknown as Component)
 
 console.log('=== Pinia和Router初始化完成 ===')
 

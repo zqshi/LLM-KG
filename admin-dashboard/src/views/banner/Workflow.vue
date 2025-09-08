@@ -1,12 +1,16 @@
 <template>
   <div class="workflow-config">
-    <div class="header">
-      <h2>Banner审批流配置</h2>
-      <el-button type="primary" @click="createWorkflow">
-        <el-icon><Plus /></el-icon>
-        创建审批流
-      </el-button>
-    </div>
+    <UnifiedPageHeader 
+      title="Banner审批流配置" 
+      description="配置和管理Banner审批流程，设定审批节点和角色"
+    >
+      <template #actions>
+        <el-button type="primary" @click="createWorkflow">
+          <el-icon><Plus /></el-icon>
+          创建审批流
+        </el-button>
+      </template>
+    </UnifiedPageHeader>
 
     <div class="search-bar">
       <el-form :inline="true" :model="searchForm" class="demo-form-inline">
@@ -238,6 +242,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Minus } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 interface ApprovalNode {
   name: string

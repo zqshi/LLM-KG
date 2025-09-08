@@ -1,16 +1,16 @@
 <template>
   <div class="categories-page">
-    <div class="page-header">
-      <div class="header-left">
-        <h1 class="page-title">版块管理</h1>
-      </div>
-      <div class="header-actions">
+    <UnifiedPageHeader 
+      title="版块管理" 
+      description="管理内容版块，支持创建、编辑和排序版块结构"
+    >
+      <template #actions>
         <el-button type="primary" @click="handleAdd">
           <el-icon><Plus /></el-icon>
           新增版块
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <!-- 版块统计 -->
     <el-row :gutter="16" class="stats-row">
@@ -140,7 +140,7 @@
                   <div class="moderators-list">
                     <el-avatar v-for="moderator in category.moderators.slice(0, 3)" :key="moderator.id" :size="24"
                       :src="moderator.avatar" class="moderator-avatar">
-                      {{ moderator.nickname.charAt(0) }}
+                      {{ moderator.nickname?.charAt(0) || '?' }}
                     </el-avatar>
                     <span v-if="category.moderators.length > 3" class="more-count">
                       +{{ category.moderators.length - 3 }}
@@ -404,7 +404,7 @@
                 {{ moderator.nickname.charAt(0) }}
               </el-avatar>
               <div class="moderator-info">
-                <div class="moderator-name">{{ moderator.nickname }}</div>
+                <div class="moderator-name">{{ moderator.nickname || '未知' }}</div>
                 <div class="moderator-dept">{{ moderator.department }}</div>
               </div>
               <el-button type="danger" size="small" @click="removeModerator(moderator)">
@@ -441,14 +441,14 @@ import {
   Plus, FolderOpened, Select, Document, User as UserIcon,
   MoreFilled, Rank, Picture, Key, QuestionFilled, InfoFilled,
   Unlock, Lock, CircleCheck, Clock, View, DataLine, Close, Check,
-  UserFilled, Star, Shield
+  UserFilled, Star, ShieldFilled
 } from '@element-plus/icons-vue'
 import { contentApi } from '@/api/content'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 统一组件导入
 import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
-import UnifiedStatsCard from '@/components/UnifiedStatsCard.vue'
+import StatsCard from '@/components/StatsCard.vue'
 
 interface Category {
   id: number
@@ -459,7 +459,7 @@ interface Category {
   sortOrder: number
   isPublic: boolean
   isActive: boolean
-  auditMode: 'none' | 'pre' | 'post' | 'sample'
+  auditMode: 0 | 1 | 2 | 3
   postPermissions: string[]
   postCount: number
   todayPosts: number
@@ -483,7 +483,7 @@ const categoryForm = reactive({
   sortOrder: 0,
   isPublic: true,
   isActive: true,
-  auditMode: 'none' as 'none' | 'pre' | 'post' | 'sample',
+  auditMode: 0 as 0 | 1 | 2 | 3,
   postPermissions: ['all']
 })
 
@@ -525,7 +525,7 @@ const permissionOptions = [
     value: 'moderator', 
     label: '仅版主', 
     desc: '只有版主可以发帖', 
-    icon: 'Shield', 
+    icon: 'ShieldFilled', 
     type: 'danger' 
   }
 ]
@@ -559,7 +559,7 @@ const mockCategoryData = (): Category[] => [
     sortOrder: 1,
     isPublic: true,
     isActive: true,
-    auditMode: 'post',
+    auditMode: 2,
     postPermissions: ['all'],
     postCount: 456,
     todayPosts: 8,
@@ -579,7 +579,7 @@ const mockCategoryData = (): Category[] => [
     sortOrder: 2,
     isPublic: true,
     isActive: true,
-    auditMode: 'pre',
+    auditMode: 1,
     postPermissions: ['member'],
     postCount: 234,
     todayPosts: 3,
@@ -635,23 +635,23 @@ const mockAvailableUsers = (): User[] => [
   { id: 12, username: 'user3', nickname: '王五', email: '', department: '运营部', status: 'active', roles: [], createdAt: '', updatedAt: '' }
 ]
 
-const getAuditModeName = (mode: string) => {
-  const modeMap: Record<string, string> = {
-    none: '无需审核',
-    pre: '先审后发',
-    post: '先发后审',
-    sample: '抽样审核'
+const getAuditModeName = (mode: number) => {
+  const modeMap: Record<number, string> = {
+    0: '无需审核',
+    1: '先审后发',
+    2: '先发后审',
+    3: '抽样审核'
   }
-  return modeMap[mode] || mode
+  return modeMap[mode] || '未知'
 }
 
 type TagType = 'primary' | 'success' | 'info' | 'warning' | 'danger'
-const getAuditModeColor = (mode: string): TagType => {
-  const colorMap: Record<string, TagType> = {
-    none: 'success',
-    pre: 'danger',
-    post: 'warning',
-    sample: 'info'
+const getAuditModeColor = (mode: 0 | 1 | 2 | 3): TagType => {
+  const colorMap: Record<number, TagType> = {
+    0: 'success',
+    1: 'danger',
+    2: 'warning',
+    3: 'info'
   }
   return colorMap[mode] || 'info'
 }

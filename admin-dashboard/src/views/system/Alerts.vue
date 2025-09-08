@@ -1,6 +1,9 @@
 <template>
   <div class="placeholder-page">
-    <h2>操作告警</h2>
+    <UnifiedPageHeader 
+      title="操作告警" 
+      description="系统操作告警监控和通知管理"
+    />
     <el-card>
       <div class="content">
         <el-result
@@ -18,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 // 占位组件，后续完善
 </script>
 

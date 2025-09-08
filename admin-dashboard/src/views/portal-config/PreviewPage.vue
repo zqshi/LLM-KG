@@ -1,16 +1,13 @@
 <template>
   <div class="preview-page">
-    <div class="preview-header">
-      <div class="header-left">
+    <UnifiedPageHeader 
+      title="门户预览" 
+      description="实时预览门户配置效果"
+    >
+      <template #actions>
         <el-button @click="goBack" :icon="ArrowLeft" plain>
           返回配置
         </el-button>
-        <div class="page-title">
-          <h2>门户预览</h2>
-          <p>实时预览门户配置效果</p>
-        </div>
-      </div>
-      <div class="header-right">
         <el-radio-group v-model="previewMode" size="default">
           <el-radio-button value="desktop">
             <el-icon><Monitor /></el-icon>
@@ -47,6 +44,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, Monitor, Iphone, Cellphone, Refresh } from '@element-plus/icons-vue'
 import PreviewPanel from './components/PreviewPanel.vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 import { navigationApi } from '@/api/navigation'
 import { entryPanelApi } from '@/api/entryPanel'
 import type { NavigationItem, EntryPanel } from '@/types/navigation'

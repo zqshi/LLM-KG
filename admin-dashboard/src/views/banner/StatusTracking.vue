@@ -1,8 +1,9 @@
 <template>
   <div class="status-tracking">
-    <div class="header">
-      <h2>Banner状态追踪</h2>
-    </div>
+    <UnifiedPageHeader 
+      title="Banner状态追踪" 
+      description="跟踪Banner审批流程，监控审批进度和状态变更"
+    />
 
     <div class="search-bar">
       <el-form :inline="true" :model="searchForm" class="demo-form-inline">
@@ -209,6 +210,7 @@ import { ElMessage } from 'element-plus'
 import { SuccessFilled, CircleCloseFilled, Loading } from '@element-plus/icons-vue'
 import UnifiedWorkflowViewer from '@/components/workflow/UnifiedWorkflowViewer.vue'
 import type { WorkflowData, BannerInfo } from '@/components/workflow/UnifiedWorkflowViewer.vue'
+import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 interface TrackingItem {
   id: number

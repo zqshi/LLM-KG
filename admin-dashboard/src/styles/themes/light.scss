@@ -1,0 +1,19 @@
+@forward '../core/variables.scss';
+
+// 导出额外的主题相关变量和工具
+$primary-font: 'Inter', system-ui, sans-serif;
+$secondary-font: 'Roboto Mono', monospace;
+
+@mixin theme {
+  font-family: $primary-font;
+  color: $color-text-primary;
+  background-color: $color-bg-page;
+}
+
+@function color($name) {
+  @if $name == 'primary' { @return $color-primary; }
+  @else if $name == 'success' { @return $color-success; }
+  @else if $name == 'warning' { @return $color-warning; }
+  @else if $name == 'danger' { @return $color-danger; }
+  @else { @error "Unknown color: #{$name}"; }
+}

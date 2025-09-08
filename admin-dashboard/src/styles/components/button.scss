@@ -1,0 +1,233 @@
+/**
+ * 按钮组件标准化样式
+ * 统一Element Plus按钮组件的视觉风格
+ */
+
+@use '../core/mixins' as *;
+
+// Element Plus按钮标准化
+.el-button {
+  @include button-reset;
+  @include flex-center;
+  
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  gap: var(--spacing-xs);
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+
+  // 尺寸变体
+  &.el-button--large {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--text-base);
+    min-height: 44px;
+  }
+
+  &.el-button--small {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--text-xs);
+    min-height: 32px;
+  }
+
+  // 类型变体
+  &.el-button--primary {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+
+    @include button-hover(var(--color-primary-hover));
+    @include button-focus(var(--color-primary));
+    @include button-active(var(--color-primary-active));
+  }
+
+  &.el-button--success {
+    background-color: var(--color-success);
+    color: var(--color-white);
+    border-color: var(--color-success);
+
+    @include button-hover(var(--color-success-hover));
+    @include button-focus(var(--color-success));
+  }
+
+  &.el-button--warning {
+    background-color: var(--color-warning);
+    color: var(--color-white);
+    border-color: var(--color-warning);
+
+    @include button-hover(var(--color-warning-hover));
+    @include button-focus(var(--color-warning));
+  }
+
+  &.el-button--danger {
+    background-color: var(--color-danger);
+    color: var(--color-white);
+    border-color: var(--color-danger);
+
+    @include button-hover(var(--color-danger-hover));
+    @include button-focus(var(--color-danger));
+  }
+
+  &.el-button--info {
+    background-color: var(--color-info);
+    color: var(--color-white);
+    border-color: var(--color-info);
+
+    @include button-hover(var(--color-info-hover));
+    @include button-focus(var(--color-info));
+  }
+
+  // Plain变体
+  &.el-button--primary.is-plain {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary);
+      color: var(--color-white);
+    }
+  }
+
+  // 文字按钮
+  &.is-text {
+    padding: var(--spacing-xs);
+    color: var(--color-primary);
+    background-color: transparent;
+    border: none;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary-light);
+    }
+  }
+
+  // 链接按钮
+  &.is-link {
+    color: var(--color-primary);
+    background-color: transparent;
+    border: none;
+    text-decoration: none;
+    padding: 0;
+
+    &:hover:not(:disabled) {
+      color: var(--color-primary-hover);
+      text-decoration: underline;
+    }
+  }
+
+  // 圆形按钮
+  &.is-circle {
+    border-radius: 50%;
+    padding: var(--spacing-sm);
+    width: 40px;
+    height: 40px;
+
+    &.el-button--large {
+      width: 48px;
+      height: 48px;
+    }
+
+    &.el-button--small {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  // 圆角按钮
+  &.is-round {
+    border-radius: var(--radius-full);
+    padding: var(--spacing-sm) var(--spacing-lg);
+  }
+
+  // 禁用状态
+  &.is-disabled,
+  &:disabled {
+    background-color: var(--color-bg-disabled);
+    color: var(--color-text-disabled);
+    border-color: var(--color-border-dark);
+    cursor: not-allowed;
+    opacity: 0.6;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  // 加载状态
+  &.is-loading {
+    position: relative;
+    pointer-events: none;
+
+    &:before {
+      pointer-events: none;
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      right: -1px;
+      bottom: -1px;
+      border-radius: inherit;
+      background-color: inherit;
+      opacity: 0.4;
+    }
+  }
+
+  // 按钮组
+  &.el-button-group {
+    .el-button {
+      &:first-child {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right-color: transparent;
+      }
+
+      &:last-child {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left-color: transparent;
+      }
+
+      &:not(:first-child):not(:last-child) {
+        border-radius: 0;
+        border-left-color: transparent;
+        border-right-color: transparent;
+      }
+    }
+  }
+}
+
+// 按钮组容器
+.el-button-group {
+  display: inline-flex;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+// 自定义按钮类
+.btn-gradient {
+  background: var(--gradient-primary);
+  border: none;
+  color: var(--color-white);
+
+  &:hover:not(:disabled) {
+    background: var(--gradient-primary);
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    @include shadow-level(2);
+  }
+}
+
+.btn-ghost {
+  background-color: transparent;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+  }
+}
