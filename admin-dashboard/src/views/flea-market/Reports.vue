@@ -111,8 +111,8 @@
         <el-table-column label="举报人" width="150">
           <template #default="{ row }">
             <div class="reporter-info">
-              <div class="reporter-name">{{ row.reporter.name }}</div>
-              <div class="reporter-email">{{ row.reporter.email }}</div>
+              <div class="reporter-name">{{ row.reporter?.name || '未知用户' }}</div>
+              <div class="reporter-email">{{ row.reporter?.email || '-' }}</div>
             </div>
           </template>
         </el-table-column>
@@ -122,7 +122,7 @@
             <div v-if="row.targetType === 'goods' && row.targetGoods" class="target-info">
               <div class="target-title">{{ row.targetGoods.title }}</div>
               <div class="target-meta">
-                卖家：{{ row.targetGoods.seller.name }} | 
+                卖家：{{ row.targetGoods.seller?.name || '未知卖家' }} | 
                 类型：{{ getTargetTypeText(row.targetType) }}
               </div>
             </div>
@@ -155,7 +155,7 @@
         <el-table-column label="处理信息" width="200">
           <template #default="{ row }">
             <div v-if="row.status === 'processed' && row.handler" class="handle-info">
-              <div class="handler">处理人：{{ row.handler.name }}</div>
+              <div class="handler">处理人：{{ row.handler?.name || '未知处理人' }}</div>
               <div class="handle-time">时间：{{ row.handleTime }}</div>
               <div v-if="row.handleRemark" class="handle-remark">
                 备注：{{ row.handleRemark }}
@@ -234,7 +234,7 @@
           <h4>举报详情</h4>
           <el-descriptions :column="2" border>
             <el-descriptions-item label="举报ID">{{ currentReport.id }}</el-descriptions-item>
-            <el-descriptions-item label="举报人">{{ currentReport.reporter.name }}</el-descriptions-item>
+            <el-descriptions-item label="举报人">{{ currentReport.reporter?.name || '未知用户' }}</el-descriptions-item>
             <el-descriptions-item label="被举报对象">
               <span v-if="currentReport.targetGoods">{{ currentReport.targetGoods.title }}</span>
               <span v-else>{{ getTargetTypeText(currentReport.targetType) }} (ID: {{ currentReport.targetId }})</span>
@@ -341,12 +341,12 @@
         <el-descriptions :column="1" border>
           <el-descriptions-item label="举报ID">{{ currentReport.id }}</el-descriptions-item>
           <el-descriptions-item label="举报人">
-            {{ currentReport.reporter.name }} ({{ currentReport.reporter.email }})
+            {{ currentReport.reporter?.name || '未知用户' }} ({{ currentReport.reporter?.email || '-' }})
           </el-descriptions-item>
           <el-descriptions-item label="被举报对象">
             <div v-if="currentReport.targetGoods">
               <strong>{{ currentReport.targetGoods.title }}</strong><br>
-              卖家：{{ currentReport.targetGoods.seller.name }}<br>
+              卖家：{{ currentReport.targetGoods.seller?.name || '未知卖家' }}<br>
               类型：商品 (ID: {{ currentReport.targetId }})
             </div>
             <div v-else>
@@ -361,7 +361,7 @@
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item v-if="currentReport.handler" label="处理人">
-            {{ currentReport.handler.name }}
+            {{ currentReport.handler?.name || '未知处理人' }}
           </el-descriptions-item>
           <el-descriptions-item v-if="currentReport.handleTime" label="处理时间">
             {{ currentReport.handleTime }}

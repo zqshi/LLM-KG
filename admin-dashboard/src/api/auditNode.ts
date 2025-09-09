@@ -226,14 +226,21 @@ export abstract class AuditNode {
   // 私有辅助方法
 
   private async loadAuditPolicy(): Promise<AuditPolicy | null> {
-    try {
-      const response = await request.get(`/audit/policies/by-biztype/${this.config.bizType}`)
-      return response.data
-    } catch (error) {
-      console.error('加载审核策略失败:', error)
-      return null
+      try {
+        // 移除URL中的/api前缀，因为request库的baseURL已经包含了/api
+        const url = `/audit/policies/by-biztype/${this.config.bizType}`
+        console.log(`🔍 请求审核策略URL: ${url}`)
+        console.log(`🔍 完整请求URL: ${request.defaults.baseURL}${url}`)
+        const response = await request.get(url)
+        console.log(`✅ 审核策略请求成功，响应数据:`, response.data)
+        // 从响应中正确提取审核策略数据
+        return response.data?.policies?.[0] || null
+      } catch (error) {
+        console.error('加载审核策略失败:', error)
+        console.error('❌ 错误详情:', error.response || error.message)
+        return null
+      }
     }
-  }
 
   private async preprocessContent(content: any): Promise<any> {
     if (!this.policy || !this.policy.ruleConfig?.sensitiveWordCheck) {

@@ -166,7 +166,7 @@
       
       <el-table
         v-loading="loading.value"
-        :data="quotationList.value"
+        :data="quotationList"
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />

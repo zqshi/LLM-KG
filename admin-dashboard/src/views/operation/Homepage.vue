@@ -444,7 +444,7 @@ const mockBannerData = (): Banner[] => [
   {
     id: 1,
     title: '企业知识分享平台正式上线',
-    image: '/api/placeholder/800/300?text=Banner1',
+    image: `${import.meta.env.VITE_API_BASE_URL}/placeholder/800/300?text=Banner1`,
     link: '/announcement/1',
     position: 'top',
     displayTime: null,
@@ -454,7 +454,7 @@ const mockBannerData = (): Banner[] => [
   {
     id: 2,
     title: '年度优秀员工评选活动开始',
-    image: '/api/placeholder/800/300?text=Banner2',
+    image: `${import.meta.env.VITE_API_BASE_URL}/placeholder/800/300?text=Banner2`,
     link: '/activity/annual-award',
     position: 'top',
     displayTime: null,

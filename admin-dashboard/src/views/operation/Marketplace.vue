@@ -202,7 +202,7 @@ const productList = ref([
   {
     id: 1,
     title: '二手iPhone 13',
-    image: '/api/placeholder/60/60?text=iPhone',
+    image: `${import.meta.env.VITE_API_BASE_URL}/placeholder/60/60?text=iPhone`,
     seller: { name: '张三' },
     price: 3999,
     category: '数码产品',
@@ -212,7 +212,7 @@ const productList = ref([
   {
     id: 2,
     title: '办公桌椅一套',
-    image: '/api/placeholder/60/60?text=桌椅',
+    image: `${import.meta.env.VITE_API_BASE_URL}/placeholder/60/60?text=桌椅`,
     seller: { name: '李四' },
     price: 500,
     category: '办公用品',

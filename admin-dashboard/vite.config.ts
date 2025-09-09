@@ -94,12 +94,12 @@ export default defineConfig({
     cors: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3010',
         changeOrigin: true,
         secure: false
       },
       '/flea-market': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:3010',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/flea-market/, '/api/flea-market')
@@ -113,9 +113,7 @@ export default defineConfig({
   },
   css: {
     preprocessorOptions: {
-      scss: {
-        api: 'modern-compiler'
-      }
+      scss: {}
     },
     modules: {
       localsConvention: 'camelCase'

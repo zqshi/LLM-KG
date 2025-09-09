@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const app = express()
-const port = 3001
+const port = process.env.PORT || 3001
 
 // 启用CORS
 app.use(cors())
@@ -907,6 +907,7 @@ function generateVoteTimeline(totalVotes) {
 // ===== 审核相关API (处理audit相关404) =====
 app.get('/api/audit/policies/by-biztype/:biztype', (req, res) => {
   console.log(`⚖️ Audit policies requested for biztype: ${req.params.biztype}`)
+  console.log(`🔍 Full request URL: ${req.originalUrl}`)
   res.json({
     code: 200,
     message: 'success',
@@ -917,6 +918,9 @@ app.get('/api/audit/policies/by-biztype/:biztype', (req, res) => {
           name: '默认审核策略',
           bizType: req.params.biztype,
           enabled: true,
+          isActive: true,
+          mode: 'all',
+          priority: 'normal',
           rules: []
         }
       ]
@@ -1029,6 +1033,126 @@ app.get('/api/audit/policies', (req, res) => {
     data: {
       list: mockPolicies,
       total: mockPolicies.length
+    }
+  })
+})
+
+// 全局审核日志API (处理缺失的POST端点)
+app.post('/api/audit/global/logs', (req, res) => {
+  console.log('📋 Global audit logs creation requested', req.body)
+  
+  const newLog = {
+    id: Date.now(),
+    action: req.body.action || 'UNKNOWN',
+    resource_type: req.body.resource_type || 'unknown',
+    resource_id: req.body.resource_id || '',
+    user_id: req.body.user_id || 1,
+    user_name: req.body.user_name || '系统用户',
+    ip_address: req.body.ip_address || '127.0.0.1',
+    user_agent: req.body.user_agent || 'Unknown',
+    details: req.body.details || {},
+    status: req.body.status || 'SUCCESS',
+    created_at: new Date().toISOString()
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: newLog
+  })
+})
+
+// 获取全局审核日志列表
+app.get('/api/audit/global/logs', (req, res) => {
+  console.log('📋 Global audit logs list requested', req.query)
+  const { page = 1, pageSize = 20, action = '', resource_type = '', startTime = '', endTime = '' } = req.query
+  
+  const mockLogs = [
+    {
+      id: 1,
+      action: 'CREATE',
+      resource_type: 'quotation',
+      resource_id: '123',
+      user_id: 1,
+      user_name: '张明',
+      ip_address: '192.168.1.100',
+      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      details: { content: '创建了新的名言' },
+      status: 'SUCCESS',
+      created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+    },
+    {
+      id: 2,
+      action: 'UPDATE', 
+      resource_type: 'banner',
+      resource_id: '456',
+      user_id: 2,
+      user_name: '李华',
+      ip_address: '192.168.1.101',
+      user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      details: { content: '更新了横幅信息' },
+      status: 'SUCCESS',
+      created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString()
+    },
+    {
+      id: 3,
+      action: 'DELETE',
+      resource_type: 'content',
+      resource_id: '789',
+      user_id: 3,
+      user_name: '王强',
+      ip_address: '192.168.1.102',
+      user_agent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15',
+      details: { content: '删除了违规内容' },
+      status: 'SUCCESS',
+      created_at: new Date(Date.now() - 1000 * 60 * 90).toISOString()
+    }
+  ]
+  
+  let filteredLogs = [...mockLogs]
+  
+  // 操作类型过滤
+  if (action) {
+    filteredLogs = filteredLogs.filter(log => log.action === action)
+  }
+  
+  // 资源类型过滤
+  if (resource_type) {
+    filteredLogs = filteredLogs.filter(log => log.resource_type === resource_type)
+  }
+  
+  // 时间范围过滤
+  if (startTime || endTime) {
+    filteredLogs = filteredLogs.filter(log => {
+      const logTime = new Date(log.created_at).getTime()
+      const start = startTime ? new Date(startTime).getTime() : 0
+      const end = endTime ? new Date(endTime).getTime() : Date.now()
+      return logTime >= start && logTime <= end
+    })
+  }
+  
+  const total = filteredLogs.length
+  const startIndex = (parseInt(page) - 1) * parseInt(pageSize)
+  const endIndex = startIndex + parseInt(pageSize)
+  const paginatedLogs = filteredLogs.slice(startIndex, endIndex)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      list: paginatedLogs,
+      total,
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      statistics: {
+        totalLogs: total,
+        todayLogs: mockLogs.filter(log => {
+          const today = new Date().toDateString()
+          return new Date(log.created_at).toDateString() === today
+        }).length,
+        successLogs: mockLogs.filter(log => log.status === 'SUCCESS').length,
+        errorLogs: mockLogs.filter(log => log.status === 'ERROR').length
+      }
     }
   })
 })
@@ -1800,6 +1924,8 @@ app.listen(port, () => {
   console.log(`   GET  /api/audit/auditors`)
   console.log(`   GET  /api/audit/stats`)
   console.log(`   GET  /api/audit/policies`)
+  console.log(`   POST /api/audit/global/logs`)
+  console.log(`   GET  /api/audit/global/logs`)
   console.log(`   Flea Market APIs:`)
   console.log(`   GET  /api/flea-market/categories`)
   console.log(`   GET  /api/flea-market/goods`)
