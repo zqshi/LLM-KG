@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, LoginResponse, MenuNode } from '@/types'
+import { SUPER_ADMIN_PERMISSIONS, isSuperAdmin, hasPermission as hasUserPermission } from './permissions'
 
 // 生成默认菜单的函数 - 与router/index.ts保持严格一致
 function generateDefaultMenus(): MenuNode[] {
@@ -121,7 +122,8 @@ function generateDefaultMenus(): MenuNode[] {
       children: [
         { id: 121, name: '系统配置', path: '/system/settings', icon: 'Setting' },
         { id: 122, name: '审计日志', path: '/system/logs', icon: 'DocumentChecked' },
-        { id: 123, name: '操作告警', path: '/system/alerts', icon: 'Bell' }
+        { id: 123, name: '操作告警', path: '/system/alerts', icon: 'Bell' },
+        { id: 124, name: '权限验证', path: '/system/permissions-test', icon: 'Key', meta: { hideInMenu: true } }
       ]
     }
   ]
@@ -257,7 +259,7 @@ export const useAuthStore = defineStore('auth', () => {
             createTime: new Date().toISOString(),
             updateTime: new Date().toISOString()
           }
-          permissions.value = ['*'] // 所有权限
+          permissions.value = SUPER_ADMIN_PERMISSIONS // 超级管理员的完整权限
           menus.value = generateDefaultMenus()
 
           // 保存到localStorage
@@ -345,6 +347,8 @@ export const useAuthStore = defineStore('auth', () => {
               )))
         if (isAdminUser) {
           menus.value = generateDefaultMenus()
+          // 强制更新菜单缓存
+          localStorage.setItem('menus', JSON.stringify(menus.value))
         }
       } else {
         console.log('没有有效的登录信息，保持未登录状态')
@@ -360,39 +364,21 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查权限
   function checkPermission(permission: string): boolean {
-    // 管理员无限制
-    const current = user.value
-    const isAdminUser =
-      !!current &&
-      (current.username === 'admin' ||
-        (Array.isArray(current.roles) &&
-          current.roles.some(r => ['system_admin', 'super_admin', 'admin'].includes(r.code))))
-    if (isAdminUser) return true
-    return permissions.value.includes(permission)
+    return hasUserPermission(user.value, permission)
   }
 
   // 检查多个权限（AND关系）
   function checkPermissions(perms: string[]): boolean {
-    const current = user.value
-    const isAdminUser =
-      !!current &&
-      (current.username === 'admin' ||
-        (Array.isArray(current.roles) &&
-          current.roles.some(r => ['system_admin', 'super_admin', 'admin'].includes(r.code))))
-    if (isAdminUser) return true
-    return perms.every(perm => permissions.value.includes(perm))
+    // 超级管理员拥有所有权限
+    if (isSuperAdmin(user.value)) return true
+    return perms.every(perm => hasUserPermission(user.value, perm))
   }
 
   // 检查多个权限（OR关系）
   function checkAnyPermission(perms: string[]): boolean {
-    const current = user.value
-    const isAdminUser =
-      !!current &&
-      (current.username === 'admin' ||
-        (Array.isArray(current.roles) &&
-          current.roles.some(r => ['system_admin', 'super_admin', 'admin'].includes(r.code))))
-    if (isAdminUser) return true
-    return perms.some(perm => permissions.value.includes(perm))
+    // 超级管理员拥有所有权限
+    if (isSuperAdmin(user.value)) return true
+    return perms.some(perm => hasUserPermission(user.value, perm))
   }
 
   return {

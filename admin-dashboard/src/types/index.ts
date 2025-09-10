@@ -443,6 +443,10 @@ export interface MenuNode {
   name: string
   path?: string
   icon?: string
+  meta?: {
+    hideInMenu?: boolean
+    [key: string]: any
+  }
   children?: MenuNode[]
 }
 

@@ -88,8 +88,8 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 3102,
-    strictPort: true,
+    port: process.env.PORT ? parseInt(process.env.PORT) : 3102,
+    strictPort: false,
     open: true,
     cors: true,
     proxy: {

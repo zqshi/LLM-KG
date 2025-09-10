@@ -99,6 +99,7 @@ declare module 'vue' {
     Modal: typeof import('./src/components/common/Modal.vue')['default']
     PageHeader: typeof import('./src/components/common/PageHeader.vue')['default']
     PendingTasks: typeof import('./src/components/dashboard/PendingTasks.vue')['default']
+    PermissionTest: typeof import('./src/components/PermissionTest.vue')['default']
     QuickActions: typeof import('./src/components/dashboard/QuickActions.vue')['default']
     QuotationCard: typeof import('./src/components/quotation/QuotationCard.vue')['default']
     QuotationForm: typeof import('./src/components/quotation/QuotationForm.vue')['default']

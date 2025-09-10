@@ -346,6 +346,12 @@ const routes: RouteRecordRaw[] = [
             name: 'SystemAlerts',
             component: () => import('@/views/system/Alerts.vue'),
             meta: { title: '操作告警', icon: 'Bell' }
+          },
+          {
+            path: 'permissions-test',
+            name: 'PermissionsTest',
+            component: () => import('@/views/system/permissions-test.vue'),
+            meta: { title: '权限验证', icon: 'Key', permission: 'system:settings:view', hideInMenu: true }
           }
         ]
       }

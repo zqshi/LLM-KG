@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import ElementPlus from 'element-plus'
+import * as ElementPlusIcons from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
 import { setupRouterGuards } from './router/guards'
@@ -42,6 +44,12 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+app.use(ElementPlus)
+
+// 注册所有 Element Plus 图标组件
+for (const [key, component] of Object.entries(ElementPlusIcons)) {
+  app.component(key, component)
+}
 
 // 注册 VChart 组件
 app.component('VChart', VChart as unknown as Component)

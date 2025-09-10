@@ -129,15 +129,34 @@ export function useMenuFilter() {
   }
 
   /**
+   * 过滤 hideInMenu 项目
+   */
+  const filterHiddenMenuItems = (menus: MenuNode[]): MenuNode[] => {
+    return menus
+      .filter(menu => !menu.meta?.hideInMenu)
+      .map(menu => ({
+        ...menu,
+        children: menu.children ? filterHiddenMenuItems(menu.children) : undefined
+      }))
+      .filter(menu => {
+        // 如果菜单有子项，确保过滤后至少有一个可见的子项
+        if (menu.children) {
+          return menu.children.length > 0
+        }
+        return true
+      })
+  }
+
+  /**
    * 获取过滤后的菜单
    */
   const filteredMenus = computed(() => {
     const allMenus = authStore.menus
     const currentRole = getUserRole.value
 
-    // 管理员返回全部菜单，不做过滤
+    // 管理员返回全部菜单，但需要过滤 hideInMenu 项目
     if (isAdminUser.value) {
-      return allMenus
+      return filterHiddenMenuItems(allMenus)
     }
 
     console.log('=== 菜单过滤调试信息 ===')

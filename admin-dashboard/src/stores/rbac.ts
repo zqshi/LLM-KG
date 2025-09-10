@@ -62,36 +62,78 @@ export const useRbacStore = defineStore('rbac', () => {
           roles: [
             {
               id: 1,
-              name: '系统管理员',
-              code: 'system_admin',
+              name: '超级管理员',
+              code: 'super_admin',
+              description: '拥有系统的所有功能权限和数据权限，可以访问全部页面和执行全部操作',
               permissions: [
                 // 仪表盘权限
-                'dashboard:view',
+                'dashboard:view', 'dashboard:stats', 'dashboard:export',
                 
                 // RBAC权限 - 组织架构
-                'rbac:org:view', 'rbac:org:create', 'rbac:org:edit', 'rbac:org:delete',
+                'rbac:org:view', 'rbac:org:create', 'rbac:org:edit', 'rbac:org:delete', 'rbac:org:move',
                 
                 // RBAC权限 - 用户管理
                 'rbac:user:view', 'rbac:user:create', 'rbac:user:edit', 'rbac:user:delete', 'rbac:user:assign',
+                'rbac:user:resetpwd', 'rbac:user:export', 'rbac:user:import', 'rbac:user:toggle',
                 
                 // RBAC权限 - 角色管理
-                'rbac:role:view', 'rbac:role:create', 'rbac:role:edit', 'rbac:role:delete',
+                'rbac:role:view', 'rbac:role:create', 'rbac:role:edit', 'rbac:role:delete', 'rbac:role:copy',
+                'rbac:role:assign', 'rbac:role:export',
                 
                 // RBAC权限 - 权限管理
                 'rbac:permission:view', 'rbac:permission:create', 'rbac:permission:edit', 'rbac:permission:delete',
+                'rbac:permission:tree', 'rbac:permission:export',
                 
                 // RBAC权限 - 同步配置
-                'rbac:sync:config',
+                'rbac:sync:config', 'rbac:sync:execute', 'rbac:sync:history', 'rbac:sync:test',
                 
-                // 内容管理权限
+                // 内容管理权限 - 所有模块
                 'content:view', 'content:create', 'content:edit', 'content:delete', 'content:audit',
+                'content:publish', 'content:unpublish', 'content:top', 'content:elite', 'content:lock',
                 'content:category:view', 'content:category:create', 'content:category:edit', 'content:category:delete',
+                'content:polls:view', 'content:polls:create', 'content:polls:edit', 'content:polls:delete',
+                'content:dashboard:view', 'content:export', 'content:import', 'content:batch',
+                
+                // 资讯聚合管理权限
+                'news:sources:view', 'news:sources:create', 'news:sources:edit', 'news:sources:delete',
+                'news:content:view', 'news:content:edit', 'news:content:delete', 'news:content:audit',
+                'news:content:publish', 'news:tasks:view', 'news:tasks:execute', 'news:export',
+                
+                // Banner管理权限
+                'banner:view', 'banner:create', 'banner:edit', 'banner:delete', 'banner:audit',
+                'banner:approve', 'banner:reject', 'banner:publish', 'banner:todo', 'banner:done',
+                'banner:tracking', 'banner:export',
+                
+                // 跳蚤市场管理权限
+                'flea:categories:view', 'flea:categories:create', 'flea:categories:edit', 'flea:categories:delete',
+                'flea:goods:view', 'flea:goods:create', 'flea:goods:edit', 'flea:goods:delete',
+                'flea:goods:audit', 'flea:reports:view', 'flea:reports:handle', 'flea:dashboard:view',
+                'flea:export', 'flea:batch',
+                
+                // 领导名言管理权限
+                'quotation:view', 'quotation:create', 'quotation:edit', 'quotation:delete',
+                'quotation:audit', 'quotation:publish', 'quotation:display:config', 'quotation:export',
+                
+                // 统一审核中心权限
+                'audit:center:view', 'audit:tasks:view', 'audit:tasks:handle', 'audit:policies:view',
+                'audit:policies:config', 'audit:sensitive:view', 'audit:sensitive:manage',
+                'audit:batch', 'audit:assign', 'audit:export',
+                
+                // 运营与推荐管理权限
+                'operation:homepage:view', 'operation:homepage:config', 'operation:recommendations:view',
+                'operation:recommendations:manage', 'operation:rankings:view', 'operation:rankings:manage',
+                'operation:dashboard:view', 'operation:export',
+                
+                // 门户配置管理权限
+                'portal:navigation:view', 'portal:navigation:manage', 'portal:entry:view', 'portal:entry:manage',
+                'portal:version:view', 'portal:version:manage', 'portal:performance:view', 'portal:export',
                 
                 // 系统管理权限
-                'system:logs:view', 'system:settings:view', 'system:settings:edit', 
-                'system:alerts:view', 'system:alerts:manage'
+                'system:settings:view', 'system:settings:edit', 'system:logs:view', 'system:logs:export',
+                'system:alerts:view', 'system:alerts:manage', 'system:backup', 'system:restore',
+                'system:cache:clear', 'system:maintenance'
               ],
-              dataScope: 1,
+              dataScope: 1, // 全部数据权限
               status: 1,
               createTime: '2025-08-30T00:00:00',
               updateTime: '2025-08-30T00:00:00'
@@ -221,37 +263,78 @@ export const useRbacStore = defineStore('rbac', () => {
       const mockRoles: Role[] = [
         {
           id: 1,
-          name: '系统管理员',
-          code: 'system_admin',
-          description: '拥有系统所有权限',
+          name: '超级管理员',
+          code: 'super_admin',
+          description: '拥有系统的所有功能权限和数据权限，可以访问全部页面和执行全部操作',
           permissions: [
             // 仪表盘权限
-            'dashboard:view',
+            'dashboard:view', 'dashboard:stats', 'dashboard:export',
             
             // RBAC权限 - 组织架构
-            'rbac:org:view', 'rbac:org:create', 'rbac:org:edit', 'rbac:org:delete',
+            'rbac:org:view', 'rbac:org:create', 'rbac:org:edit', 'rbac:org:delete', 'rbac:org:move',
             
             // RBAC权限 - 用户管理
             'rbac:user:view', 'rbac:user:create', 'rbac:user:edit', 'rbac:user:delete', 'rbac:user:assign',
+            'rbac:user:resetpwd', 'rbac:user:export', 'rbac:user:import', 'rbac:user:toggle',
             
             // RBAC权限 - 角色管理
-            'rbac:role:view', 'rbac:role:create', 'rbac:role:edit', 'rbac:role:delete',
+            'rbac:role:view', 'rbac:role:create', 'rbac:role:edit', 'rbac:role:delete', 'rbac:role:copy',
+            'rbac:role:assign', 'rbac:role:export',
             
             // RBAC权限 - 权限管理
             'rbac:permission:view', 'rbac:permission:create', 'rbac:permission:edit', 'rbac:permission:delete',
+            'rbac:permission:tree', 'rbac:permission:export',
             
             // RBAC权限 - 同步配置
-            'rbac:sync:config',
+            'rbac:sync:config', 'rbac:sync:execute', 'rbac:sync:history', 'rbac:sync:test',
             
-            // 内容管理权限
+            // 内容管理权限 - 所有模块
             'content:view', 'content:create', 'content:edit', 'content:delete', 'content:audit',
+            'content:publish', 'content:unpublish', 'content:top', 'content:elite', 'content:lock',
             'content:category:view', 'content:category:create', 'content:category:edit', 'content:category:delete',
+            'content:polls:view', 'content:polls:create', 'content:polls:edit', 'content:polls:delete',
+            'content:dashboard:view', 'content:export', 'content:import', 'content:batch',
+            
+            // 资讯聚合管理权限
+            'news:sources:view', 'news:sources:create', 'news:sources:edit', 'news:sources:delete',
+            'news:content:view', 'news:content:edit', 'news:content:delete', 'news:content:audit',
+            'news:content:publish', 'news:tasks:view', 'news:tasks:execute', 'news:export',
+            
+            // Banner管理权限
+            'banner:view', 'banner:create', 'banner:edit', 'banner:delete', 'banner:audit',
+            'banner:approve', 'banner:reject', 'banner:publish', 'banner:todo', 'banner:done',
+            'banner:tracking', 'banner:export',
+            
+            // 跳蚤市场管理权限
+            'flea:categories:view', 'flea:categories:create', 'flea:categories:edit', 'flea:categories:delete',
+            'flea:goods:view', 'flea:goods:create', 'flea:goods:edit', 'flea:goods:delete',
+            'flea:goods:audit', 'flea:reports:view', 'flea:reports:handle', 'flea:dashboard:view',
+            'flea:export', 'flea:batch',
+            
+            // 领导名言管理权限
+            'quotation:view', 'quotation:create', 'quotation:edit', 'quotation:delete',
+            'quotation:audit', 'quotation:publish', 'quotation:display:config', 'quotation:export',
+            
+            // 统一审核中心权限
+            'audit:center:view', 'audit:tasks:view', 'audit:tasks:handle', 'audit:policies:view',
+            'audit:policies:config', 'audit:sensitive:view', 'audit:sensitive:manage',
+            'audit:batch', 'audit:assign', 'audit:export',
+            
+            // 运营与推荐管理权限
+            'operation:homepage:view', 'operation:homepage:config', 'operation:recommendations:view',
+            'operation:recommendations:manage', 'operation:rankings:view', 'operation:rankings:manage',
+            'operation:dashboard:view', 'operation:export',
+            
+            // 门户配置管理权限
+            'portal:navigation:view', 'portal:navigation:manage', 'portal:entry:view', 'portal:entry:manage',
+            'portal:version:view', 'portal:version:manage', 'portal:performance:view', 'portal:export',
             
             // 系统管理权限
-            'system:logs:view', 'system:settings:view', 'system:settings:edit', 
-            'system:alerts:view', 'system:alerts:manage'
+            'system:settings:view', 'system:settings:edit', 'system:logs:view', 'system:logs:export',
+            'system:alerts:view', 'system:alerts:manage', 'system:backup', 'system:restore',
+            'system:cache:clear', 'system:maintenance'
           ],
-          dataScope: 1,
+          dataScope: 1, // 全部数据权限
           status: 1,
           createTime: '2025-08-30T00:00:00',
           updateTime: '2025-08-30T00:00:00'
@@ -369,10 +452,26 @@ export const useRbacStore = defineStore('rbac', () => {
           type: 1,
           createTime: '2025-08-30T00:00:00'
         },
+        {
+          id: 2,
+          permKey: 'dashboard:stats',
+          name: '查看仪表盘统计',
+          module: 'Dashboard',
+          type: 1,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 3,
+          permKey: 'dashboard:export',
+          name: '导出仪表盘数据',
+          module: 'Dashboard',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
         
         // RBAC权限 - 组织架构
         {
-          id: 2,
+          id: 10,
           permKey: 'rbac:org:view',
           name: '查看组织架构',
           module: 'RBAC',
@@ -380,7 +479,7 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 3,
+          id: 11,
           permKey: 'rbac:org:create',
           name: '创建组织',
           module: 'RBAC',
@@ -388,7 +487,7 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 4,
+          id: 12,
           permKey: 'rbac:org:edit',
           name: '编辑组织',
           module: 'RBAC',
@@ -396,9 +495,17 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 5,
+          id: 13,
           permKey: 'rbac:org:delete',
           name: '删除组织',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 14,
+          permKey: 'rbac:org:move',
+          name: '移动组织',
           module: 'RBAC',
           type: 2,
           createTime: '2025-08-30T00:00:00'
@@ -406,7 +513,7 @@ export const useRbacStore = defineStore('rbac', () => {
         
         // RBAC权限 - 用户管理
         {
-          id: 6,
+          id: 20,
           permKey: 'rbac:user:view',
           name: '查看用户',
           module: 'RBAC',
@@ -414,7 +521,7 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 7,
+          id: 21,
           permKey: 'rbac:user:create',
           name: '创建用户',
           module: 'RBAC',
@@ -422,7 +529,7 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 8,
+          id: 22,
           permKey: 'rbac:user:edit',
           name: '编辑用户',
           module: 'RBAC',
@@ -430,7 +537,7 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 9,
+          id: 23,
           permKey: 'rbac:user:delete',
           name: '删除用户',
           module: 'RBAC',
@@ -438,9 +545,41 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 10,
+          id: 24,
           permKey: 'rbac:user:assign',
           name: '分配用户角色',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 25,
+          permKey: 'rbac:user:resetpwd',
+          name: '重置用户密码',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 26,
+          permKey: 'rbac:user:export',
+          name: '导出用户数据',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 27,
+          permKey: 'rbac:user:import',
+          name: '导入用户数据',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 28,
+          permKey: 'rbac:user:toggle',
+          name: '启用/禁用用户',
           module: 'RBAC',
           type: 2,
           createTime: '2025-08-30T00:00:00'
@@ -448,7 +587,7 @@ export const useRbacStore = defineStore('rbac', () => {
         
         // RBAC权限 - 角色管理
         {
-          id: 11,
+          id: 30,
           permKey: 'rbac:role:view',
           name: '查看角色',
           module: 'RBAC',
@@ -456,7 +595,7 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 12,
+          id: 31,
           permKey: 'rbac:role:create',
           name: '创建角色',
           module: 'RBAC',
@@ -464,7 +603,7 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 13,
+          id: 32,
           permKey: 'rbac:role:edit',
           name: '编辑角色',
           module: 'RBAC',
@@ -472,9 +611,33 @@ export const useRbacStore = defineStore('rbac', () => {
           createTime: '2025-08-30T00:00:00'
         },
         {
-          id: 14,
+          id: 33,
           permKey: 'rbac:role:delete',
           name: '删除角色',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 34,
+          permKey: 'rbac:role:copy',
+          name: '复制角色',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 35,
+          permKey: 'rbac:role:assign',
+          name: '分配角色权限',
+          module: 'RBAC',
+          type: 2,
+          createTime: '2025-08-30T00:00:00'
+        },
+        {
+          id: 36,
+          permKey: 'rbac:role:export',
+          name: '导出角色数据',
           module: 'RBAC',
           type: 2,
           createTime: '2025-08-30T00:00:00'
