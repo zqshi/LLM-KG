@@ -1,133 +1,132 @@
 <template>
   <div class="layout-container">
-    <el-container>
-      <el-aside :width="isCollapse ? '64px' : '280px'" role="navigation" aria-label="主导航菜单" id="main-navigation" class="navigation-aside">
-        <div class="logo-container" @click="toggleCollapse">
+    <!-- 固定顶部Header -->
+    <header class="fixed-header" role="banner">
+      <div class="header-container">
+        <div class="header-logo" @click="toggleCollapse">
           <div class="logo-icon">
             <el-icon size="24">
               <DataBoard />
             </el-icon>
           </div>
-          <div class="logo-text" v-show="!isCollapse">
-            <h2 class="text-lg font-bold">知识聚合平台</h2>
-            <span class="text-sm text-color-tertiary">管理端</span>
+          <div class="logo-text">
+            <h2>知识聚合平台</h2>
+            <span>管理端</span>
           </div>
         </div>
-        <el-menu :default-active="activeMenu" class="el-menu-vertical modern-menu" @select="handleMenuSelect" :collapse="isCollapse"
-          background-color="transparent" text-color="var(--color-text-tertiary)" active-text-color="var(--color-primary)" role="menu" aria-label="主导航菜单">
-          <template v-for="item in menuList" :key="item.path">
-            <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
-              <template #title>
-                <el-icon>
-                  <component :is="item.icon || 'Menu'" />
-                </el-icon>
-                <span>{{ item.name }}</span>
+
+        <div class="header-right">
+          <!-- 搜索框 -->
+          <div class="global-search">
+            <el-input 
+              v-model="globalSearchText" 
+              placeholder="搜索功能、内容..." 
+              class="search-input"
+              clearable
+              @keyup.enter="handleGlobalSearch">
+              <template #prefix>
+                <el-icon><Search /></el-icon>
               </template>
-              <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path">
-                <el-icon>
-                  <component :is="child.icon || 'Document'" />
-                </el-icon>
-                <template #title>{{ child.name }}</template>
-              </el-menu-item>
-            </el-sub-menu>
-            <el-menu-item v-else :index="item.path">
-              <el-icon>
-                <component :is="item.icon || 'Menu'" />
-              </el-icon>
-              <template #title>{{ item.name }}</template>
-            </el-menu-item>
-          </template>
-        </el-menu>
-      </el-aside>
-
-      <el-container>
-        <el-header height="60px" role="banner">
-          <div class="header-container">
-            <div class="header-left">
-              <el-breadcrumb separator="/" class="breadcrumb-container modern-breadcrumb">
-                <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="item.path" 
-                  :class="{ 'is-active': index === breadcrumbList.length - 1 }">
-                  <el-icon v-if="index === 0" class="breadcrumb-icon"><House /></el-icon>
-                  {{ item.meta?.title }}
-                </el-breadcrumb-item>
-              </el-breadcrumb>
-            </div>
-
-            <div class="header-right">
-              <!-- 搜索框 -->
-              <div class="global-search">
-                <el-input 
-                  v-model="globalSearchText" 
-                  placeholder="搜索功能、内容..." 
-                  class="search-input"
-                  clearable
-                  @keyup.enter="handleGlobalSearch">
-                  <template #prefix>
-                    <el-icon><Search /></el-icon>
-                  </template>
-                </el-input>
-              </div>
-
-              <el-button class="badge-item modern-badge" :aria-label="`通知中心，${pendingCount}条未读通知`"
-                @click="handleNotificationClick">
-                <el-badge :value="pendingCount" class="notification-badge">
-                  <el-icon size="18">
-                    <Bell />
-                  </el-icon>
-                </el-badge>
-              </el-button>
-
-              <!-- 主题切换按钮 -->
-              <el-dropdown @command="handleThemeChange">
-                <el-button class="theme-toggle-btn" circle
-                  :aria-label="`当前主题：${themeStore.getThemeDisplayName(themeStore.currentTheme)}，点击切换主题`">
-                  <el-icon size="16">
-                    <component :is="currentThemeIcon" />
-                  </el-icon>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item v-for="theme in themeOptions" :key="theme.value" :command="theme.value"
-                      :class="{ 'is-active': themeStore.currentTheme === theme.value }">
-                      <el-icon style="margin-right: 8px;">
-                        <component :is="theme.icon" />
-                      </el-icon>
-                      {{ theme.label }}
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-
-              <el-dropdown trigger="click">
-                <div class="user-profile modern-profile">
-                  <el-avatar :size="36" class="user-avatar">
-                    {{ userInfo.name?.charAt(0) || 'U' }}
-                  </el-avatar>
-                  <div class="user-info" v-show="!isMobile">
-                    <span class="username">{{ userInfo.name || '未登录' }}</span>
-                    <span class="user-role">{{ getRoleDisplayName(getUserRole) }}</span>
-                  </div>
-                  <el-icon class="dropdown-icon">
-                    <ArrowDown />
-                  </el-icon>
-                </div>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item>个人中心</el-dropdown-item>
-                    <el-dropdown-item>修改密码</el-dropdown-item>
-                    <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
+            </el-input>
           </div>
-        </el-header>
+
+          <el-button class="badge-item modern-badge" :aria-label="`通知中心，${pendingCount}条未读通知`"
+            @click="handleNotificationClick">
+            <el-badge :value="pendingCount" class="notification-badge">
+              <el-icon size="18">
+                <Bell />
+              </el-icon>
+            </el-badge>
+          </el-button>
+
+          <!-- 主题切换按钮 -->
+          <el-dropdown @command="handleThemeChange">
+            <el-button class="theme-toggle-btn" circle
+              :aria-label="`当前主题：${themeStore.getThemeDisplayName(themeStore.currentTheme)}，点击切换主题`">
+              <el-icon size="16">
+                <component :is="currentThemeIcon" />
+              </el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-for="theme in themeOptions" :key="theme.value" :command="theme.value"
+                  :class="{ 'is-active': themeStore.currentTheme === theme.value }">
+                  <el-icon style="margin-right: 8px;">
+                    <component :is="theme.icon" />
+                  </el-icon>
+                  {{ theme.label }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+
+          <el-dropdown trigger="click">
+            <div class="user-profile modern-profile">
+              <el-avatar :size="36" class="user-avatar">
+                {{ userInfo.name?.charAt(0) || 'U' }}
+              </el-avatar>
+              <div class="user-info" v-show="!isMobile">
+                <span class="username">{{ userInfo.name || '未登录' }}</span>
+                <span class="user-role">{{ getRoleDisplayName(getUserRole) }}</span>
+              </div>
+              <el-icon class="dropdown-icon">
+                <ArrowDown />
+              </el-icon>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>个人中心</el-dropdown-item>
+                <el-dropdown-item>修改密码</el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <div class="main-container">
+      <el-container>
+        <el-aside :width="isCollapse ? '64px' : '280px'" role="navigation" aria-label="主导航菜单" id="main-navigation" class="navigation-aside">
+          <el-menu :default-active="activeMenu" class="el-menu-vertical modern-menu" @select="handleMenuSelect" :collapse="isCollapse"
+            background-color="transparent" text-color="var(--color-text-tertiary)" active-text-color="var(--color-primary)" role="menu" aria-label="主导航菜单">
+            <template v-for="item in menuList" :key="item.path">
+              <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
+                <template #title>
+                  <el-tooltip :content="item.name" placement="right" :disabled="!isCollapse">
+                    <el-icon>
+                      <component :is="item.icon || 'Menu'" />
+                    </el-icon>
+                  </el-tooltip>
+                  <span>{{ item.name }}</span>
+                </template>
+                <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path">
+                  <el-tooltip :content="child.name" placement="right" :disabled="!isCollapse">
+                    <el-icon>
+                      <component :is="child.icon || 'Document'" />
+                    </el-icon>
+                  </el-tooltip>
+                  <template #title>{{ child.name }}</template>
+                </el-menu-item>
+              </el-sub-menu>
+              <el-menu-item v-else :index="item.path">
+                <el-tooltip :content="item.name" placement="right" :disabled="!isCollapse">
+                  <el-icon>
+                    <component :is="item.icon || 'Menu'" />
+                  </el-icon>
+                </el-tooltip>
+                <template #title>{{ item.name }}</template>
+              </el-menu-item>
+            </template>
+          </el-menu>
+        </el-aside>
 
         <el-main role="main" aria-label="主要内容区域" id="main-content">
           <router-view />
         </el-main>
       </el-container>
-    </el-container>
+    </div>
 
     <!-- 反馈收集组件 -->
     <FeedbackWidget />
@@ -149,8 +148,9 @@ import {
   ChatDotRound, Shield, WarnTriangleFilled, DocumentChecked,
   UserFilled, Lock, View, Fold, Expand, Bell, ArrowDown,
   OfficeBuilding, Key, Avatar, Refresh, Connection, DataBoard,
-  Checked, Picture, Operation, CircleCheck, DataLine,
-  Goods, Warning, Menu, EditPen, Newspaper, Sunny, Moon, Search
+  Check, Picture, Operation, CircleCheck, DataLine,
+  ShoppingBag, Warning, Menu, EditPen, Reading, Sunny, Moon, Search,
+  Grid, Clock
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -214,6 +214,41 @@ const userInfo = computed(() => {
   }
 })
 
+// 图标名称映射，确保所有图标都存在
+const iconMapping: Record<string, string> = {
+  'Monitor': 'Monitor',
+  'Lock': 'Lock',
+  'Document': 'Document', 
+  'Newspaper': 'Reading',  // 使用Reading图标替代Newspaper
+  'Picture': 'Picture',
+  'ShoppingCart': 'ShoppingCart',
+  'ChatDotRound': 'ChatDotRound',
+  'Check': 'Check',
+  'Setting': 'Setting',
+  'Grid': 'Grid',
+  'Tools': 'Tools',
+  'House': 'House',
+  'Star': 'Star',
+  'TrendCharts': 'TrendCharts',
+  'DataBoard': 'DataBoard',
+  'Menu': 'Menu',
+  'Clock': 'Clock',
+  'FolderOpened': 'FolderOpened',
+  'Connection': 'Connection',
+  'Bell': 'Bell',
+  'CircleCheck': 'CircleCheck',
+  'DataLine': 'DataLine',
+  'Warning': 'Warning',
+  'OfficeBuilding': 'OfficeBuilding',
+  'User': 'User',
+  'UserFilled': 'UserFilled',
+  'Key': 'Key',
+  'Avatar': 'Avatar',
+  'Refresh': 'Refresh',
+  'Goods': 'ShoppingBag', // 替换不存在的图标
+  'DocumentChecked': 'DocumentChecked'
+}
+
 const menuList = computed(() => {
   try {
     console.log('=== Layout组件菜单数据详细分析 ===')
@@ -222,15 +257,31 @@ const menuList = computed(() => {
     console.log('用户角色:', getUserRole.value)
     console.log('角色显示名称:', getRoleDisplayName(getUserRole.value))
 
-    // 使用基于角色过滤后的菜单
-    const menus = filteredMenus.value
+    // 使用基于角色过滤后的菜单，并映射图标名称
+    const menus = filteredMenus.value.map(menu => {
+      const mappedIcon = iconMapping[menu.icon || ''] || 'Menu'
+      console.log(`映射图标: ${menu.icon} -> ${mappedIcon}`)
+      return {
+        ...menu,
+        icon: mappedIcon,
+        children: menu.children?.map(child => {
+          const childMappedIcon = iconMapping[child.icon || ''] || 'Document'
+          console.log(`子菜单映射图标: ${child.icon} -> ${childMappedIcon}`)
+          return {
+            ...child,
+            icon: childMappedIcon
+          }
+        })
+      }
+    })
+    
     console.log('过滤后的菜单数量:', menus.length)
     console.log('过滤后菜单详情:', menus.map(m => ({
       name: m.name,
       path: m.path,
       icon: m.icon,
       childrenCount: m.children?.length || 0,
-      children: m.children?.map(c => ({ name: c.name, path: c.path })) || []
+      children: m.children?.map(c => ({ name: c.name, path: c.path, icon: c.icon })) || []
     })))
 
     return menus
@@ -296,6 +347,27 @@ const handleLogout = () => {
 .layout-container {
   min-height: 100vh;
   background-color: var(--color-bg-page);
+}
+
+/* 固定顶部Header */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 60px;
+  z-index: 1000;
+  background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* 主内容容器 */
+.main-container {
+  padding-top: 60px;
+  min-height: 100vh;
 }
 
 .logo-container {
@@ -444,8 +516,8 @@ const handleLogout = () => {
 
 .modern-menu {
   border-right: none;
-  min-height: calc(100vh - 80px);
-  max-height: calc(100vh - 80px);
+  min-height: calc(100vh - 60px);
+  max-height: calc(100vh - 60px);
   overflow-y: auto;
   overflow-x: hidden;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
@@ -491,90 +563,76 @@ const handleLogout = () => {
   align-items: center;
   height: 100%;
   padding: 0 var(--spacing-xl);
-  background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  border-bottom: 1px solid #e2e8f0;
-  position: relative;
-  backdrop-filter: blur(8px);
+  gap: var(--spacing-lg);
 }
 
-.header-container::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
+/* Header Logo区域 */
+.header-logo {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0 var(--spacing-lg);
-  position: relative;
-  overflow: hidden;
   cursor: pointer;
   transition: all var(--transition-medium);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-lg);
+  min-width: 200px;
 }
 
-.logo-container:hover {
-  background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+.header-logo:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
   transform: translateY(-1px);
 }
 
-.logo-container::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 0;
-  background: var(--gradient-primary);
-}
-
-.logo-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-xl);
-  background: var(--gradient-primary);
+.header-logo .logo-icon {
+  margin-right: var(--spacing-sm);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-floating);
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(47, 129, 247, 0.3);
   transition: all var(--transition-medium);
 }
 
-.logo-icon:hover {
+.header-logo .logo-icon:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 24px rgba(76, 154, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(47, 129, 247, 0.4);
 }
 
-.logo-text {
+.header-logo .logo-icon .el-icon {
+  color: white;
+}
+
+.header-logo .logo-text {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.logo-text h2 {
+.header-logo .logo-text h2 {
   font-size: 16px;
   margin: 0;
   font-weight: 700;
+  color: var(--color-text-primary);
   letter-spacing: 0.5px;
 }
 
-.logo-text span {
-  font-size: 11px;
-  opacity: 0.7;
+.header-logo .logo-text span {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
   margin-top: 2px;
   font-weight: 400;
 }
 
+
+
+
 .modern-menu {
   border-right: none;
-  min-height: calc(100vh - 80px);
-  max-height: calc(100vh - 80px);
+  min-height: calc(100vh - 60px);
+  max-height: calc(100vh - 60px);
   overflow-y: auto;
   overflow-x: hidden;
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
@@ -612,30 +670,6 @@ const handleLogout = () => {
 
 .el-menu-vertical:not(.el-menu--collapse) {
   width: 250px;
-}
-
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 100%;
-  padding: 0 var(--spacing-xl);
-  background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  border-bottom: 1px solid #e2e8f0;
-  position: relative;
-  backdrop-filter: blur(8px);
-}
-
-.header-container::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--gradient-primary);
-  opacity: 0.3;
 }
 
 .header-left {
@@ -903,18 +937,22 @@ const handleLogout = () => {
   font-weight: 500;
 }
 
+/* 统一的悬停状态 - 所有一级导航项使用相同的悬停效果 */
 .modern-menu .el-menu-item:hover,
 .modern-menu .el-sub-menu__title:hover {
   background: linear-gradient(90deg, rgba(47, 129, 247, 0.08) 0%, rgba(47, 129, 247, 0.04) 100%) !important;
   color: #2f81f7 !important;
   transform: translateX(2px);
+  box-shadow: 0 1px 3px rgba(47, 129, 247, 0.1);
 }
 
+/* 统一的活跃状态 - 确保仪表盘和其他导航项样式完全一致 */
 .modern-menu .el-menu-item.is-active {
   background: linear-gradient(90deg, #2f81f7 0%, #4f46e5 100%) !important;
   color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(47, 129, 247, 0.3);
   font-weight: 600;
+  transform: translateX(0px);
 }
 
 .modern-menu .el-menu-item.is-active::before {
@@ -940,8 +978,12 @@ const handleLogout = () => {
   font-size: 13px;
 }
 
+/* 统一的子菜单项悬停效果 */
 .modern-menu .el-sub-menu .el-menu-item:hover {
-  background: rgba(47, 129, 247, 0.06) !important;
+  background: linear-gradient(90deg, rgba(47, 129, 247, 0.06) 0%, rgba(47, 129, 247, 0.03) 100%) !important;
+  color: #2f81f7 !important;
+  transform: translateX(2px);
+  box-shadow: 0 1px 2px rgba(47, 129, 247, 0.08);
 }
 
 /* 折叠状态下的优化 */
@@ -950,6 +992,74 @@ const handleLogout = () => {
   padding: 0 !important;
   text-align: center;
   justify-content: center;
+  width: 44px !important;
+  height: 44px !important;
+  margin: 4px auto !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative;
+}
+
+/* 折叠状态下图标优化 */
+.modern-menu.el-menu--collapse .el-menu-item .el-icon,
+.modern-menu.el-menu--collapse .el-sub-menu__title .el-icon {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 折叠状态下隐藏文本 */
+.modern-menu.el-menu--collapse .el-menu-item > span,
+.modern-menu.el-menu--collapse .el-sub-menu__title > span {
+  display: none !important;
+}
+
+/* 折叠状态下的子菜单箭头隐藏 */
+.modern-menu.el-menu--collapse .el-sub-menu__icon-arrow {
+  display: none !important;
+}
+
+/* 折叠状态下的活动状态优化 */
+.modern-menu.el-menu--collapse .el-menu-item.is-active {
+  width: 44px !important;
+  height: 44px !important;
+  margin: 4px auto !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(47, 129, 247, 0.3);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 折叠状态下的悬停效果 - 统一样式，确保所有一级导航项完全一致 */
+.modern-menu.el-menu--collapse .el-menu-item:hover,
+.modern-menu.el-menu--collapse .el-sub-menu__title:hover {
+  width: 44px !important;
+  height: 44px !important;
+  transform: scale(1.05) !important;
+  transition: all var(--transition-medium) !important;
+  margin: 4px auto !important;
+  background: linear-gradient(90deg, rgba(47, 129, 247, 0.08) 0%, rgba(47, 129, 247, 0.04) 100%) !important;
+  color: #2f81f7 !important;
+  box-shadow: 0 2px 8px rgba(47, 129, 247, 0.15) !important;
+  border-radius: 8px !important;
+}
+
+/* 折叠状态下确保图标完全居中 */
+.modern-menu.el-menu--collapse .el-menu-item .el-tooltip,
+.modern-menu.el-menu--collapse .el-sub-menu__title .el-tooltip {
+  width: 100%;
+  height: 100%;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* 菜单图标优化 */
@@ -988,18 +1098,38 @@ const handleLogout = () => {
   color: #94a3b8;
 }
 
+/* 深色主题下的统一悬停效果 */
 :root[data-theme="dark"] .modern-menu .el-menu-item:hover,
 :root[data-theme="dark"] .modern-menu .el-sub-menu__title:hover {
   background: linear-gradient(90deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%) !important;
   color: #a5b4fc !important;
+  transform: translateX(2px);
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.1);
 }
 
-:root[data-theme="dark"] .logo-container {
-  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+/* 深色主题下子菜单项的统一悬停效果 */
+:root[data-theme="dark"] .modern-menu .el-sub-menu .el-menu-item:hover {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%) !important;
+  color: #a5b4fc !important;
+  transform: translateX(2px);
+  box-shadow: 0 1px 2px rgba(99, 102, 241, 0.08);
 }
 
-:root[data-theme="dark"] .header-container {
+/* 深色主题下折叠状态的统一悬停效果 - 确保所有一级导航项完全一致 */
+:root[data-theme="dark"] .modern-menu.el-menu--collapse .el-menu-item:hover,
+:root[data-theme="dark"] .modern-menu.el-menu--collapse .el-sub-menu__title:hover {
+  width: 44px !important;
+  height: 44px !important;
+  transform: scale(1.05) !important;
+  transition: all var(--transition-medium) !important;
+  margin: 4px auto !important;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.06) 100%) !important;
+  color: #a5b4fc !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15) !important;
+  border-radius: 8px !important;
+}
+
+:root[data-theme="dark"] .fixed-header {
   background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
   border-bottom: 1px solid #334155;
 }
@@ -1033,6 +1163,18 @@ const handleLogout = () => {
 @media (max-width: 768px) {
   .header-container {
     padding: 0 var(--spacing-md);
+  }
+  
+  .header-logo {
+    min-width: 160px;
+  }
+  
+  .header-logo .logo-text h2 {
+    font-size: 14px;
+  }
+  
+  .header-logo .logo-text span {
+    font-size: 10px;
   }
   
   .global-search {
@@ -1072,11 +1214,11 @@ const handleLogout = () => {
     gap: var(--spacing-sm);
   }
   
-  .logo-text h2 {
+  .header-logo .logo-text h2 {
     font-size: 14px;
   }
   
-  .logo-text span {
+  .header-logo .logo-text span {
     font-size: 10px;
   }
 }
