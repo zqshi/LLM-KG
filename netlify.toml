@@ -3,10 +3,15 @@
   publish = "admin-dashboard/dist"
   base = "/"
 
-[functions]
-  node_version = "18"
-
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[functions]
+  included_files = ["admin-dashboard/dist/**"]
+
+[dev]
+  command = "cd admin-dashboard && npm run dev"
+  port = 3000
+  targetPort = 3000
