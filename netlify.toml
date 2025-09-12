@@ -2,14 +2,12 @@
   command = "cd admin-dashboard && npm install && npm run build"
   publish = "admin-dashboard/dist"
   base = "/"
+  node_version = "18"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[functions]
-  node_version = "18"
 
 [[headers]]
   for = "/*"
