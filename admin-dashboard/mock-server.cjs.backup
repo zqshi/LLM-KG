@@ -9,6 +9,92 @@ app.use(cors())
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
+// 部门树数据
+const departmentTree = [
+  {
+    id: '1',
+    name: '技术部',
+    parentId: null,
+    children: [
+      {
+        id: '1-1',
+        name: '前端开发组',
+        parentId: '1',
+        children: []
+      },
+      {
+        id: '1-2',
+        name: '后端开发组',
+        parentId: '1',
+        children: []
+      },
+      {
+        id: '1-3',
+        name: '测试组',
+        parentId: '1',
+        children: []
+      }
+    ]
+  },
+  {
+    id: '2',
+    name: '产品部',
+    parentId: null,
+    children: [
+      {
+        id: '2-1',
+        name: '产品设计组',
+        parentId: '2',
+        children: []
+      },
+      {
+        id: '2-2',
+        name: '用户研究组',
+        parentId: '2',
+        children: []
+      }
+    ]
+  },
+  {
+    id: '3',
+    name: '人事部',
+    parentId: null,
+    children: [
+      {
+        id: '3-1',
+        name: '招聘组',
+        parentId: '3',
+        children: []
+      },
+      {
+        id: '3-2',
+        name: '培训组',
+        parentId: '3',
+        children: []
+      }
+    ]
+  },
+  {
+    id: '4',
+    name: '市场部',
+    parentId: null,
+    children: [
+      {
+        id: '4-1',
+        name: '品牌推广组',
+        parentId: '4',
+        children: []
+      },
+      {
+        id: '4-2',
+        name: '数据分析组',
+        parentId: '4',
+        children: []
+      }
+    ]
+  }
+]
+
 // 跳蚤市场API路由
 console.log('Registering flea market API routes...')
 // 获取举报列表
@@ -1503,9 +1589,6 @@ app.post('/api/banner/:id/offline', (req, res) => {
     data: mockData.banners[bannerIndex]
   })
 })
-
-// ===== 内容管理API (处理content相关404) =====
-
 
 app.get('/api/content/list', (req, res) => {
   console.log('📄 Content list requested')
@@ -3362,7 +3445,9 @@ const contentCategories = [
       }
     ],
     createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
+    updatedAt: '2024-01-15T10:00:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
   },
   {
     id: 2,
@@ -3389,7 +3474,9 @@ const contentCategories = [
       }
     ],
     createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-14T15:30:00Z'
+    updatedAt: '2024-01-14T15:30:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
   },
   {
     id: 3,
@@ -3416,7 +3503,9 @@ const contentCategories = [
       }
     ],
     createdAt: '2024-01-03T00:00:00Z',
-    updatedAt: '2024-01-13T12:15:00Z'
+    updatedAt: '2024-01-13T12:15:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
   },
   {
     id: 4,
@@ -3443,7 +3532,9 @@ const contentCategories = [
       }
     ],
     createdAt: '2024-01-04T00:00:00Z',
-    updatedAt: '2024-01-12T08:45:00Z'
+    updatedAt: '2024-01-12T08:45:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
   },
   {
     id: 5,
@@ -3470,24 +3561,9 @@ const contentCategories = [
       }
     ],
     createdAt: '2024-01-05T00:00:00Z',
-    updatedAt: '2024-01-11T16:20:00Z'
-  },
-  {
-    id: 6,
-    name: '学习园地',
-    code: 'learning_zone',
-    description: '学习资料、教程分享、知识交流等',
-    icon: 'Reading',
-    sortOrder: 6,
-    isActive: false,
-    isPublic: true,
-    auditMode: 'pre',
-    postPermissions: ['member'],
-    postCount: 67,
-    todayPosts: 0,
-    moderators: [],
-    createdAt: '2024-01-06T00:00:00Z',
-    updatedAt: '2024-01-10T14:30:00Z'
+    updatedAt: '2024-01-11T16:20:00Z',
+    visibleDepartments: [],
+    sampleRate: 30
   }
 ]
 
@@ -3679,7 +3755,199 @@ app.get('/api/content/categories/:id/latest-posts', (req, res) => {
   })
 })
 
+// 搜索用户API（用于版主管理）
+app.get('/api/users/search', (req, res) => {
+  const { keyword, excludeIds } = req.query
+  console.log(`🔍 Users search requested with keyword: ${keyword}`)
+  
+  // Mock用户数据
+  const mockUsers = [
+    {
+      id: 101,
+      username: 'zhang_san',
+      name: '张三',
+      nickname: '张三',
+      email: 'zhangsan@example.com',
+      department: '技术部',
+      groupId: 1,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    },
+    {
+      id: 102,
+      username: 'li_si',
+      name: '李四',
+      nickname: '李四',
+      email: 'lisi@example.com',
+      department: '产品部',
+      groupId: 2,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    },
+    {
+      id: 103,
+      username: 'wang_wu',
+      name: '王五',
+      nickname: '王五',
+      email: 'wangwu@example.com',
+      department: '运营部',
+      groupId: 3,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    },
+    {
+      id: 104,
+      username: 'zhao_liu',
+      name: '赵六',
+      nickname: '赵六',
+      email: 'zhaoliu@example.com',
+      department: '市场部',
+      groupId: 4,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    }
+  ]
+  
+  let filteredUsers = mockUsers
+  
+  // 根据关键词过滤
+  if (keyword) {
+    const searchKeyword = keyword.toLowerCase()
+    filteredUsers = mockUsers.filter(user => 
+      user.name.toLowerCase().includes(searchKeyword) ||
+      user.username.toLowerCase().includes(searchKeyword) ||
+      user.email.toLowerCase().includes(searchKeyword) ||
+      (user.nickname && user.nickname.toLowerCase().includes(searchKeyword))
+    )
+  }
+  
+  // 排除指定的用户ID
+  if (excludeIds) {
+    const excludeIdArray = Array.isArray(excludeIds) ? excludeIds : [excludeIds]
+    filteredUsers = filteredUsers.filter(user => !excludeIdArray.includes(user.id.toString()))
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: filteredUsers
+  })
+})
 
+// 添加版主API
+app.post('/api/content/categories/:id/moderators/:userId', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  const userId = parseInt(req.params.userId)
+  console.log(`👥 Add moderator requested - Category: ${categoryId}, User: ${userId}`)
+  
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === categoryId)
+  if (categoryIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: null
+    })
+  }
+  
+  // 检查用户是否已经是版主
+  const isAlreadyModerator = contentCategories[categoryIndex].moderators.some(mod => mod.id === userId)
+  if (isAlreadyModerator) {
+    return res.status(400).json({
+      code: 400,
+      message: 'User is already a moderator',
+      data: null
+    })
+  }
+  
+  // 模拟添加版主（实际应用中需要从用户数据源获取用户信息）
+  const newModerator = {
+    id: userId,
+    username: `user_${userId}`,
+    name: `用户${userId}`,
+    nickname: `用户${userId}`,
+    email: `user${userId}@example.com`,
+    department: '技术部',
+    groupId: 1,
+    status: 1,
+    roles: [],
+    createTime: '2024-01-01T00:00:00Z',
+    updateTime: '2024-01-16T14:30:00Z'
+  }
+  
+  contentCategories[categoryIndex].moderators.push(newModerator)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: null
+  })
+})
+
+// 移除版主API
+app.delete('/api/content/categories/:id/moderators/:userId', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  const userId = parseInt(req.params.userId)
+  console.log(`👥 Remove moderator requested - Category: ${categoryId}, User: ${userId}`)
+  
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === categoryId)
+  if (categoryIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: null
+    })
+  }
+  
+  const moderatorIndex = contentCategories[categoryIndex].moderators.findIndex(mod => mod.id === userId)
+  if (moderatorIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Moderator not found',
+      data: null
+    })
+  }
+  
+  contentCategories[categoryIndex].moderators.splice(moderatorIndex, 1)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: null
+  })
+})
+
+// 获取版主列表API
+app.get('/api/content/categories/:id/moderators', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  console.log(`👥 Get moderators requested for category: ${categoryId}`)
+  
+  const category = contentCategories.find(cat => cat.id === categoryId)
+  if (!category) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: []
+    })
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: category.moderators
+  })
+})
 
 // 模拟标签数据
 const mockPostTags = [
@@ -4086,166 +4354,213 @@ app.post('/api/post-tags/recommend', (req, res) => {
   })
 })
 
-// ======================== 内容版块管理 APIs ========================
+// ===== 内容管理API (处理content相关404) =====
 
-// 内容版块数据
-const contentCategories = [
-  {
-    id: 1,
-    name: '技术分享',
-    code: 'tech_share',
-    description: '分享技术经验、开发心得、解决方案等内容',
-    icon: 'Monitor',
-    sortOrder: 1,
-    isActive: true,
-    isPublic: true,
-    auditMode: 'post',
-    postPermissions: ['all'],
-    postCount: 456,
-    todayPosts: 8,
-    moderators: [
-      {
-        id: 1,
-        username: 'tech_admin',
-        name: '技术管理员',
-        nickname: '技术管理员',
-        email: 'tech@example.com',
-        department: '技术部',
-        groupId: 1,
-        status: 1,
-        roles: [],
-        createTime: '2024-01-01T00:00:00Z',
-        updateTime: '2024-01-16T14:30:00Z'
-      }
-    ],
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: 2,
-    name: '产品心得',
-    code: 'product_insight',
-    description: '产品设计思路、用户体验、市场分析等内容',
-    icon: 'Briefcase',
-    sortOrder: 2,
-    isActive: true,
-    isPublic: true,
-    auditMode: 'pre',
-    postPermissions: ['member'],
-    postCount: 234,
-    todayPosts: 3,
-    moderators: [
-      {
-        id: 3,
-        username: 'product_manager',
-        name: '产品经理',
-        nickname: '产品经理',
-        email: 'pm@example.com',
-        department: '产品部',
-        groupId: 2,
-        status: 1,
-        roles: [],
-        createTime: '2024-01-01T00:00:00Z',
-        updateTime: '2024-01-16T14:30:00Z'
-      }
-    ],
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-14T15:30:00Z'
-  },
-  {
-    id: 3,
-    name: '企业文化',
-    code: 'company_culture',
-    description: '企业价值观、文化活动、团建等相关内容',
-    icon: 'OfficeBuilding',
-    sortOrder: 3,
-    isActive: true,
-    isPublic: true,
-    auditMode: 'pre',
-    postPermissions: ['member'],
-    postCount: 189,
-    todayPosts: 2,
-    moderators: [
-      {
-        id: 4,
-        username: 'hr_manager',
-        name: 'HR经理',
-        nickname: 'HR经理',
-        email: 'hr@example.com',
-        department: '人事部',
-        groupId: 3,
-        status: 1,
-        roles: [],
-        createTime: '2024-01-01T00:00:00Z',
-        updateTime: '2024-01-16T14:30:00Z'
-      }
-    ],
-    createdAt: '2024-01-03T00:00:00Z',
-    updatedAt: '2024-01-13T12:15:00Z'
-  },
-  {
-    id: 4,
-    name: '行业资讯',
-    code: 'industry_news',
-    description: '行业最新动态、趋势分析、市场报告等',
-    icon: 'DataLine',
-    sortOrder: 4,
-    isActive: true,
-    isPublic: true,
-    auditMode: 'none',
-    postPermissions: ['all'],
-    postCount: 125,
-    todayPosts: 5,
-    moderators: [
-      {
-        id: 5,
-        username: 'news_editor',
-        name: '资讯编辑',
-        nickname: '资讯编辑',
-        email: 'news@example.com',
-        department: '编辑部',
-        groupId: 4,
-        status: 1,
-        roles: [],
-        createTime: '2024-01-01T00:00:00Z',
-        updateTime: '2024-01-16T14:30:00Z'
-      }
-    ],
-    createdAt: '2024-01-04T00:00:00Z',
-    updatedAt: '2024-01-16T09:45:00Z'
-  },
-  {
-    id: 5,
-    name: '创新实验',
-    code: 'innovation_lab',
-    description: '前沿技术探索、创新项目分享、实验性内容',
-    icon: 'Experiment',
-    sortOrder: 5,
-    isActive: false,
-    isPublic: false,
-    auditMode: 'sample',
-    postPermissions: ['admin'],
-    postCount: 67,
-    todayPosts: 1,
-    moderators: [
-      {
-        id: 6,
-        username: 'innovation_lead',
-        name: '创新负责人',
-        nickname: '创新负责人',
-        email: 'innovation@example.com',
-        department: '研发部',
-        groupId: 5,
-        status: 1,
-        roles: [],
-        createTime: '2024-01-01T00:00:00Z',
-        updateTime: '2024-01-16T14:30:00Z'
-      }
-    ],
-    createdAt: '2024-01-05T00:00:00Z',
-    updatedAt: '2024-01-12T11:20:00Z'
+// 获取部门树结构
+app.get('/api/departments/tree', (req, res) => {
+  console.log('🌳 Department tree requested')
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: departmentTree
+  })
+})
+
+// ===== 新版API路径（不带/api前缀） =====
+// 这些路径将通过Vite代理访问
+
+// 获取部门树结构 - 新路径
+app.get('/departments/tree', (req, res) => {
+  console.log('🌳 Department tree requested (new path)')
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: departmentTree
+  })
+})
+
+// 获取内容版块列表 - 新路径
+app.get('/content/categories', (req, res) => {
+  console.log('📂 Content categories requested (new path)', req.query)
+  
+  const mockCategories = contentCategories
+  
+  const stats = {
+    total: mockCategories.length,
+    active: mockCategories.filter(cat => cat.isActive).length,
+    totalPosts: mockCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: mockCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
   }
-]
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: mockCategories,
+      stats
+    }
+  })
+})
+
+// 获取版块详情 - 新路径
+app.get('/content/categories/:id', (req, res) => {
+  console.log('📋 Content category detail requested (new path)', req.params.id)
+  const id = parseInt(req.params.id)
+  
+  const category = contentCategories.find(cat => cat.id === id)
+  if (!category) {
+    return res.json({
+      code: 404,
+      message: '版块不存在',
+      data: null
+    })
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: category
+  })
+})
+
+// 获取版块最新帖子 - 新路径
+app.get('/content/categories/:id/latest-posts', (req, res) => {
+  console.log('📝 Latest posts requested for category (new path)', req.params.id)
+  const id = parseInt(req.params.id)
+  const { limit = 5 } = req.query
+  
+  const latestPosts = [
+    {
+      id: 1,
+      title: '最新技术分享：Vue 3.4 新特性详解',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 2,
+      title: '实用开发技巧：TypeScript 高级类型应用',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 3,
+      title: '性能优化实战：前端bundle大小优化',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 4,
+      title: '工程化实践：monorepo项目管理',
+      createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 5,
+      title: '架构设计：微前端解决方案对比',
+      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: latestPosts.slice(0, parseInt(limit))
+  })
+})
+
+// ===== 兼容旧版API路径 =====
+// 旧版categories API重定向到新版content/categories
+app.get('/api/categories', (req, res) => {
+  console.log('📂 Legacy categories API redirected to content/categories', req.query)
+  
+  // 模拟版块数据
+  const mockCategories = contentCategories
+  
+  // 计算统计数据
+  const stats = {
+    total: mockCategories.length,
+    active: mockCategories.filter(cat => cat.isActive).length,
+    totalPosts: mockCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: mockCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: mockCategories,
+      stats
+    }
+  })
+})
+
+// 旧版categories/:id/latest-posts API
+app.get('/api/categories/:id/latest-posts', (req, res) => {
+  console.log('📝 Legacy latest posts API redirected', req.params.id)
+  const id = parseInt(req.params.id)
+  const { limit = 5 } = req.query
+  
+  // 模拟最新帖子数据
+  const latestPosts = [
+    {
+      id: 1,
+      title: '最新技术分享：Vue 3.4 新特性详解',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 2,
+      title: '实用开发技巧：TypeScript 高级类型应用',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 3,
+      title: '性能优化实战：前端bundle大小优化',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 4,
+      title: '工程化实践：monorepo项目管理',
+      createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 5,
+      title: '架构设计：微前端解决方案对比',
+      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: latestPosts.slice(0, parseInt(limit))
+  })
+})
+
+// 获取内容版块列表 - 简化版本
+app.get('/api/content/categories', (req, res) => {
+  console.log('📂 Content categories requested', req.query)
+  
+  // 模拟版块数据
+  const mockCategories = contentCategories
+  
+  // 计算统计数据
+  const stats = {
+    total: mockCategories.length,
+    active: mockCategories.filter(cat => cat.isActive).length,
+    totalPosts: mockCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: mockCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: mockCategories,
+      stats
+    }
+  })
+})
+
+// ======================== 内容版块管理 APIs ========================
+// 使用之前声明的contentCategories变量
 
 // 获取内容版块列表
 app.get('/api/content/categories', (req, res) => {
