@@ -1328,5 +1328,162 @@ export interface Approver {
   averageResponseTime?: string
 }
 
+// ======================== 企业论坛增强功能类型定义 ========================
+
+// 三级分类系统接口（继承并增强现有ContentCategory）
+export interface ForumCategory {
+  id: number
+  name: string
+  code: string
+  description?: string
+  icon?: string
+  parentId: number  // 0表示一级分类
+  level: 1 | 2 | 3  // 层级：1, 2, 3
+  sortOrder: number
+  isActive: boolean
+  isPublic: boolean
+  auditMode: 'none' | 'pre' | 'post' | 'sample'  // 审核模式
+  postPermissions: string[]  // 发帖权限
+  children?: ForumCategory[]
+  postCount?: number
+  todayPosts?: number
+  moderators?: User[]
+  createdAt: string
+  updatedAt?: string
+}
+
+// 论坛分类树接口
+export interface ForumCategoryTree {
+  categories: ForumCategory[]
+  total: number
+}
+
+// 分类表单接口
+export interface ForumCategoryForm {
+  id?: number
+  name: string
+  code: string
+  description?: string
+  icon?: string
+  parentId: number
+  level: 1 | 2 | 3
+  sortOrder: number
+  isActive: boolean
+  isPublic: boolean
+  auditMode: 'none' | 'pre' | 'post' | 'sample'
+  postPermissions: string[]
+}
+
+// 置顶/加精申请类型枚举
+export type FeatureRequestType = 'top' | 'elite'
+
+// 申请状态枚举  
+export type FeatureRequestStatus = 'pending' | 'approved' | 'rejected'
+
+// 置顶/加精申请接口
+export interface ForumFeatureRequest {
+  id: number
+  postId: number
+  post?: Content  // 关联的帖子
+  applicantId: number
+  applicant: User  // 申请人
+  requestType: FeatureRequestType  // 申请类型：置顶或加精
+  reason: string  // 申请理由
+  status: FeatureRequestStatus  // 状态
+  reviewerId?: number
+  reviewer?: User  // 审核人
+  rejectReason?: string  // 拒绝原因
+  createdAt: string
+  updatedAt?: string
+  reviewedAt?: string
+}
+
+// 申请查询参数
+export interface FeatureRequestQueryParams extends PaginationParams {
+  requestType?: FeatureRequestType
+  status?: FeatureRequestStatus
+  applicantId?: number
+  reviewerId?: number
+  postId?: number
+  startTime?: string
+  endTime?: string
+}
+
+// 申请处理表单
+export interface FeatureRequestProcessForm {
+  requestId: number
+  action: 'approve' | 'reject'
+  rejectReason?: string  // 拒绝时必填
+}
+
+// 扩展Content接口，支持官方发布标识
+export interface ForumPost extends Content {
+  officialFlag: boolean  // 是否官方发布
+  categoryId?: number    // 关联的三级分类ID
+  visibleRange?: string[]  // 可见范围（部门/组织）
+  attachments?: string[]   // 附件URLs
+}
+
+// 后台发帖表单接口
+export interface AdminPostForm {
+  title: string
+  description?: string  // 内容摘要/导语
+  categoryId: number   // 三级分类ID（级联选择）
+  tags: string[]       // 标签
+  content: string      // 正文内容（富文本）
+  contentHtml?: string // 富文本HTML内容
+  visibleRange: string[]  // 可见范围（组织架构）
+  attachments?: string[]  // 附件
+  officialFlag?: boolean  // 官方发布标识，默认true
+}
+
+// 级联分类选择器值类型
+export type CascaderValue = (string | number)[]
+
+// 组织架构树节点接口
+export interface OrganizationNode {
+  id: string
+  label: string
+  value: string
+  children?: OrganizationNode[]
+}
+
+// 申请统计数据接口
+export interface FeatureRequestStats {
+  totalRequests: number
+  pendingRequests: number
+  approvedRequests: number
+  rejectedRequests: number
+  todayRequests: number
+  thisWeekRequests: number
+  topRequests: number
+  eliteRequests: number
+  approvalRate: number
+}
+
+// 分类统计数据接口
+export interface CategoryStats {
+  total: number
+  active: number
+  inactive: number
+  totalPosts: number
+  todayPosts: number
+  moderators: number
+}
+
+// 批量申请操作接口
+export interface BatchFeatureRequestOperation {
+  requestIds: number[]
+  action: 'approve' | 'reject'
+  rejectReason?: string
+}
+
 // 导出投票帖相关类型
 export * from './poll'
+
+// 导出帖子标签管理相关类型
+export * from './postTags'
+
+// 导出资讯聚合管理相关类型
+export * from './news'
+

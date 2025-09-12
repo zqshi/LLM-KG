@@ -34,7 +34,7 @@ function generateDefaultMenus(): MenuNode[] {
       children: [
         { id: 21, name: '版块管理', path: '/content/categories', icon: 'FolderOpened' },
         { id: 24, name: '投票管理', path: '/content/polls', icon: 'DataBoard' },
-
+        { id: 26, name: '置顶/加精申请', path: '/content/feature-requests', icon: 'Star' },
         { id: 23, name: '数据看板', path: '/content/dashboard', icon: 'DataBoard' }
       ]
     },
@@ -99,7 +99,18 @@ function generateDefaultMenus(): MenuNode[] {
         { id: 91, name: '首页配置', path: '/operation/homepage', icon: 'House' },
         { id: 92, name: '推荐位管理', path: '/operation/recommendations', icon: 'Star' },
         { id: 93, name: '榜单管理', path: '/operation/rankings', icon: 'TrendCharts' },
-        { id: 94, name: '数据看板', path: '/operation/dashboard', icon: 'DataBoard' }
+        { id: 94, name: '数据看板', path: '/operation/dashboard', icon: 'DataBoard' },
+        {
+          id: 95,
+          name: '工具箱管理',
+          path: '/operation/ai-tools',
+          icon: 'Tools',
+          children: [
+            { id: 951, name: '工具标签管理', path: '/operation/ai-tools/tags', icon: 'Collection' },
+            { id: 952, name: '工具列表', path: '/operation/ai-tools/tools', icon: 'Box' }
+          ]
+        },
+        { id: 96, name: '问题反馈管理', path: '/operation/feedback', icon: 'ChatDotRound' }
       ]
     },
     {
@@ -192,6 +203,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       return loginResponse
     } catch (error) {
+      console.error('登录失败:', error)
       throw error
     } finally {
       loading.value = false
@@ -230,6 +242,11 @@ export const useAuthStore = defineStore('auth', () => {
       if (import.meta.env.DEV) {
         console.log('开发模式：检查是否需要自动登录')
         const storedToken = localStorage.getItem('auth_token')
+        
+        // 强制更新菜单数据 - 清除旧的菜单缓存
+        console.log('🔄 强制更新菜单数据，清除旧的缓存')
+        localStorage.removeItem('menus')
+        
         if (!storedToken) {
           console.log('开发模式：自动登录管理员用户')
           // 自动登录管理员用户
@@ -260,8 +277,11 @@ export const useAuthStore = defineStore('auth', () => {
             updateTime: new Date().toISOString()
           }
           permissions.value = SUPER_ADMIN_PERMISSIONS // 超级管理员的完整权限
+          
+          // 强制使用最新的菜单结构
+          console.log('🔧 强制更新菜单为最新结构')
           menus.value = generateDefaultMenus()
-
+          
           // 保存到localStorage
           localStorage.setItem('auth_token', token.value)
           localStorage.setItem('user_info', JSON.stringify(user.value))
@@ -269,6 +289,7 @@ export const useAuthStore = defineStore('auth', () => {
           localStorage.setItem('menus', JSON.stringify(menus.value))
 
           console.log('开发模式：自动登录完成')
+          console.log('📋 菜单列表验证:', menus.value.find(m => m.name === '内容管理')?.children?.map(c => c.name))
           return
         }
       }
@@ -346,9 +367,11 @@ export const useAuthStore = defineStore('auth', () => {
                 ['system_admin', 'super_admin', 'admin'].includes(r.code)
               )))
         if (isAdminUser) {
+          console.log('🔧 管理员用户，强制更新为最新菜单')
           menus.value = generateDefaultMenus()
           // 强制更新菜单缓存
           localStorage.setItem('menus', JSON.stringify(menus.value))
+          console.log('📋 管理员菜单验证:', menus.value.find(m => m.name === '内容管理')?.children?.map(c => c.name))
         }
       } else {
         console.log('没有有效的登录信息，保持未登录状态')

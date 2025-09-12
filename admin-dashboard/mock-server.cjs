@@ -9,6 +9,92 @@ app.use(cors())
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
+// 部门树数据
+const departmentTree = [
+  {
+    id: '1',
+    name: '技术部',
+    parentId: null,
+    children: [
+      {
+        id: '1-1',
+        name: '前端开发组',
+        parentId: '1',
+        children: []
+      },
+      {
+        id: '1-2',
+        name: '后端开发组',
+        parentId: '1',
+        children: []
+      },
+      {
+        id: '1-3',
+        name: '测试组',
+        parentId: '1',
+        children: []
+      }
+    ]
+  },
+  {
+    id: '2',
+    name: '产品部',
+    parentId: null,
+    children: [
+      {
+        id: '2-1',
+        name: '产品设计组',
+        parentId: '2',
+        children: []
+      },
+      {
+        id: '2-2',
+        name: '用户研究组',
+        parentId: '2',
+        children: []
+      }
+    ]
+  },
+  {
+    id: '3',
+    name: '人事部',
+    parentId: null,
+    children: [
+      {
+        id: '3-1',
+        name: '招聘组',
+        parentId: '3',
+        children: []
+      },
+      {
+        id: '3-2',
+        name: '培训组',
+        parentId: '3',
+        children: []
+      }
+    ]
+  },
+  {
+    id: '4',
+    name: '市场部',
+    parentId: null,
+    children: [
+      {
+        id: '4-1',
+        name: '品牌推广组',
+        parentId: '4',
+        children: []
+      },
+      {
+        id: '4-2',
+        name: '数据分析组',
+        parentId: '4',
+        children: []
+      }
+    ]
+  }
+]
+
 // 跳蚤市场API路由
 console.log('Registering flea market API routes...')
 // 获取举报列表
@@ -1504,16 +1590,6 @@ app.post('/api/banner/:id/offline', (req, res) => {
   })
 })
 
-// ===== 内容管理API (处理content相关404) =====
-app.get('/api/content/categories', (req, res) => {
-  console.log('📂 Content categories requested')
-  res.json({
-    code: 200,
-    message: 'success',
-    data: mockData.pollData.categories
-  })
-})
-
 app.get('/api/content/list', (req, res) => {
   console.log('📄 Content list requested')
   res.json({
@@ -1867,6 +1943,43 @@ app.get('/api/portal/navigations', (req, res) => {
       children: [],
       roles: ['admin', 'user'],
       created_at: new Date().toISOString()
+    },
+    {
+      id: 4,
+      title: '工具箱管理',
+      path: '/tools',
+      icon: 'Tools',
+      sort_order: 4,
+      is_active: true,
+      parent_id: null,
+      children: [
+        {
+          id: 41,
+          title: '工具列表',
+          path: '/tools/list',
+          icon: 'Box',
+          sort_order: 1,
+          is_active: true,
+          parent_id: 4,
+          children: [],
+          roles: ['admin', 'user'],
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 42,
+          title: '工具标签管理',
+          path: '/tools/tags',
+          icon: 'Collection',
+          sort_order: 2,
+          is_active: true,
+          parent_id: 4,
+          children: [],
+          roles: ['admin', 'user'],
+          created_at: new Date().toISOString()
+        }
+      ],
+      roles: ['admin', 'user'],
+      created_at: new Date().toISOString()
     }
   ]
   
@@ -2018,6 +2131,658 @@ app.get('/api/portal/utils/icons', (req, res) => {
   })
 })
 
+// ==================== 工具箱管理API路由 ====================
+
+// AI工具标签数据
+const aiToolTags = [
+  { id: 1, name: 'AI写作', createTime: '2024-01-15T08:00:00Z', toolCount: 5 },
+  { id: 2, name: '图像生成', createTime: '2024-01-20T10:30:00Z', toolCount: 3 },
+  { id: 3, name: '数据分析', createTime: '2024-02-01T14:15:00Z', toolCount: 2 },
+  { id: 4, name: '代码生成', createTime: '2024-02-10T16:45:00Z', toolCount: 4 },
+  { id: 5, name: '语音处理', createTime: '2024-02-15T09:20:00Z', toolCount: 1 }
+]
+
+// AI工具数据
+const aiTools = [
+  {
+    id: 1,
+    logo: 'https://via.placeholder.com/64x64/4A90E2/FFFFFF?text=GPT',
+    name: 'ChatGPT',
+    tagId: 1,
+    tag: { id: 1, name: 'AI写作' },
+    description: '强大的对话式AI助手，可以帮助完成各种文本创作和问答任务',
+    url: 'https://chat.openai.com',
+    status: 'enabled',
+    creatorId: 1,
+    creator: '管理员',
+    createTime: '2024-01-15T08:30:00Z',
+    caseCount: 3
+  },
+  {
+    id: 2,
+    logo: 'https://via.placeholder.com/64x64/FF6B6B/FFFFFF?text=MJ',
+    name: 'Midjourney',
+    tagId: 2,
+    tag: { id: 2, name: '图像生成' },
+    description: '专业的AI图像生成工具，可以创造出令人惊叹的艺术作品',
+    url: 'https://www.midjourney.com',
+    status: 'enabled',
+    creatorId: 1,
+    creator: '管理员',
+    createTime: '2024-01-20T11:00:00Z',
+    caseCount: 2
+  },
+  {
+    id: 3,
+    logo: 'https://via.placeholder.com/64x64/4ECDC4/FFFFFF?text=CL',
+    name: 'Claude',
+    tagId: 1,
+    tag: { id: 1, name: 'AI写作' },
+    description: 'Anthropic开发的AI助手，擅长分析、写作和代码生成',
+    url: 'https://claude.ai',
+    status: 'enabled',
+    creatorId: 1,
+    creator: '管理员',
+    createTime: '2024-02-01T15:20:00Z',
+    caseCount: 1
+  },
+  {
+    id: 4,
+    logo: 'https://via.placeholder.com/64x64/95A5A6/FFFFFF?text=GH',
+    name: 'GitHub Copilot',
+    tagId: 4,
+    tag: { id: 4, name: '代码生成' },
+    description: 'AI编程助手，可以自动生成高质量的代码片段',
+    url: 'https://github.com/features/copilot',
+    status: 'disabled',
+    creatorId: 2,
+    creator: '开发者',
+    createTime: '2024-02-10T17:00:00Z',
+    caseCount: 0
+  }
+]
+
+// 关联案例数据
+const toolCases = [
+  { id: 1, toolId: 1, postId: 1001, postTitle: '使用ChatGPT提升工作效率的5个技巧', createTime: '2024-01-16T10:00:00Z' },
+  { id: 2, toolId: 1, postId: 1002, postTitle: 'ChatGPT在内容创作中的应用实例', createTime: '2024-01-17T14:30:00Z' },
+  { id: 3, toolId: 1, postId: 1003, postTitle: '如何用ChatGPT辅助程序设计', createTime: '2024-01-18T16:45:00Z' },
+  { id: 4, toolId: 2, postId: 2001, postTitle: 'Midjourney创作精美海报的经验分享', createTime: '2024-01-21T09:15:00Z' },
+  { id: 5, toolId: 2, postId: 2002, postTitle: 'AI绘画工具对设计行业的影响', createTime: '2024-01-22T11:20:00Z' },
+  { id: 6, toolId: 3, postId: 3001, postTitle: 'Claude在文档分析中的强大能力', createTime: '2024-02-02T13:40:00Z' }
+]
+
+// 论坛版块数据
+const forumCategories = [
+  { id: 1, name: '技术讨论', parentId: null, level: 1 },
+  { id: 2, name: '产品体验', parentId: null, level: 1 },
+  { id: 3, name: '经验分享', parentId: null, level: 1 },
+  { id: 4, name: 'AI工具', parentId: 1, level: 2 },
+  { id: 5, name: '开发实践', parentId: 1, level: 2 }
+]
+
+// 论坛帖子数据
+const forumPosts = [
+  { id: 1001, title: '使用ChatGPT提升工作效率的5个技巧', author: '张三', createTime: '2024-01-16T10:00:00Z', viewCount: 245, likeCount: 18 },
+  { id: 1002, title: 'ChatGPT在内容创作中的应用实例', author: '李四', createTime: '2024-01-17T14:30:00Z', viewCount: 189, likeCount: 12 },
+  { id: 1003, title: '如何用ChatGPT辅助程序设计', author: '王五', createTime: '2024-01-18T16:45:00Z', viewCount: 156, likeCount: 9 },
+  { id: 2001, title: 'Midjourney创作精美海报的经验分享', author: '赵六', createTime: '2024-01-21T09:15:00Z', viewCount: 203, likeCount: 15 },
+  { id: 2002, title: 'AI绘画工具对设计行业的影响', author: '钱七', createTime: '2024-01-22T11:20:00Z', viewCount: 167, likeCount: 11 },
+  { id: 3001, title: 'Claude在文档分析中的强大能力', author: '孙八', createTime: '2024-02-02T13:40:00Z', viewCount: 134, likeCount: 8 },
+  { id: 1004, title: 'AI工具使用心得分享', author: '周九', createTime: '2024-02-05T15:25:00Z', viewCount: 98, likeCount: 6 },
+  { id: 1005, title: '程序员必备的AI辅助工具推荐', author: '吴十', createTime: '2024-02-08T12:10:00Z', viewCount: 221, likeCount: 17 }
+]
+
+// AI工具标签API
+app.get('/api/ai-tools/tags', (req, res) => {
+  const { page = 1, pageSize = 20, keyword = '' } = req.query
+  
+  let filteredTags = [...aiToolTags]
+  
+  if (keyword) {
+    filteredTags = filteredTags.filter(tag => tag.name.includes(keyword))
+  }
+  
+  const total = filteredTags.length
+  const startIndex = (parseInt(page) - 1) * parseInt(pageSize)
+  const endIndex = startIndex + parseInt(pageSize)
+  const list = filteredTags.slice(startIndex, endIndex)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: { list, total }
+  })
+})
+
+// 获取所有标签（用于下拉选择）
+app.get('/api/ai-tools/tags/all', (req, res) => {
+  res.json({
+    code: 200,
+    message: 'success',
+    data: aiToolTags
+  })
+})
+
+// 创建标签
+app.post('/api/ai-tools/tags', (req, res) => {
+  const { name } = req.body
+  const newTag = {
+    id: aiToolTags.length + 1,
+    name,
+    createTime: new Date().toISOString(),
+    toolCount: 0
+  }
+  aiToolTags.push(newTag)
+  
+  res.json({
+    code: 200,
+    message: '标签创建成功',
+    data: newTag
+  })
+})
+
+// 更新标签
+app.put('/api/ai-tools/tags/:id', (req, res) => {
+  const tagId = parseInt(req.params.id)
+  const { name } = req.body
+  const tagIndex = aiToolTags.findIndex(tag => tag.id === tagId)
+  
+  if (tagIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '标签不存在',
+      data: null
+    })
+  }
+  
+  aiToolTags[tagIndex].name = name
+  aiToolTags[tagIndex].updateTime = new Date().toISOString()
+  
+  res.json({
+    code: 200,
+    message: '标签更新成功',
+    data: aiToolTags[tagIndex]
+  })
+})
+
+// 检查标签是否可以删除
+app.get('/api/ai-tools/tags/:id/check-delete', (req, res) => {
+  const tagId = parseInt(req.params.id)
+  const usedByTools = aiTools.filter(tool => tool.tagId === tagId)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      canDelete: usedByTools.length === 0,
+      usedByTools,
+      message: usedByTools.length > 0 ? '此标签已被工具使用，无法删除' : '可以删除'
+    }
+  })
+})
+
+// 删除标签
+app.delete('/api/ai-tools/tags/:id', (req, res) => {
+  const tagId = parseInt(req.params.id)
+  const tagIndex = aiToolTags.findIndex(tag => tag.id === tagId)
+  
+  if (tagIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '标签不存在',
+      data: null
+    })
+  }
+  
+  // 检查是否有工具使用此标签
+  const usedByTools = aiTools.filter(tool => tool.tagId === tagId)
+  if (usedByTools.length > 0) {
+    return res.json({
+      code: 400,
+      message: '此标签已被工具使用，无法删除',
+      data: null
+    })
+  }
+  
+  aiToolTags.splice(tagIndex, 1)
+  
+  res.json({
+    code: 200,
+    message: '标签删除成功',
+    data: null
+  })
+})
+
+// AI工具列表API
+app.get('/api/ai-tools', (req, res) => {
+  const { page = 1, pageSize = 20, keyword = '', tagId, status } = req.query
+  
+  let filteredTools = [...aiTools]
+  
+  if (keyword) {
+    filteredTools = filteredTools.filter(tool => 
+      tool.name.includes(keyword) || tool.description.includes(keyword)
+    )
+  }
+  
+  if (tagId) {
+    filteredTools = filteredTools.filter(tool => tool.tagId === parseInt(tagId))
+  }
+  
+  if (status) {
+    filteredTools = filteredTools.filter(tool => tool.status === status)
+  }
+  
+  const total = filteredTools.length
+  const startIndex = (parseInt(page) - 1) * parseInt(pageSize)
+  const endIndex = startIndex + parseInt(pageSize)
+  const list = filteredTools.slice(startIndex, endIndex)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: { list, total }
+  })
+})
+
+// 获取工具详情
+app.get('/api/ai-tools/:id', (req, res) => {
+  const toolId = parseInt(req.params.id)
+  const tool = aiTools.find(t => t.id === toolId)
+  
+  if (!tool) {
+    return res.json({
+      code: 404,
+      message: '工具不存在',
+      data: null
+    })
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: tool
+  })
+})
+
+// 创建工具
+app.post('/api/ai-tools', (req, res) => {
+  const { logo, name, tagId, description, url, status } = req.body
+  const tag = aiToolTags.find(t => t.id === tagId)
+  
+  const newTool = {
+    id: aiTools.length + 1,
+    logo,
+    name,
+    tagId,
+    tag,
+    description,
+    url,
+    status,
+    creatorId: 1,
+    creator: '管理员',
+    createTime: new Date().toISOString(),
+    caseCount: 0
+  }
+  
+  aiTools.push(newTool)
+  
+  // 更新标签的工具计数
+  if (tag) {
+    tag.toolCount = (tag.toolCount || 0) + 1
+  }
+  
+  res.json({
+    code: 200,
+    message: '工具创建成功',
+    data: newTool
+  })
+})
+
+// 更新工具
+app.put('/api/ai-tools/:id', (req, res) => {
+  const toolId = parseInt(req.params.id)
+  const { logo, name, tagId, description, url, status } = req.body
+  const toolIndex = aiTools.findIndex(tool => tool.id === toolId)
+  
+  if (toolIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '工具不存在',
+      data: null
+    })
+  }
+  
+  const tag = aiToolTags.find(t => t.id === tagId)
+  aiTools[toolIndex] = {
+    ...aiTools[toolIndex],
+    logo,
+    name,
+    tagId,
+    tag,
+    description,
+    url,
+    status,
+    updateTime: new Date().toISOString()
+  }
+  
+  res.json({
+    code: 200,
+    message: '工具更新成功',
+    data: aiTools[toolIndex]
+  })
+})
+
+// 删除工具
+app.delete('/api/ai-tools/:id', (req, res) => {
+  const toolId = parseInt(req.params.id)
+  const toolIndex = aiTools.findIndex(tool => tool.id === toolId)
+  
+  if (toolIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '工具不存在',
+      data: null
+    })
+  }
+  
+  // 删除相关案例
+  const casesToRemove = toolCases.filter(c => c.toolId === toolId)
+  casesToRemove.forEach(c => {
+    const caseIndex = toolCases.findIndex(tc => tc.id === c.id)
+    if (caseIndex !== -1) {
+      toolCases.splice(caseIndex, 1)
+    }
+  })
+  
+  aiTools.splice(toolIndex, 1)
+  
+  res.json({
+    code: 200,
+    message: '工具删除成功',
+    data: null
+  })
+})
+
+// 切换工具状态
+app.patch('/api/ai-tools/:id/status', (req, res) => {
+  const toolId = parseInt(req.params.id)
+  const { status } = req.body
+  const toolIndex = aiTools.findIndex(tool => tool.id === toolId)
+  
+  if (toolIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '工具不存在',
+      data: null
+    })
+  }
+  
+  aiTools[toolIndex].status = status
+  aiTools[toolIndex].updateTime = new Date().toISOString()
+  
+  res.json({
+    code: 200,
+    message: '状态更新成功',
+    data: null
+  })
+})
+
+// 获取工具关联案例
+app.get('/api/ai-tools/:id/cases', (req, res) => {
+  const toolId = parseInt(req.params.id)
+  const cases = toolCases.filter(c => c.toolId === toolId)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: cases
+  })
+})
+
+// 关联案例
+app.post('/api/ai-tools/cases/associate', (req, res) => {
+  const { toolId, postId, postTitle } = req.body
+  
+  // 检查是否已关联
+  const exists = toolCases.find(c => c.toolId === toolId && c.postId === postId)
+  if (exists) {
+    return res.json({
+      code: 400,
+      message: '该案例已关联',
+      data: null
+    })
+  }
+  
+  const newCase = {
+    id: toolCases.length + 1,
+    toolId,
+    postId,
+    postTitle,
+    createTime: new Date().toISOString()
+  }
+  
+  toolCases.push(newCase)
+  
+  // 更新工具的案例计数
+  const tool = aiTools.find(t => t.id === toolId)
+  if (tool) {
+    tool.caseCount = (tool.caseCount || 0) + 1
+  }
+  
+  res.json({
+    code: 200,
+    message: '案例关联成功',
+    data: newCase
+  })
+})
+
+// 移除关联案例
+app.delete('/api/ai-tools/:toolId/cases/:postId', (req, res) => {
+  const toolId = parseInt(req.params.toolId)
+  const postId = parseInt(req.params.postId)
+  const caseIndex = toolCases.findIndex(c => c.toolId === toolId && c.postId === postId)
+  
+  if (caseIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '关联案例不存在',
+      data: null
+    })
+  }
+  
+  toolCases.splice(caseIndex, 1)
+  
+  // 更新工具的案例计数
+  const tool = aiTools.find(t => t.id === toolId)
+  if (tool && tool.caseCount > 0) {
+    tool.caseCount -= 1
+  }
+  
+  res.json({
+    code: 200,
+    message: '案例移除成功',
+    data: null
+  })
+})
+
+// 获取论坛版块
+app.get('/api/forum/categories', (req, res) => {
+  res.json({
+    code: 200,
+    message: 'success',
+    data: forumCategories
+  })
+})
+
+// 搜索论坛帖子
+app.get('/api/forum/posts/search', (req, res) => {
+  const { page = 1, pageSize = 20, keyword = '', categoryId } = req.query
+  
+  let filteredPosts = [...forumPosts]
+  
+  if (categoryId) {
+    // 简化处理，这里假设所有帖子都属于指定版块
+    filteredPosts = forumPosts
+  }
+  
+  if (keyword) {
+    filteredPosts = filteredPosts.filter(post => 
+      post.title.includes(keyword) || 
+      post.id.toString().includes(keyword) ||
+      post.author.includes(keyword)
+    )
+  }
+  
+  const total = filteredPosts.length
+  const startIndex = (parseInt(page) - 1) * parseInt(pageSize)
+  const endIndex = startIndex + parseInt(pageSize)
+  const list = filteredPosts.slice(startIndex, endIndex)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: { list, total }
+  })
+})
+
+// 获取论坛版块的级联选择器数据
+app.get('/api/forum/categories/cascader', (req, res) => {
+  const cascaderData = forumCategories.map(category => ({
+    value: category.id,
+    label: category.name,
+    children: []
+  }))
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: cascaderData
+  })
+})
+
+// 模拟功能请求数据
+const featureRequests = [
+  {
+    id: 1,
+    type: 'pin',
+    postId: 101,
+    postTitle: '关于AI技术发展趋势的深度分析',
+    postAuthor: '技术专家',
+    requesterId: 1001,
+    requesterName: '张三',
+    reason: '内容质量高，具有很好的参考价值',
+    status: 'pending', // pending, approved, rejected
+    reviewerId: null,
+    reviewerName: null,
+    reviewComment: null,
+    reviewTime: null,
+    createTime: '2024-01-15T10:30:00Z',
+    updateTime: '2024-01-15T10:30:00Z'
+  },
+  {
+    id: 2,
+    type: 'highlight',
+    postId: 102,
+    postTitle: 'Vue3最佳实践分享',
+    postAuthor: '前端开发',
+    requesterId: 1002,
+    requesterName: '李四',
+    reason: '实用性强，适合推荐给更多开发者',
+    status: 'approved',
+    reviewerId: 2001,
+    reviewerName: '管理员',
+    reviewComment: '同意加精，内容确实有价值',
+    reviewTime: '2024-01-16T14:20:00Z',
+    createTime: '2024-01-15T14:45:00Z',
+    updateTime: '2024-01-16T14:20:00Z'
+  },
+  {
+    id: 3,
+    type: 'pin',
+    postId: 103,
+    postTitle: '企业数字化转型案例研究',
+    postAuthor: '商业分析师',
+    requesterId: 1003,
+    requesterName: '王五',
+    reason: '热度很高，讨论激烈，适合置顶',
+    status: 'rejected',
+    reviewerId: 2001,
+    reviewerName: '管理员',
+    reviewComment: '内容质量一般，暂不置顶',
+    reviewTime: '2024-01-17T09:15:00Z',
+    createTime: '2024-01-16T16:20:00Z',
+    updateTime: '2024-01-17T09:15:00Z'
+  }
+]
+
+// 获取功能请求列表
+app.get('/api/forum/feature-requests', (req, res) => {
+  const { page = 1, pageSize = 20, status = '', type = '', keyword = '' } = req.query
+  
+  let filteredRequests = [...featureRequests]
+  
+  if (status) {
+    filteredRequests = filteredRequests.filter(req => req.status === status)
+  }
+  
+  if (type) {
+    filteredRequests = filteredRequests.filter(req => req.type === type)
+  }
+  
+  if (keyword) {
+    filteredRequests = filteredRequests.filter(req => 
+      req.postTitle.includes(keyword) || 
+      req.requesterName.includes(keyword) ||
+      req.reason.includes(keyword)
+    )
+  }
+  
+  const total = filteredRequests.length
+  const startIndex = (parseInt(page) - 1) * parseInt(pageSize)
+  const endIndex = startIndex + parseInt(pageSize)
+  const list = filteredRequests.slice(startIndex, endIndex)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: { list, total }
+  })
+})
+
+// 获取功能请求统计
+app.get('/api/forum/feature-requests/stats', (req, res) => {
+  const stats = {
+    total: featureRequests.length,
+    pending: featureRequests.filter(req => req.status === 'pending').length,
+    approved: featureRequests.filter(req => req.status === 'approved').length,
+    rejected: featureRequests.filter(req => req.status === 'rejected').length,
+    pinRequests: featureRequests.filter(req => req.type === 'pin').length,
+    highlightRequests: featureRequests.filter(req => req.type === 'highlight').length
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: stats
+  })
+})
+
+// Logo上传接口
+app.post('/api/ai-tools/upload/logo', (req, res) => {
+  // 模拟文件上传
+  const mockUrl = `https://via.placeholder.com/64x64/${Math.random().toString(16).slice(2, 8).toUpperCase()}/FFFFFF?text=LOGO`
+  
+  setTimeout(() => {
+    res.json({
+      code: 200,
+      message: '上传成功',
+      data: { url: mockUrl }
+    })
+  }, 500) // 模拟上传延迟
+})
+
 // favicon处理
 app.get('/favicon.ico', (req, res) => {
   res.status(204).end()
@@ -2045,6 +2810,2010 @@ app.get('/', (req, res) => {
 // Chrome开发者工具相关请求处理
 app.get('/.well-known/*', (req, res) => {
   res.status(204).end()
+})
+
+// ==================== 问题反馈管理API路由 ====================
+
+// 反馈模拟数据
+const feedbackData = [
+  {
+    id: 1,
+    title: '首页加载速度太慢',
+    content: '首页打开需要5秒以上，严重影响用户体验。建议优化图片加载和减少请求数量。',
+    type: 'problem',
+    status: 'pending',
+    priority: 'high',
+    submitterId: 101,
+    submitterName: '张三',
+    submitterEmail: 'zhangsan@example.com',
+    submitterPhone: '13800138001',
+    relatedModule: '首页',
+    attachments: [
+      {
+        id: 1,
+        name: 'screenshot.png',
+        url: '/uploads/screenshot.png',
+        size: 1024000,
+        type: 'image/png',
+        uploadTime: '2024-03-15T10:00:00Z'
+      }
+    ],
+    processerId: null,
+    processerName: null,
+    createTime: '2024-03-15T10:00:00Z',
+    updateTime: '2024-03-15T10:00:00Z',
+    processTime: null,
+    processRecords: [
+      {
+        id: 1,
+        feedbackId: 1,
+        operatorId: 1,
+        operatorName: '管理员',
+        action: 'status_change',
+        actionDescription: '反馈已创建',
+        detail: '用户提交了新的反馈',
+        oldValue: null,
+        newValue: 'pending',
+        createTime: '2024-03-15T10:00:00Z'
+      }
+    ],
+    internalComments: [],
+    userReplies: []
+  },
+  {
+    id: 2,
+    title: '建议增加暗黑模式',
+    content: '希望能在设置中增加暗黑模式选项，方便夜间使用。',
+    type: 'suggestion',
+    status: 'processing',
+    priority: 'medium',
+    submitterId: 102,
+    submitterName: '李四',
+    submitterEmail: 'lisi@example.com',
+    relatedModule: '设置',
+    attachments: [],
+    processerId: 1,
+    processerName: '管理员',
+    createTime: '2024-03-14T14:30:00Z',
+    updateTime: '2024-03-15T09:00:00Z',
+    processTime: '2024-03-15T09:00:00Z',
+    processRecords: [
+      {
+        id: 2,
+        feedbackId: 2,
+        operatorId: 1,
+        operatorName: '管理员',
+        action: 'assign',
+        actionDescription: '分配处理人',
+        detail: '已分配给管理员处理',
+        createTime: '2024-03-15T09:00:00Z'
+      }
+    ],
+    internalComments: [
+      {
+        id: 1,
+        feedbackId: 2,
+        authorId: 1,
+        authorName: '管理员',
+        content: '这个建议很有价值，已安排开发团队评估实现方案',
+        createTime: '2024-03-15T09:30:00Z'
+      }
+    ],
+    userReplies: [
+      {
+        id: 1,
+        feedbackId: 2,
+        content: '感谢您的建议！我们已经将暗黑模式功能加入开发计划，预计在下个版本中发布。',
+        senderId: 1,
+        senderName: '产品经理',
+        createTime: '2024-03-15T11:00:00Z',
+        notificationSent: true
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: '搜索功能返回结果不准确',
+    content: '搜索关键词时经常返回不相关的结果，希望改进搜索算法。',
+    type: 'problem',
+    status: 'resolved',
+    priority: 'medium',
+    submitterId: 103,
+    submitterName: '王五',
+    relatedModule: '搜索',
+    attachments: [],
+    processerId: 2,
+    processerName: '技术经理',
+    createTime: '2024-03-13T16:45:00Z',
+    updateTime: '2024-03-15T14:20:00Z',
+    processTime: '2024-03-14T10:00:00Z',
+    processRecords: [
+      {
+        id: 3,
+        feedbackId: 3,
+        operatorId: 2,
+        operatorName: '技术经理',
+        action: 'status_change',
+        actionDescription: '状态变更：已解决',
+        detail: '搜索算法已优化，问题已解决',
+        oldValue: 'processing',
+        newValue: 'resolved',
+        createTime: '2024-03-15T14:20:00Z'
+      }
+    ],
+    internalComments: [],
+    userReplies: []
+  }
+]
+
+const availableProcessors = [
+  { id: 1, name: '管理员', department: '管理部' },
+  { id: 2, name: '技术经理', department: '技术部' },
+  { id: 3, name: '产品经理', department: '产品部' },
+  { id: 4, name: '客服专员', department: '客服部' }
+]
+
+// 获取反馈统计（需要放在 :id 路由之前）
+app.get('/api/feedback/statistics', (req, res) => {
+  console.log('📊 Feedback statistics requested')
+  
+  const statistics = {
+    total: feedbackData.length,
+    pending: feedbackData.filter(item => item.status === 'pending').length,
+    processing: feedbackData.filter(item => item.status === 'processing').length,
+    resolved: feedbackData.filter(item => item.status === 'resolved').length,
+    closed: feedbackData.filter(item => item.status === 'closed').length,
+    rejected: feedbackData.filter(item => item.status === 'rejected').length,
+    todayNew: 2,
+    weeklyNew: 5,
+    monthlyNew: 15,
+    avgProcessTime: 24.5,
+    typeDistribution: [
+      { type: 'problem', count: feedbackData.filter(item => item.type === 'problem').length },
+      { type: 'suggestion', count: feedbackData.filter(item => item.type === 'suggestion').length }
+    ],
+    priorityDistribution: [
+      { priority: 'low', count: feedbackData.filter(item => item.priority === 'low').length },
+      { priority: 'medium', count: feedbackData.filter(item => item.priority === 'medium').length },
+      { priority: 'high', count: feedbackData.filter(item => item.priority === 'high').length },
+      { priority: 'urgent', count: feedbackData.filter(item => item.priority === 'urgent').length }
+    ]
+  }
+
+  res.json({
+    code: 200,
+    message: 'success',
+    data: statistics
+  })
+})
+
+// 获取可用处理人员
+app.get('/api/feedback/processors', (req, res) => {
+  console.log('👥 Available processors requested')
+  res.json({
+    code: 200,
+    message: 'success',
+    data: availableProcessors
+  })
+})
+
+// 获取反馈列表
+app.get('/api/feedback/list', (req, res) => {
+  console.log('📝 Feedback list requested', req.query)
+  const {
+    page = 1,
+    pageSize = 20,
+    keyword = '',
+    type = '',
+    status = '',
+    priority = '',
+    startTime = '',
+    endTime = '',
+    submitterName = '',
+    processerId = ''
+  } = req.query
+
+  let filteredData = [...feedbackData]
+
+  // 关键词搜索
+  if (keyword) {
+    filteredData = filteredData.filter(item =>
+      item.title.includes(keyword) || item.content.includes(keyword)
+    )
+  }
+
+  // 类型筛选
+  if (type) {
+    filteredData = filteredData.filter(item => item.type === type)
+  }
+
+  // 状态筛选
+  if (status && Array.isArray(status)) {
+    filteredData = filteredData.filter(item => status.includes(item.status))
+  } else if (status) {
+    filteredData = filteredData.filter(item => item.status === status)
+  }
+
+  // 优先级筛选
+  if (priority && Array.isArray(priority)) {
+    filteredData = filteredData.filter(item => priority.includes(item.priority))
+  } else if (priority) {
+    filteredData = filteredData.filter(item => item.priority === priority)
+  }
+
+  // 提交人筛选
+  if (submitterName) {
+    filteredData = filteredData.filter(item => item.submitterName.includes(submitterName))
+  }
+
+  // 处理人筛选
+  if (processerId) {
+    filteredData = filteredData.filter(item => item.processerId === parseInt(processerId))
+  }
+
+  const total = filteredData.length
+  const startIndex = (parseInt(page) - 1) * parseInt(pageSize)
+  const list = filteredData.slice(startIndex, startIndex + parseInt(pageSize))
+
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      list,
+      total
+    }
+  })
+})
+
+// 获取反馈详情
+app.get('/api/feedback/:id', (req, res) => {
+  console.log('📋 Feedback detail requested', req.params.id)
+  const id = parseInt(req.params.id)
+  const feedback = feedbackData.find(item => item.id === id)
+
+  if (!feedback) {
+    return res.json({
+      code: 404,
+      message: '反馈不存在',
+      data: null
+    })
+  }
+
+  res.json({
+    code: 200,
+    message: 'success',
+    data: feedback
+  })
+})
+
+
+// 分配反馈
+app.put('/api/feedback/:id/assign', (req, res) => {
+  console.log('👤 Assign feedback requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  const { processerId, note } = req.body
+  
+  const feedbackIndex = feedbackData.findIndex(item => item.id === id)
+  if (feedbackIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '反馈不存在',
+      data: null
+    })
+  }
+
+  const processor = availableProcessors.find(p => p.id === processerId)
+  if (!processor) {
+    return res.json({
+      code: 400,
+      message: '处理人不存在',
+      data: null
+    })
+  }
+
+  feedbackData[feedbackIndex].processerId = processerId
+  feedbackData[feedbackIndex].processerName = processor.name
+  feedbackData[feedbackIndex].updateTime = new Date().toISOString()
+
+  // 添加处理记录
+  const newRecord = {
+    id: Date.now(),
+    feedbackId: id,
+    operatorId: 1,
+    operatorName: '当前用户',
+    action: 'assign',
+    actionDescription: '分配处理人',
+    detail: note || `已分配给${processor.name}`,
+    createTime: new Date().toISOString()
+  }
+  feedbackData[feedbackIndex].processRecords.push(newRecord)
+
+  res.json({
+    code: 200,
+    message: '分配成功',
+    data: null
+  })
+})
+
+// 更新反馈状态
+app.put('/api/feedback/:id/status', (req, res) => {
+  console.log('🔄 Update feedback status requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  const { status, processNote } = req.body
+  
+  const feedbackIndex = feedbackData.findIndex(item => item.id === id)
+  if (feedbackIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '反馈不存在',
+      data: null
+    })
+  }
+
+  const oldStatus = feedbackData[feedbackIndex].status
+  feedbackData[feedbackIndex].status = status
+  feedbackData[feedbackIndex].updateTime = new Date().toISOString()
+
+  // 添加处理记录
+  const newRecord = {
+    id: Date.now(),
+    feedbackId: id,
+    operatorId: 1,
+    operatorName: '当前用户',
+    action: 'status_change',
+    actionDescription: '状态变更',
+    detail: processNote,
+    oldValue: oldStatus,
+    newValue: status,
+    createTime: new Date().toISOString()
+  }
+  feedbackData[feedbackIndex].processRecords.push(newRecord)
+
+  res.json({
+    code: 200,
+    message: '状态更新成功',
+    data: null
+  })
+})
+
+// 更新优先级
+app.put('/api/feedback/:id/priority', (req, res) => {
+  console.log('⚡ Update feedback priority requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  const { priority } = req.body
+  
+  const feedbackIndex = feedbackData.findIndex(item => item.id === id)
+  if (feedbackIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '反馈不存在',
+      data: null
+    })
+  }
+
+  const oldPriority = feedbackData[feedbackIndex].priority
+  feedbackData[feedbackIndex].priority = priority
+  feedbackData[feedbackIndex].updateTime = new Date().toISOString()
+
+  // 添加处理记录
+  const newRecord = {
+    id: Date.now(),
+    feedbackId: id,
+    operatorId: 1,
+    operatorName: '当前用户',
+    action: 'priority_change',
+    actionDescription: '优先级变更',
+    detail: `优先级从${oldPriority}调整为${priority}`,
+    oldValue: oldPriority,
+    newValue: priority,
+    createTime: new Date().toISOString()
+  }
+  feedbackData[feedbackIndex].processRecords.push(newRecord)
+
+  res.json({
+    code: 200,
+    message: '优先级更新成功',
+    data: null
+  })
+})
+
+// 添加内部评论
+app.post('/api/feedback/:id/comment', (req, res) => {
+  console.log('💬 Add internal comment requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  const { content } = req.body
+  
+  const feedbackIndex = feedbackData.findIndex(item => item.id === id)
+  if (feedbackIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '反馈不存在',
+      data: null
+    })
+  }
+
+  const newComment = {
+    id: Date.now(),
+    feedbackId: id,
+    authorId: 1,
+    authorName: '当前用户',
+    content,
+    createTime: new Date().toISOString()
+  }
+
+  feedbackData[feedbackIndex].internalComments.push(newComment)
+  feedbackData[feedbackIndex].updateTime = new Date().toISOString()
+
+  res.json({
+    code: 200,
+    message: '评论添加成功',
+    data: newComment
+  })
+})
+
+// 回复用户
+app.post('/api/feedback/:id/reply', (req, res) => {
+  console.log('📧 Reply to user requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  const { content, sendNotification } = req.body
+  
+  const feedbackIndex = feedbackData.findIndex(item => item.id === id)
+  if (feedbackIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '反馈不存在',
+      data: null
+    })
+  }
+
+  const newReply = {
+    id: Date.now(),
+    feedbackId: id,
+    content,
+    senderId: 1,
+    senderName: '当前用户',
+    createTime: new Date().toISOString(),
+    notificationSent: sendNotification
+  }
+
+  feedbackData[feedbackIndex].userReplies.push(newReply)
+  feedbackData[feedbackIndex].updateTime = new Date().toISOString()
+
+  res.json({
+    code: 200,
+    message: '回复发送成功',
+    data: newReply
+  })
+})
+
+// 下载附件
+app.get('/api/feedback/attachment/:id/download', (req, res) => {
+  console.log('📎 Download attachment requested', req.params.id)
+  // 模拟文件下载
+  res.json({
+    code: 200,
+    message: '下载链接生成成功',
+    data: {
+      url: '/uploads/mock-file.txt',
+      expires: new Date(Date.now() + 3600000).toISOString()
+    }
+  })
+})
+
+// 新闻管理 API
+app.get('/api/news/articles/stats', (req, res) => {
+  console.log('📊 News articles stats requested')
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      pendingCount: 15,
+      duplicateCount: 3,
+      todayApproved: 8,
+      avgProcessTime: 24.5,
+      totalFetched: 342,
+      activeSourceCount: 12,
+      errorSourceCount: 2
+    }
+  })
+})
+
+app.get('/api/news/articles', (req, res) => {
+  console.log('📰 News articles requested', req.query)
+  const { page = 1, size = 20, status, category, duplicateStatus } = req.query.params || req.query
+  
+  const mockArticles = Array.from({ length: 50 }, (_, index) => ({
+    id: index + 1,
+    title: `新闻标题 ${index + 1}`,
+    content: `这是新闻内容 ${index + 1}，内容详情...`,
+    summary: `新闻摘要 ${index + 1}`,
+    status: ['pending', 'approved', 'rejected'][index % 3],
+    category: ['科技', '财经', '社会', '娱乐'][index % 4],
+    source: `来源 ${(index % 5) + 1}`,
+    sourceUrl: `https://example.com/news/${index + 1}`,
+    publishTime: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString(),
+    createTime: new Date(Date.now() - index * 24 * 60 * 60 * 1000 - 3600000).toISOString(),
+    isDuplicate: index % 10 === 0,
+    qualityScore: 75 + Math.floor(Math.random() * 25),
+    tags: [`标签${index % 3 + 1}`, `标签${index % 5 + 1}`],
+    author: `编辑${(index % 3) + 1}`,
+    viewCount: Math.floor(Math.random() * 1000),
+    likeCount: Math.floor(Math.random() * 100)
+  }))
+
+  let filteredArticles = mockArticles
+  
+  if (status && status !== '') {
+    filteredArticles = filteredArticles.filter(article => article.status === status)
+  }
+  
+  if (category && category !== '') {
+    filteredArticles = filteredArticles.filter(article => article.category === category)
+  }
+  
+  if (duplicateStatus === 'duplicate') {
+    filteredArticles = filteredArticles.filter(article => article.isDuplicate)
+  } else if (duplicateStatus === 'unique') {
+    filteredArticles = filteredArticles.filter(article => !article.isDuplicate)
+  }
+
+  const startIndex = (parseInt(page) - 1) * parseInt(size)
+  const endIndex = startIndex + parseInt(size)
+  const pageData = filteredArticles.slice(startIndex, endIndex)
+
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      list: pageData,
+      total: filteredArticles.length,
+      page: parseInt(page),
+      size: parseInt(size)
+    }
+  })
+})
+
+app.get('/api/news/sources', (req, res) => {
+  console.log('📡 News sources requested', req.query)
+  
+  const mockSources = Array.from({ length: 15 }, (_, index) => ({
+    id: index + 1,
+    name: `新闻源 ${index + 1}`,
+    url: `https://newssite${index + 1}.com`,
+    type: ['rss', 'api', 'crawler'][index % 3],
+    status: ['active', 'inactive', 'error'][index % 3],
+    category: ['科技', '财经', '社会', '娱乐'][index % 4],
+    fetchInterval: [15, 30, 60, 120][index % 4],
+    lastFetchTime: new Date(Date.now() - Math.floor(Math.random() * 24 * 60 * 60 * 1000)).toISOString(),
+    successCount: 100 + Math.floor(Math.random() * 500),
+    errorCount: Math.floor(Math.random() * 10),
+    createTime: new Date(Date.now() - (index + 1) * 7 * 24 * 60 * 60 * 1000).toISOString(),
+    description: `新闻源 ${index + 1} 的描述信息`,
+    tags: [`标签${index % 3 + 1}`],
+    priority: Math.floor(Math.random() * 10) + 1
+  }))
+
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      list: mockSources,
+      total: mockSources.length
+    }
+  })
+})
+
+// 帖子标签管理 API
+console.log('🏷️ Registering Post Tags Management APIs...')
+
+// ===== 内容版块管理 API =====
+console.log('📂 Registering Content Categories Management APIs...')
+
+// 内容版块 Mock 数据
+const contentCategories = [
+  {
+    id: 1,
+    name: '技术分享',
+    code: 'tech_share',
+    description: '分享技术经验、开发心得、解决方案等内容',
+    icon: 'Monitor',
+    sortOrder: 1,
+    isActive: true,
+    isPublic: true,
+    auditMode: 'post',
+    postPermissions: ['all'],
+    postCount: 456,
+    todayPosts: 8,
+    moderators: [
+      {
+        id: 1,
+        username: 'tech_admin',
+        name: '技术管理员',
+        nickname: '技术管理员',
+        email: 'tech@example.com',
+        department: '技术部',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face'
+      },
+      {
+        id: 2,
+        username: 'dev_lead',
+        name: '开发负责人',
+        nickname: '开发负责人',
+        email: 'dev@example.com',
+        department: '技术部',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face'
+      }
+    ],
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-15T10:00:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
+  },
+  {
+    id: 2,
+    name: '产品心得',
+    code: 'product_insight',
+    description: '产品设计思路、用户体验、市场分析等内容',
+    icon: 'Briefcase',
+    sortOrder: 2,
+    isActive: true,
+    isPublic: true,
+    auditMode: 'pre',
+    postPermissions: ['member'],
+    postCount: 234,
+    todayPosts: 3,
+    moderators: [
+      {
+        id: 3,
+        username: 'product_manager',
+        name: '产品经理',
+        nickname: '产品经理',
+        email: 'pm@example.com',
+        department: '产品部',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612345b?w=64&h=64&fit=crop&crop=face'
+      }
+    ],
+    createdAt: '2024-01-02T00:00:00Z',
+    updatedAt: '2024-01-14T15:30:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
+  },
+  {
+    id: 3,
+    name: '企业文化',
+    code: 'company_culture',
+    description: '企业价值观、文化活动、团建等相关内容',
+    icon: 'OfficeBuilding',
+    sortOrder: 3,
+    isActive: true,
+    isPublic: true,
+    auditMode: 'pre',
+    postPermissions: ['member'],
+    postCount: 189,
+    todayPosts: 2,
+    moderators: [
+      {
+        id: 4,
+        username: 'hr_manager',
+        name: 'HR经理',
+        nickname: 'HR经理',
+        email: 'hr@example.com',
+        department: '人事部',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face'
+      }
+    ],
+    createdAt: '2024-01-03T00:00:00Z',
+    updatedAt: '2024-01-13T12:15:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
+  },
+  {
+    id: 4,
+    name: '行业资讯',
+    code: 'industry_news',
+    description: '行业动态、市场趋势、新闻资讯等',
+    icon: 'Monitor',
+    sortOrder: 4,
+    isActive: true,
+    isPublic: true,
+    auditMode: 'post',
+    postPermissions: ['member', 'vip'],
+    postCount: 145,
+    todayPosts: 5,
+    moderators: [
+      {
+        id: 5,
+        username: 'news_editor',
+        name: '资讯编辑',
+        nickname: '资讯编辑',
+        email: 'news@example.com',
+        department: '运营部',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=face'
+      }
+    ],
+    createdAt: '2024-01-04T00:00:00Z',
+    updatedAt: '2024-01-12T08:45:00Z',
+    visibleDepartments: [],
+    sampleRate: 0
+  },
+  {
+    id: 5,
+    name: '生活分享',
+    code: 'life_sharing',
+    description: '生活经验、兴趣爱好、休闲娱乐等内容',
+    icon: 'Star',
+    sortOrder: 5,
+    isActive: true,
+    isPublic: true,
+    auditMode: 'sample',
+    postPermissions: ['all'],
+    postCount: 298,
+    todayPosts: 12,
+    moderators: [
+      {
+        id: 6,
+        username: 'life_moderator',
+        name: '生活版主',
+        nickname: '生活版主',
+        email: 'life@example.com',
+        department: '运营部',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face'
+      }
+    ],
+    createdAt: '2024-01-05T00:00:00Z',
+    updatedAt: '2024-01-11T16:20:00Z',
+    visibleDepartments: [],
+    sampleRate: 30
+  }
+]
+
+// 获取内容版块列表
+app.get('/api/content/categories', (req, res) => {
+  console.log('📂 Content categories requested', req.query)
+  const { module } = req.query
+  
+  // 根据模块过滤（如果需要的话）
+  let filteredCategories = [...contentCategories]
+  
+  // 计算统计数据
+  const stats = {
+    total: filteredCategories.length,
+    active: filteredCategories.filter(cat => cat.isActive).length,
+    totalPosts: filteredCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: filteredCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: filteredCategories,
+      stats
+    }
+  })
+})
+
+// 获取版块统计数据
+app.get('/api/content/categories/stats', (req, res) => {
+  console.log('📊 Content categories stats requested')
+  
+  const stats = {
+    total: contentCategories.length,
+    active: contentCategories.filter(cat => cat.isActive).length,
+    totalPosts: contentCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: contentCategories.reduce((sum, cat) => sum + cat.moderators.length, 0),
+    todayPosts: contentCategories.reduce((sum, cat) => sum + cat.todayPosts, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: stats
+  })
+})
+
+// 获取版块详情
+app.get('/api/content/categories/:id', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  console.log(`📂 Content category detail requested for ID: ${categoryId}`)
+  
+  const category = contentCategories.find(cat => cat.id === categoryId)
+  if (!category) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: null
+    })
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: category
+  })
+})
+
+// 创建新版块
+app.post('/api/content/categories', (req, res) => {
+  console.log('📂 Create content category requested', req.body)
+  const newCategory = {
+    id: contentCategories.length + 1,
+    ...req.body,
+    postCount: 0,
+    todayPosts: 0,
+    moderators: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+  
+  contentCategories.push(newCategory)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: newCategory
+  })
+})
+
+// 更新版块
+app.put('/api/content/categories/:id', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  console.log(`📂 Update content category requested for ID: ${categoryId}`, req.body)
+  
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === categoryId)
+  if (categoryIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: null
+    })
+  }
+  
+  contentCategories[categoryIndex] = {
+    ...contentCategories[categoryIndex],
+    ...req.body,
+    updatedAt: new Date().toISOString()
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: contentCategories[categoryIndex]
+  })
+})
+
+// 删除版块
+app.delete('/api/content/categories/:id', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  console.log(`📂 Delete content category requested for ID: ${categoryId}`)
+  
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === categoryId)
+  if (categoryIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: null
+    })
+  }
+  
+  contentCategories.splice(categoryIndex, 1)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: null
+  })
+})
+
+// 获取版块最新帖子
+app.get('/api/content/categories/:id/latest-posts', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  const { limit = 5 } = req.query
+  console.log(`📄 Latest posts requested for category ID: ${categoryId}`)
+  
+  const category = contentCategories.find(cat => cat.id === categoryId)
+  if (!category) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: []
+    })
+  }
+  
+  // 模拟最新帖子数据
+  const latestPosts = [
+    {
+      id: 1,
+      title: `${category.name}最新动态分享`,
+      author: '张三',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      viewCount: 45,
+      commentCount: 3
+    },
+    {
+      id: 2,
+      title: `关于${category.name}的深度思考`,
+      author: '李四',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      viewCount: 32,
+      commentCount: 8
+    },
+    {
+      id: 3,
+      title: `${category.name}实践经验总结`,
+      author: '王五',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+      viewCount: 67,
+      commentCount: 12
+    }
+  ].slice(0, parseInt(limit))
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: latestPosts
+  })
+})
+
+// 搜索用户API（用于版主管理）
+app.get('/api/users/search', (req, res) => {
+  const { keyword, excludeIds } = req.query
+  console.log(`🔍 Users search requested with keyword: ${keyword}`)
+  
+  // Mock用户数据
+  const mockUsers = [
+    {
+      id: 101,
+      username: 'zhang_san',
+      name: '张三',
+      nickname: '张三',
+      email: 'zhangsan@example.com',
+      department: '技术部',
+      groupId: 1,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    },
+    {
+      id: 102,
+      username: 'li_si',
+      name: '李四',
+      nickname: '李四',
+      email: 'lisi@example.com',
+      department: '产品部',
+      groupId: 2,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    },
+    {
+      id: 103,
+      username: 'wang_wu',
+      name: '王五',
+      nickname: '王五',
+      email: 'wangwu@example.com',
+      department: '运营部',
+      groupId: 3,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    },
+    {
+      id: 104,
+      username: 'zhao_liu',
+      name: '赵六',
+      nickname: '赵六',
+      email: 'zhaoliu@example.com',
+      department: '市场部',
+      groupId: 4,
+      status: 1,
+      avatar: null,
+      roles: [],
+      createTime: '2024-01-01T00:00:00Z',
+      updateTime: '2024-01-16T14:30:00Z'
+    }
+  ]
+  
+  let filteredUsers = mockUsers
+  
+  // 根据关键词过滤
+  if (keyword) {
+    const searchKeyword = keyword.toLowerCase()
+    filteredUsers = mockUsers.filter(user => 
+      user.name.toLowerCase().includes(searchKeyword) ||
+      user.username.toLowerCase().includes(searchKeyword) ||
+      user.email.toLowerCase().includes(searchKeyword) ||
+      (user.nickname && user.nickname.toLowerCase().includes(searchKeyword))
+    )
+  }
+  
+  // 排除指定的用户ID
+  if (excludeIds) {
+    const excludeIdArray = Array.isArray(excludeIds) ? excludeIds : [excludeIds]
+    filteredUsers = filteredUsers.filter(user => !excludeIdArray.includes(user.id.toString()))
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: filteredUsers
+  })
+})
+
+// 添加版主API
+app.post('/api/content/categories/:id/moderators/:userId', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  const userId = parseInt(req.params.userId)
+  console.log(`👥 Add moderator requested - Category: ${categoryId}, User: ${userId}`)
+  
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === categoryId)
+  if (categoryIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: null
+    })
+  }
+  
+  // 检查用户是否已经是版主
+  const isAlreadyModerator = contentCategories[categoryIndex].moderators.some(mod => mod.id === userId)
+  if (isAlreadyModerator) {
+    return res.status(400).json({
+      code: 400,
+      message: 'User is already a moderator',
+      data: null
+    })
+  }
+  
+  // 模拟添加版主（实际应用中需要从用户数据源获取用户信息）
+  const newModerator = {
+    id: userId,
+    username: `user_${userId}`,
+    name: `用户${userId}`,
+    nickname: `用户${userId}`,
+    email: `user${userId}@example.com`,
+    department: '技术部',
+    groupId: 1,
+    status: 1,
+    roles: [],
+    createTime: '2024-01-01T00:00:00Z',
+    updateTime: '2024-01-16T14:30:00Z'
+  }
+  
+  contentCategories[categoryIndex].moderators.push(newModerator)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: null
+  })
+})
+
+// 移除版主API
+app.delete('/api/content/categories/:id/moderators/:userId', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  const userId = parseInt(req.params.userId)
+  console.log(`👥 Remove moderator requested - Category: ${categoryId}, User: ${userId}`)
+  
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === categoryId)
+  if (categoryIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: null
+    })
+  }
+  
+  const moderatorIndex = contentCategories[categoryIndex].moderators.findIndex(mod => mod.id === userId)
+  if (moderatorIndex === -1) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Moderator not found',
+      data: null
+    })
+  }
+  
+  contentCategories[categoryIndex].moderators.splice(moderatorIndex, 1)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: null
+  })
+})
+
+// 获取版主列表API
+app.get('/api/content/categories/:id/moderators', (req, res) => {
+  const categoryId = parseInt(req.params.id)
+  console.log(`👥 Get moderators requested for category: ${categoryId}`)
+  
+  const category = contentCategories.find(cat => cat.id === categoryId)
+  if (!category) {
+    return res.status(404).json({
+      code: 404,
+      message: 'Category not found',
+      data: []
+    })
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: category.moderators
+  })
+})
+
+// 模拟标签数据
+const mockPostTags = [
+  {
+    id: 1,
+    name: '技术交流',
+    code: 'tech',
+    parentId: 0,
+    level: 1,
+    sortOrder: 1,
+    isActive: true,
+    description: '技术相关讨论',
+    icon: 'el-icon-cpu',
+    color: '#409eff',
+    createTime: '2023-01-01T00:00:00.000Z',
+    updateTime: '2023-01-01T00:00:00.000Z',
+    postCount: 156,
+    childCount: 3,
+    children: [
+      {
+        id: 2,
+        name: '前端开发',
+        code: 'frontend',
+        parentId: 1,
+        level: 2,
+        sortOrder: 1,
+        isActive: true,
+        description: '前端技术讨论',
+        icon: 'el-icon-monitor',
+        color: '#67c23a',
+        createTime: '2023-01-01T00:00:00.000Z',
+        postCount: 89,
+        childCount: 2,
+        children: [
+          {
+            id: 3,
+            name: 'Vue.js',
+            code: 'vue',
+            parentId: 2,
+            level: 3,
+            sortOrder: 1,
+            isActive: true,
+            description: 'Vue.js框架相关',
+            createTime: '2023-01-01T00:00:00.000Z',
+            postCount: 45,
+            childCount: 0
+          },
+          {
+            id: 4,
+            name: 'React',
+            code: 'react',
+            parentId: 2,
+            level: 3,
+            sortOrder: 2,
+            isActive: true,
+            description: 'React框架相关',
+            createTime: '2023-01-01T00:00:00.000Z',
+            postCount: 32,
+            childCount: 0
+          }
+        ]
+      },
+      {
+        id: 5,
+        name: '后端开发',
+        code: 'backend',
+        parentId: 1,
+        level: 2,
+        sortOrder: 2,
+        isActive: true,
+        description: '后端技术讨论',
+        createTime: '2023-01-01T00:00:00.000Z',
+        postCount: 67,
+        childCount: 1,
+        children: [
+          {
+            id: 6,
+            name: 'Node.js',
+            code: 'nodejs',
+            parentId: 5,
+            level: 3,
+            sortOrder: 1,
+            isActive: true,
+            description: 'Node.js相关',
+            createTime: '2023-01-01T00:00:00.000Z',
+            postCount: 28,
+            childCount: 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 7,
+    name: '产品讨论',
+    code: 'product',
+    parentId: 0,
+    level: 1,
+    sortOrder: 2,
+    isActive: true,
+    description: '产品设计和需求讨论',
+    createTime: '2023-01-02T00:00:00.000Z',
+    postCount: 78,
+    childCount: 2,
+    children: [
+      {
+        id: 8,
+        name: 'UI设计',
+        code: 'ui-design',
+        parentId: 7,
+        level: 2,
+        sortOrder: 1,
+        isActive: true,
+        description: '用户界面设计',
+        createTime: '2023-01-02T00:00:00.000Z',
+        postCount: 34,
+        childCount: 0
+      },
+      {
+        id: 9,
+        name: '用户体验',
+        code: 'ux',
+        parentId: 7,
+        level: 2,
+        sortOrder: 2,
+        isActive: true,
+        description: '用户体验设计',
+        createTime: '2023-01-02T00:00:00.000Z',
+        postCount: 44,
+        childCount: 0
+      }
+    ]
+  }
+]
+
+// 获取标签树结构
+app.get('/api/post-tags/tree', (req, res) => {
+  console.log('🏷️ Post tags tree requested')
+  res.json({
+    code: 200,
+    message: 'success',
+    data: mockPostTags
+  })
+})
+
+// 获取级联选择器数据
+app.get('/api/post-tags/cascader', (req, res) => {
+  console.log('📋 Post tags cascader options requested')
+  
+  function convertToCascaderOption(tag) {
+    return {
+      value: tag.id,
+      label: tag.name,
+      level: tag.level,
+      disabled: !tag.isActive,
+      children: tag.children ? tag.children.map(convertToCascaderOption) : undefined
+    }
+  }
+  
+  const cascaderOptions = mockPostTags.map(convertToCascaderOption)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: cascaderOptions
+  })
+})
+
+// 获取标签统计信息
+app.get('/api/post-tags/stats', (req, res) => {
+  console.log('📊 Post tags stats requested')
+  
+  let totalTags = 0
+  let level1Count = 0
+  let level2Count = 0
+  let level3Count = 0
+  let activeTags = 0
+  let totalPosts = 0
+  const popularTags = []
+  
+  function countTags(tags) {
+    tags.forEach(tag => {
+      totalTags++
+      if (tag.level === 1) level1Count++
+      else if (tag.level === 2) level2Count++
+      else if (tag.level === 3) level3Count++
+      
+      if (tag.isActive) activeTags++
+      totalPosts += tag.postCount || 0
+      
+      if (tag.postCount > 30) {
+        popularTags.push({
+          id: tag.id,
+          name: tag.name,
+          postCount: tag.postCount,
+          level: tag.level
+        })
+      }
+      
+      if (tag.children) {
+        countTags(tag.children)
+      }
+    })
+  }
+  
+  countTags(mockPostTags)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      totalTags,
+      level1Count,
+      level2Count,
+      level3Count,
+      activeTags,
+      totalPosts,
+      avgPostsPerTag: totalTags > 0 ? (totalPosts / totalTags).toFixed(1) : 0,
+      popularTags: popularTags.slice(0, 10)
+    }
+  })
+})
+
+// 获取标签列表（分页）
+app.get('/api/post-tags', (req, res) => {
+  console.log('🏷️ Post tags list requested', req.query)
+  const { page = 1, pageSize = 20, keyword = '', level, isActive, parentId } = req.query
+  
+  // 扁平化标签数据
+  function flattenTags(tags) {
+    let result = []
+    tags.forEach(tag => {
+      result.push(tag)
+      if (tag.children) {
+        result = result.concat(flattenTags(tag.children))
+      }
+    })
+    return result
+  }
+  
+  let allTags = flattenTags(mockPostTags)
+  
+  // 过滤
+  if (keyword) {
+    allTags = allTags.filter(tag => tag.name.includes(keyword) || tag.code.includes(keyword))
+  }
+  if (level) {
+    allTags = allTags.filter(tag => tag.level === parseInt(level))
+  }
+  if (isActive !== undefined) {
+    allTags = allTags.filter(tag => tag.isActive === (isActive === 'true'))
+  }
+  if (parentId !== undefined) {
+    allTags = allTags.filter(tag => tag.parentId === parseInt(parentId))
+  }
+  
+  const total = allTags.length
+  const startIndex = (parseInt(page) - 1) * parseInt(pageSize)
+  const endIndex = startIndex + parseInt(pageSize)
+  const pageData = allTags.slice(startIndex, endIndex)
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      list: pageData,
+      total
+    }
+  })
+})
+
+// 创建标签
+app.post('/api/post-tags', (req, res) => {
+  console.log('✨ Create post tag requested', req.body)
+  const { name, code, parentId, level, sortOrder, isActive, description, icon, color } = req.body
+  
+  const newTag = {
+    id: Date.now(),
+    name,
+    code,
+    parentId: parentId || 0,
+    level: level || 1,
+    sortOrder: sortOrder || 0,
+    isActive: isActive !== undefined ? isActive : true,
+    description: description || '',
+    icon: icon || '',
+    color: color || '',
+    createTime: new Date().toISOString(),
+    updateTime: new Date().toISOString(),
+    postCount: 0,
+    childCount: 0,
+    children: []
+  }
+  
+  res.json({
+    code: 200,
+    message: '标签创建成功',
+    data: newTag
+  })
+})
+
+// 更新标签
+app.put('/api/post-tags/:id', (req, res) => {
+  console.log('📝 Update post tag requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  
+  res.json({
+    code: 200,
+    message: '标签更新成功',
+    data: { id, ...req.body, updateTime: new Date().toISOString() }
+  })
+})
+
+// 删除标签
+app.delete('/api/post-tags/:id', (req, res) => {
+  console.log('🗑️ Delete post tag requested', req.params.id)
+  const id = parseInt(req.params.id)
+  
+  res.json({
+    code: 200,
+    message: '标签删除成功',
+    data: null
+  })
+})
+
+// 搜索标签
+app.get('/api/post-tags/search', (req, res) => {
+  console.log('🔍 Search post tags requested', req.query)
+  const { keyword = '', limit = 20 } = req.query
+  
+  function flattenTags(tags) {
+    let result = []
+    tags.forEach(tag => {
+      result.push(tag)
+      if (tag.children) {
+        result = result.concat(flattenTags(tag.children))
+      }
+    })
+    return result
+  }
+  
+  let allTags = flattenTags(mockPostTags)
+  
+  if (keyword) {
+    allTags = allTags.filter(tag => 
+      tag.name.includes(keyword) || 
+      tag.code.includes(keyword) || 
+      (tag.description && tag.description.includes(keyword))
+    )
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: allTags.slice(0, parseInt(limit))
+  })
+})
+
+// 批量操作
+app.post('/api/post-tags/batch', (req, res) => {
+  console.log('📦 Batch operation on post tags requested', req.body)
+  const { action, tagIds, targetParentId } = req.body
+  
+  res.json({
+    code: 200,
+    message: '批量操作成功',
+    data: {
+      successCount: tagIds.length,
+      failCount: 0,
+      errors: []
+    }
+  })
+})
+
+// 推荐标签
+app.post('/api/post-tags/recommend', (req, res) => {
+  console.log('🤖 Recommend tags requested', req.body)
+  const { content, limit = 5 } = req.body
+  
+  // 简单的推荐逻辑
+  function flattenTags(tags) {
+    let result = []
+    tags.forEach(tag => {
+      result.push(tag)
+      if (tag.children) {
+        result = result.concat(flattenTags(tag.children))
+      }
+    })
+    return result
+  }
+  
+  let allTags = flattenTags(mockPostTags)
+  
+  // 模拟推荐算法：根据内容关键词匹配
+  const recommendedTags = allTags
+    .filter(tag => tag.isActive)
+    .sort(() => Math.random() - 0.5) // 随机排序模拟推荐
+    .slice(0, parseInt(limit))
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: recommendedTags
+  })
+})
+
+// ===== 内容管理API (处理content相关404) =====
+
+// 获取部门树结构
+app.get('/api/departments/tree', (req, res) => {
+  console.log('🌳 Department tree requested')
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: departmentTree
+  })
+})
+
+// ===== 新版API路径（不带/api前缀） =====
+// 这些路径将通过Vite代理访问
+
+// 获取部门树结构 - 新路径
+app.get('/departments/tree', (req, res) => {
+  console.log('🌳 Department tree requested (new path)')
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: departmentTree
+  })
+})
+
+// 获取内容版块列表 - 新路径
+app.get('/content/categories', (req, res) => {
+  console.log('📂 Content categories requested (new path)', req.query)
+  
+  const mockCategories = contentCategories
+  
+  const stats = {
+    total: mockCategories.length,
+    active: mockCategories.filter(cat => cat.isActive).length,
+    totalPosts: mockCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: mockCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: mockCategories,
+      stats
+    }
+  })
+})
+
+// 获取版块详情 - 新路径
+app.get('/content/categories/:id', (req, res) => {
+  console.log('📋 Content category detail requested (new path)', req.params.id)
+  const id = parseInt(req.params.id)
+  
+  const category = contentCategories.find(cat => cat.id === id)
+  if (!category) {
+    return res.json({
+      code: 404,
+      message: '版块不存在',
+      data: null
+    })
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: category
+  })
+})
+
+// 获取版块最新帖子 - 新路径
+app.get('/content/categories/:id/latest-posts', (req, res) => {
+  console.log('📝 Latest posts requested for category (new path)', req.params.id)
+  const id = parseInt(req.params.id)
+  const { limit = 5 } = req.query
+  
+  const latestPosts = [
+    {
+      id: 1,
+      title: '最新技术分享：Vue 3.4 新特性详解',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 2,
+      title: '实用开发技巧：TypeScript 高级类型应用',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 3,
+      title: '性能优化实战：前端bundle大小优化',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 4,
+      title: '工程化实践：monorepo项目管理',
+      createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 5,
+      title: '架构设计：微前端解决方案对比',
+      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: latestPosts.slice(0, parseInt(limit))
+  })
+})
+
+// ===== 兼容旧版API路径 =====
+// 旧版categories API重定向到新版content/categories
+app.get('/api/categories', (req, res) => {
+  console.log('📂 Legacy categories API redirected to content/categories', req.query)
+  
+  // 模拟版块数据
+  const mockCategories = contentCategories
+  
+  // 计算统计数据
+  const stats = {
+    total: mockCategories.length,
+    active: mockCategories.filter(cat => cat.isActive).length,
+    totalPosts: mockCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: mockCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: mockCategories,
+      stats
+    }
+  })
+})
+
+// 旧版categories/:id/latest-posts API
+app.get('/api/categories/:id/latest-posts', (req, res) => {
+  console.log('📝 Legacy latest posts API redirected', req.params.id)
+  const id = parseInt(req.params.id)
+  const { limit = 5 } = req.query
+  
+  // 模拟最新帖子数据
+  const latestPosts = [
+    {
+      id: 1,
+      title: '最新技术分享：Vue 3.4 新特性详解',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 2,
+      title: '实用开发技巧：TypeScript 高级类型应用',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 3,
+      title: '性能优化实战：前端bundle大小优化',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 4,
+      title: '工程化实践：monorepo项目管理',
+      createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 5,
+      title: '架构设计：微前端解决方案对比',
+      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: latestPosts.slice(0, parseInt(limit))
+  })
+})
+
+// 获取内容版块列表 - 简化版本
+app.get('/api/content/categories', (req, res) => {
+  console.log('📂 Content categories requested', req.query)
+  
+  // 模拟版块数据
+  const mockCategories = contentCategories
+  
+  // 计算统计数据
+  const stats = {
+    total: mockCategories.length,
+    active: mockCategories.filter(cat => cat.isActive).length,
+    totalPosts: mockCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: mockCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: mockCategories,
+      stats
+    }
+  })
+})
+
+// ======================== 内容版块管理 APIs ========================
+// 使用之前声明的contentCategories变量
+
+// 获取内容版块列表
+app.get('/api/content/categories', (req, res) => {
+  console.log('📂 Content categories requested', req.query)
+  const { module } = req.query
+  
+  let filteredCategories = [...contentCategories]
+  
+  // 如果指定了模块，过滤相关版块
+  if (module) {
+    // 这里可以根据模块进行过滤，目前返回所有
+  }
+  
+  // 计算统计数据
+  const stats = {
+    total: filteredCategories.length,
+    active: filteredCategories.filter(cat => cat.isActive).length,
+    totalPosts: filteredCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: filteredCategories.reduce((sum, cat) => sum + cat.moderators.length, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: {
+      categories: filteredCategories,
+      stats
+    }
+  })
+})
+
+// 获取版块统计信息
+app.get('/api/content/categories/stats', (req, res) => {
+  console.log('📊 Content categories stats requested')
+  
+  const stats = {
+    total: contentCategories.length,
+    active: contentCategories.filter(cat => cat.isActive).length,
+    totalPosts: contentCategories.reduce((sum, cat) => sum + cat.postCount, 0),
+    moderators: contentCategories.reduce((sum, cat) => sum + cat.moderators.length, 0),
+    todayPosts: contentCategories.reduce((sum, cat) => sum + cat.todayPosts, 0)
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: stats
+  })
+})
+
+// 获取版块详情
+app.get('/api/content/categories/:id', (req, res) => {
+  console.log('📋 Content category detail requested', req.params.id)
+  const id = parseInt(req.params.id)
+  
+  const category = contentCategories.find(cat => cat.id === id)
+  if (!category) {
+    return res.json({
+      code: 404,
+      message: '版块不存在',
+      data: null
+    })
+  }
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: category
+  })
+})
+
+// 获取版块最新帖子
+app.get('/api/content/categories/:id/latest-posts', (req, res) => {
+  console.log('📝 Latest posts requested for category', req.params.id)
+  const id = parseInt(req.params.id)
+  const { limit = 5 } = req.query
+  
+  // 模拟最新帖子数据
+  const latestPosts = [
+    {
+      id: 1,
+      title: '最新技术分享：Vue 3.4 新特性详解',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 2,
+      title: '实用开发技巧：TypeScript 高级类型应用',
+      createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 3,
+      title: '性能优化实战：前端bundle大小优化',
+      createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 4,
+      title: '工程化实践：monorepo项目管理',
+      createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 5,
+      title: '架构设计：微前端解决方案对比',
+      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+  
+  res.json({
+    code: 200,
+    message: 'success',
+    data: latestPosts.slice(0, parseInt(limit))
+  })
+})
+
+// 创建版块
+app.post('/api/content/categories', (req, res) => {
+  console.log('➕ Create content category requested', req.body)
+  const { name, code, description, icon, sortOrder, isActive, isPublic, auditMode, postPermissions } = req.body
+  
+  const newCategory = {
+    id: Math.max(...contentCategories.map(c => c.id)) + 1,
+    name,
+    code,
+    description: description || '',
+    icon: icon || 'Folder',
+    sortOrder: sortOrder || 99,
+    isActive: isActive !== false,
+    isPublic: isPublic !== false,
+    auditMode: auditMode || 'none',
+    postPermissions: postPermissions || ['all'],
+    postCount: 0,
+    todayPosts: 0,
+    moderators: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+  
+  contentCategories.push(newCategory)
+  
+  res.json({
+    code: 200,
+    message: '版块创建成功',
+    data: newCategory
+  })
+})
+
+// 更新版块
+app.put('/api/content/categories/:id', (req, res) => {
+  console.log('✏️ Update content category requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === id)
+  
+  if (categoryIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '版块不存在',
+      data: null
+    })
+  }
+  
+  contentCategories[categoryIndex] = {
+    ...contentCategories[categoryIndex],
+    ...req.body,
+    updatedAt: new Date().toISOString()
+  }
+  
+  res.json({
+    code: 200,
+    message: '版块更新成功',
+    data: contentCategories[categoryIndex]
+  })
+})
+
+// 删除版块
+app.delete('/api/content/categories/:id', (req, res) => {
+  console.log('🗑️ Delete content category requested', req.params.id)
+  const id = parseInt(req.params.id)
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === id)
+  
+  if (categoryIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '版块不存在',
+      data: null
+    })
+  }
+  
+  contentCategories.splice(categoryIndex, 1)
+  
+  res.json({
+    code: 200,
+    message: '版块删除成功',
+    data: null
+  })
+})
+
+// 版块排序
+app.put('/api/content/categories/sort', (req, res) => {
+  console.log('🔄 Sort content categories requested', req.body)
+  const { categoryIds } = req.body
+  
+  categoryIds.forEach((id, index) => {
+    const categoryIndex = contentCategories.findIndex(cat => cat.id === id)
+    if (categoryIndex !== -1) {
+      contentCategories[categoryIndex].sortOrder = index + 1
+      contentCategories[categoryIndex].updatedAt = new Date().toISOString()
+    }
+  })
+  
+  res.json({
+    code: 200,
+    message: '版块排序成功',
+    data: null
+  })
+})
+
+// 设置版主
+app.put('/api/content/categories/:id/moderators', (req, res) => {
+  console.log('👥 Set category moderators requested', req.params.id, req.body)
+  const id = parseInt(req.params.id)
+  const { moderatorIds } = req.body
+  const categoryIndex = contentCategories.findIndex(cat => cat.id === id)
+  
+  if (categoryIndex === -1) {
+    return res.json({
+      code: 404,
+      message: '版块不存在',
+      data: null
+    })
+  }
+  
+  // 模拟根据ID获取用户信息
+  const mockModerators = moderatorIds.map(id => ({
+    id,
+    username: `user_${id}`,
+    name: `用户${id}`,
+    nickname: `用户${id}`,
+    email: `user${id}@example.com`,
+    department: '技术部',
+    groupId: 1,
+    status: 1,
+    roles: [],
+    createTime: '2024-01-01T00:00:00Z',
+    updateTime: new Date().toISOString()
+  }))
+  
+  contentCategories[categoryIndex].moderators = mockModerators
+  contentCategories[categoryIndex].updatedAt = new Date().toISOString()
+  
+  res.json({
+    code: 200,
+    message: '版主设置成功',
+    data: null
+  })
 })
 
 // 通用错误处理
@@ -2107,9 +4876,52 @@ app.listen(port, () => {
   console.log(`   GET  /api/quotation/statistics`)
   console.log(`   GET  /api/quotation/playlists`)
   console.log(`   GET  /api/quotation/daily-quote/config`)
+  console.log(`   AI Tools Management APIs:`)
+  console.log(`   GET  /api/ai-tools/tags`)
+  console.log(`   GET  /api/ai-tools/tags/all`)
+  console.log(`   POST /api/ai-tools/tags`)
+  console.log(`   PUT  /api/ai-tools/tags/:id`)
+  console.log(`   DELETE /api/ai-tools/tags/:id`)
+  console.log(`   GET  /api/ai-tools/tags/:id/check-delete`)
+  console.log(`   GET  /api/ai-tools`)
+  console.log(`   POST /api/ai-tools`)
+  console.log(`   GET  /api/ai-tools/:id`)
+  console.log(`   PUT  /api/ai-tools/:id`)
+  console.log(`   DELETE /api/ai-tools/:id`)
+  console.log(`   PATCH /api/ai-tools/:id/status`)
+  console.log(`   POST /api/ai-tools/upload/logo`)
+  console.log(`   Portal Configuration APIs:`)
+  console.log(`   GET  /api/portal/navigations`)
+  console.log(`   GET  /api/portal/entry-panels`)
   console.log(`   User Management APIs:`)
   console.log(`   GET  /api/rbac/users`)
   console.log(`   GET  /api/rbac/users/:id`)
+  console.log(`   Feedback Management APIs:`)
+  console.log(`   GET    /api/feedback/list`)
+  console.log(`   GET    /api/feedback/:id`)
+  console.log(`   GET    /api/feedback/statistics`)
+  console.log(`   GET    /api/feedback/processors`)
+  console.log(`   PUT    /api/feedback/:id/assign`)
+  console.log(`   PUT    /api/feedback/:id/status`)
+  console.log(`   PUT    /api/feedback/:id/priority`)
+  console.log(`   POST   /api/feedback/:id/comment`)
+  console.log(`   POST   /api/feedback/:id/reply`)
+  console.log(`   GET    /api/feedback/attachment/:id/download`)
+  console.log(`   News Management APIs:`)
+  console.log(`   GET  /api/news/articles/stats`)
+  console.log(`   GET  /api/news/articles`)
+  console.log(`   GET  /api/news/sources`)
+  console.log(`   Post Tags Management APIs:`)
+  console.log(`   GET  /api/post-tags/tree`)
+  console.log(`   GET  /api/post-tags/cascader`)
+  console.log(`   GET  /api/post-tags/stats`)
+  console.log(`   GET  /api/post-tags`)
+  console.log(`   POST /api/post-tags`)
+  console.log(`   PUT  /api/post-tags/:id`)
+  console.log(`   DELETE /api/post-tags/:id`)
+  console.log(`   GET  /api/post-tags/search`)
+  console.log(`   POST /api/post-tags/batch`)
+  console.log(`   POST /api/post-tags/recommend`)
   console.log(`   Utility APIs:`)
   console.log(`   GET  /api/placeholder/:width/:height`)
 })

@@ -159,18 +159,7 @@ export function useMenuFilter() {
       return filterHiddenMenuItems(allMenus)
     }
 
-    console.log('=== 菜单过滤调试信息 ===')
-    console.log('当前用户角色:', currentRole)
-    console.log('原始菜单数量:', allMenus.length)
-    console.log('角色可访问的顶级菜单:', ROLE_MENU_ACCESS[currentRole])
-
     const filtered = filterMenuItems(allMenus, currentRole)
-
-    console.log('过滤后菜单数量:', filtered.length)
-    console.log(
-      '过滤后菜单:',
-      filtered.map(m => ({ name: m.name, path: m.path }))
-    )
 
     return filtered
   })

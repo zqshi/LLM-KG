@@ -145,6 +145,8 @@ function getRoutePermission(path: string): string | undefined {
     '/content/dashboard': 'content:view',
     '/content/list': 'content:view',
     '/content/categories': 'content:category:view',
+
+    '/content/feature-requests': 'content:feature:review',
     '/rbac/organizations': 'rbac:org:view',
     '/rbac/users': 'rbac:user:view',
     '/rbac/roles': 'rbac:role:view',

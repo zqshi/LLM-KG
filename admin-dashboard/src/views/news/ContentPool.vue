@@ -1,13 +1,17 @@
 <template>
   <div class="content-pool">
     <UnifiedPageHeader 
-      title="资讯审核中心" 
-      description="审核待发布资讯内容，管理资讯质量和发布流程"
+      title="资讯内容池" 
+      description="管理所有资讯内容，支持手动创建和审核发布"
     >
       <template #actions>
-        <el-button type="primary" @click="refreshList">
+        <el-button type="info" @click="refreshList">
           <el-icon><Refresh /></el-icon>
           刷新列表
+        </el-button>
+        <el-button type="primary" @click="createNews">
+          <el-icon><Plus /></el-icon>
+          创建资讯
         </el-button>
         <el-button type="success" @click="batchApprove" :disabled="selectedArticles.length === 0">
           <el-icon><Check /></el-icon>
@@ -280,14 +284,14 @@
               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="原文链接">
-              <el-link :href="selectedArticle.originalUrl" type="primary" target="_blank">查看原文</el-link>
+              <el-link :href="selectedArticle.sourceUrl" type="primary" target="_blank">查看原文</el-link>
             </el-descriptions-item>
           </el-descriptions>
         </div>
         
         <div class="preview-content">
           <h3>文章内容</h3>
-          <div class="content-text" v-html="selectedArticle.content"></div>
+          <div class="content-text" v-html="selectedArticle.cleanContent || selectedArticle.content"></div>
         </div>
 
         <div class="preview-tags">
@@ -343,6 +347,19 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 创建资讯对话框 -->
+    <CreateNewsDialog
+      v-model="createDialogVisible"
+      @created="handleNewsCreated"
+    />
+
+    <!-- 编辑资讯对话框 -->
+    <EditNewsDialog
+      v-model="editDialogVisible"
+      :article-id="editingArticleId"
+      @updated="handleNewsUpdated"
+    />
   </div>
 </template>
 
@@ -354,46 +371,31 @@ import {
   Check, 
   Close, 
   Search, 
-  Warning 
+  Warning,
+  Plus 
 } from '@element-plus/icons-vue'
 import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
+import CreateNewsDialog from './components/CreateNewsDialog.vue'
+import EditNewsDialog from './components/EditNewsDialog.vue'
+import { useNewsStore } from '@/stores/news'
+import type { NewsArticle, NewsSource, NewsQueryParams } from '@/types'
 
-interface NewsArticle {
-  id: number
-  title: string
-  content: string
-  sourceId: number
-  sourceName: string
-  sourceType: 'rss' | 'api' | 'crawler'
-  originalUrl: string
-  category: string
-  autoTags: string[]
-  status: 'pending' | 'approved' | 'rejected'
-  fetchTime: string
-  qualityScore: number
-  isDuplicate: boolean
-  similarity?: number
-  duplicateGroupId?: string
-}
-
-interface NewsSource {
-  id: number
-  name: string
-  type: 'rss' | 'api' | 'crawler'
-}
-
-const loading = ref(false)
+const newsStore = useNewsStore()
 const previewVisible = ref(false)
 const rejectDialogVisible = ref(false)
+const createDialogVisible = ref(false)
+const editDialogVisible = ref(false)
 const viewMode = ref<'list' | 'card'>('list')
 const selectedArticle = ref<NewsArticle | null>(null)
 const selectedArticles = ref<NewsArticle[]>([])
 const selectedIds = ref<number[]>([])
+const editingArticleId = ref<number>()
 
-const filterForm = reactive({
+const filterForm = reactive<NewsQueryParams>({
   keyword: '',
-  sourceId: '',
+  sourceId: undefined,
   category: '',
+  status: 'pending',
   duplicateStatus: ''
 })
 
@@ -402,21 +404,12 @@ const rejectForm = reactive({
   note: ''
 })
 
-const pagination = reactive({
-  currentPage: 1,
-  pageSize: 20,
-  total: 0
-})
-
-const stats = reactive({
-  pendingCount: 0,
-  duplicateCount: 0,
-  todayApproved: 0,
-  avgProcessTime: 0
-})
-
-const articleList = ref<NewsArticle[]>([])
-const sourceList = ref<NewsSource[]>([])
+// 使用 store 中的响应式数据
+const loading = computed(() => newsStore.loading)
+const pagination = computed(() => newsStore.pagination)
+const stats = computed(() => newsStore.stats)
+const articleList = computed(() => newsStore.articleList)
+const sourceList = computed(() => newsStore.sourceList)
 
 const getSourceTypeColor = (type: string) => {
   const colorMap: Record<string, string> = {
@@ -432,96 +425,21 @@ const truncateContent = (content: string, maxLength: number) => {
   return content.substring(0, maxLength) + '...'
 }
 
-const fetchStats = async () => {
-  // 模拟API调用
-  Object.assign(stats, {
-    pendingCount: 156,
-    duplicateCount: 23,
-    todayApproved: 89,
-    avgProcessTime: 2.5
-  })
-}
-
-const fetchSources = async () => {
-  sourceList.value = [
-    { id: 1, name: '科技资讯RSS', type: 'rss' },
-    { id: 2, name: '财经API接口', type: 'api' },
-    { id: 3, name: '企业新闻爬虫', type: 'crawler' }
-  ]
-}
-
-const fetchArticleList = async () => {
-  loading.value = true
-  try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
-    const mockArticles: NewsArticle[] = [
-      {
-        id: 1,
-        title: '人工智能技术在金融行业的最新应用进展',
-        content: '随着人工智能技术的快速发展，金融行业正在经历一场深刻的数字化变革。从智能客服到风险控制，从算法交易到个性化投资建议，AI技术正在重塑金融服务的各个环节。本文将详细分析当前AI在金融行业的主要应用场景，以及未来的发展趋势...',
-        sourceId: 1,
-        sourceName: '科技资讯RSS',
-        sourceType: 'rss',
-        originalUrl: 'https://example.com/article/1',
-        category: 'tech',
-        autoTags: ['人工智能', '金融科技', '数字化转型', '机器学习'],
-        status: 'pending',
-        fetchTime: '2024-03-01 14:30:00',
-        qualityScore: 4,
-        isDuplicate: false
-      },
-      {
-        id: 2,
-        title: '央行发布新政策支持小微企业融资',
-        content: '中国人民银行今日发布最新政策文件，旨在进一步支持小微企业融资，降低融资成本。新政策包括定向降准、专项再贷款等多项措施，预计将为小微企业提供更多流动性支持...',
-        sourceId: 2,
-        sourceName: '财经API接口',
-        sourceType: 'api',
-        originalUrl: 'https://example.com/article/2',
-        category: 'policy',
-        autoTags: ['央行政策', '小微企业', '融资', '金融政策'],
-        status: 'pending',
-        fetchTime: '2024-03-01 14:15:00',
-        qualityScore: 5,
-        isDuplicate: true,
-        similarity: 85,
-        duplicateGroupId: 'group_001'
-      },
-      {
-        id: 3,
-        title: '区块链技术在供应链管理中的创新实践',
-        content: '区块链技术因其去中心化、不可篡改的特性，在供应链管理领域展现出巨大潜力。越来越多的企业开始探索区块链在商品溯源、物流跟踪、质量管控等环节的应用...',
-        sourceId: 3,
-        sourceName: '企业新闻爬虫',
-        sourceType: 'crawler',
-        originalUrl: 'https://example.com/article/3',
-        category: 'tech',
-        autoTags: ['区块链', '供应链', '技术创新', '企业管理'],
-        status: 'pending',
-        fetchTime: '2024-03-01 13:45:00',
-        qualityScore: 3,
-        isDuplicate: false
-      }
-    ]
-    
-    articleList.value = mockArticles
-    pagination.total = mockArticles.length
-  } catch (error) {
-    ElMessage.error('获取资讯列表失败')
-  } finally {
-    loading.value = false
-  }
-}
-
 const refreshList = async () => {
   await Promise.all([
-    fetchArticleList(),
-    fetchStats(),
-    fetchSources()
+    newsStore.fetchArticleList(filterForm),
+    newsStore.fetchStats(),
+    newsStore.fetchSourceList()
   ])
   ElMessage.success('列表已刷新')
+}
+
+const createNews = () => {
+  createDialogVisible.value = true
+}
+
+const handleNewsCreated = () => {
+  refreshList()
 }
 
 const handleSelectionChange = (val: NewsArticle[]) => {
@@ -546,10 +464,10 @@ const batchApprove = async () => {
       }
     )
     
-    ElMessage.success(`已审核通过 ${selectedArticles.value.length} 篇资讯`)
+    const ids = selectedArticles.value.map(article => article.id)
+    await newsStore.batchAuditNews(ids, 'approve')
     selectedArticles.value = []
     selectedIds.value = []
-    fetchArticleList()
   } catch {}
 }
 
@@ -565,8 +483,12 @@ const previewArticle = (article: NewsArticle) => {
 }
 
 const editArticle = (article: NewsArticle) => {
-  // 编辑功能将在下一个页面实现
-  ElMessage.info('编辑功能正在开发中')
+  editingArticleId.value = article.id
+  editDialogVisible.value = true
+}
+
+const handleNewsUpdated = () => {
+  refreshList()
 }
 
 const approveArticle = async (article: NewsArticle) => {
@@ -581,8 +503,7 @@ const approveArticle = async (article: NewsArticle) => {
       }
     )
     
-    ElMessage.success('资讯已审核通过')
-    fetchArticleList()
+    await newsStore.auditNews(article.id, 'approve')
   } catch {}
 }
 
@@ -615,54 +536,69 @@ const confirmReject = async () => {
     return
   }
   
-  const targetArticles = selectedArticles.value.length > 0 ? selectedArticles.value : [selectedArticle.value!]
+  const reason = rejectForm.reason === 'other' ? rejectForm.note : rejectForm.reason
   
-  ElMessage.success(`已拒绝 ${targetArticles.length} 篇资讯`)
-  rejectDialogVisible.value = false
-  previewVisible.value = false
-  
-  // 重置表单
-  Object.assign(rejectForm, {
-    reason: '',
-    note: ''
-  })
-  
-  selectedArticles.value = []
-  selectedIds.value = []
-  fetchArticleList()
+  try {
+    if (selectedArticles.value.length > 0) {
+      // 批量拒绝
+      const ids = selectedArticles.value.map(article => article.id)
+      await newsStore.batchAuditNews(ids, 'reject', reason)
+      selectedArticles.value = []
+      selectedIds.value = []
+    } else if (selectedArticle.value) {
+      // 单个拒绝
+      await newsStore.auditNews(selectedArticle.value.id, 'reject', reason)
+    }
+    
+    rejectDialogVisible.value = false
+    previewVisible.value = false
+    
+    // 重置表单
+    Object.assign(rejectForm, {
+      reason: '',
+      note: ''
+    })
+  } catch (error) {
+    console.error('拒绝操作失败:', error)
+  }
 }
 
-const updateCategory = (article: NewsArticle) => {
-  ElMessage.success('分类已更新')
+const updateCategory = async (article: NewsArticle) => {
+  if (article.category) {
+    await newsStore.updateNewsCategory(article.id, article.category)
+  }
 }
 
-const updateQualityScore = (article: NewsArticle) => {
-  ElMessage.success('质量评分已更新')
+const updateQualityScore = async (article: NewsArticle) => {
+  if (article.qualityScore) {
+    await newsStore.updateQualityScore(article.id, article.qualityScore)
+  }
 }
 
 const handleFilter = () => {
-  pagination.currentPage = 1
-  fetchArticleList()
+  newsStore.setPagination(1)
+  newsStore.fetchArticleList(filterForm)
 }
 
 const resetFilter = () => {
   Object.assign(filterForm, {
     keyword: '',
-    sourceId: '',
+    sourceId: undefined,
     category: '',
+    status: 'pending',
     duplicateStatus: ''
   })
   handleFilter()
 }
 
 const handleSizeChange = (size: number) => {
-  pagination.pageSize = size
-  fetchArticleList()
+  newsStore.setPagination(newsStore.pagination.currentPage, size)
+  newsStore.fetchArticleList(filterForm)
 }
 
 const handleCurrentChange = (page: number) => {
-  pagination.currentPage = page
-  fetchArticleList()
+  newsStore.setPagination(page)
+  newsStore.fetchArticleList(filterForm)
 }
 
 onMounted(() => {

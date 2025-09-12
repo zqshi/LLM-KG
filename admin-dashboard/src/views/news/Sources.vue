@@ -108,6 +108,13 @@
           {{ getFrequencyText(row.frequency) }}
         </template>
       </el-table-column>
+      <el-table-column label="审核设置" width="100" align="center">
+        <template #default="{ row }">
+          <el-tag :type="row.requiresReview ? 'warning' : 'success'" size="small">
+            {{ row.requiresReview ? '需要审核' : '自动通过' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" width="140">
         <template #default="{ row }">
           <div class="status-info">
@@ -275,6 +282,11 @@
           <span class="form-tip">开启后将自动过滤重复内容</span>
         </el-form-item>
 
+        <el-form-item label="是否需要审核">
+          <el-switch v-model="sourceForm.requiresReview" />
+          <span class="form-tip">关闭后该资讯源的内容将自动审核通过</span>
+        </el-form-item>
+
         <el-form-item label="自动分类">
           <el-switch v-model="sourceForm.autoCategory" />
           <span class="form-tip">基于AI自动分类识别</span>
@@ -349,37 +361,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Download, Upload, Refresh } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
 import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
-
-interface NewsSource {
-  id: number
-  name: string
-  type: 'rss' | 'api' | 'crawler'
-  url: string
-  frequency: string
-  status: 'active' | 'inactive' | 'error'
-  category: string[]
-  lastFetchTime?: string
-  successRate: number
-  todayFetchCount: number
-  healthScore: number
-  description?: string
-  // API特有属性
-  method?: string
-  headers?: string
-  requestBody?: string
-  // 爬虫特有属性
-  contentSelector?: string
-  titleSelector?: string
-  linkSelector?: string
-  delay?: number
-  // 功能开关
-  autoDedup: boolean
-  autoCategory: boolean
-  // 监控配置
-  alertOnFailure?: boolean
-  maxRetries?: number
-  timeout?: number
-}
+import { newsApi } from '@/api/news'
+import type { NewsSource } from '@/types'
 
 interface LogEntry {
   time: string
@@ -410,6 +393,7 @@ const sourceForm = reactive({
   url: '',
   frequency: '1hour',
   category: [] as string[],
+  requiresReview: true, // 新增字段，默认需要审核
   method: 'GET',
   headers: '',
   requestBody: '',
@@ -531,6 +515,7 @@ const createSource = () => {
     url: '',
     frequency: '1hour',
     category: [],
+    requiresReview: true, // 新增字段
     method: 'GET',
     headers: '',
     requestBody: '',
@@ -554,6 +539,7 @@ const editSource = (source: NewsSource) => {
     url: source.url,
     frequency: source.frequency,
     category: [...source.category],
+    requiresReview: source.requiresReview, // 新增字段
     method: source.method || 'GET',
     headers: source.headers || '',
     requestBody: source.requestBody || '',
@@ -718,6 +704,7 @@ const fetchSourceList = async () => {
         successRate: 95,
         todayFetchCount: 48,
         healthScore: 95,
+        requiresReview: false, // 可信源，无需审核
         autoDedup: true,
         autoCategory: true,
         description: '主流科技媒体RSS订阅',
@@ -739,6 +726,7 @@ const fetchSourceList = async () => {
         healthScore: 88,
         method: 'GET',
         headers: '{"Authorization": "Bearer xxx"}',
+        requiresReview: true, // API源，需要审核
         autoDedup: true,
         autoCategory: false,
         description: '财经资讯API数据源',
@@ -762,6 +750,7 @@ const fetchSourceList = async () => {
         titleSelector: '.title a',
         linkSelector: '.title a',
         delay: 3,
+        requiresReview: true, // 爬虫源，需要审核
         autoDedup: true,
         autoCategory: true,
         description: '企业新闻网站爬虫',

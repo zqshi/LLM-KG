@@ -92,7 +92,7 @@
           <el-menu :default-active="activeMenu" class="el-menu-vertical modern-menu" @select="handleMenuSelect" :collapse="isCollapse"
             background-color="transparent" text-color="var(--color-text-tertiary)" active-text-color="var(--color-primary)" role="menu" aria-label="主导航菜单">
             <template v-for="item in menuList" :key="item.path">
-              <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
+              <el-sub-menu v-if="item.children && item.children.length" :index="item.path || ''">
                 <template #title>
                   <el-tooltip :content="item.name" placement="right" :disabled="!isCollapse">
                     <el-icon>
@@ -101,7 +101,7 @@
                   </el-tooltip>
                   <span>{{ item.name }}</span>
                 </template>
-                <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path">
+                <el-menu-item v-for="child in item.children" :key="child.path" :index="child.path || ''">
                   <el-tooltip :content="child.name" placement="right" :disabled="!isCollapse">
                     <el-icon>
                       <component :is="child.icon || 'Document'" />
@@ -110,7 +110,7 @@
                   <template #title>{{ child.name }}</template>
                 </el-menu-item>
               </el-sub-menu>
-              <el-menu-item v-else :index="item.path">
+              <el-menu-item v-else :index="item.path || ''">
                 <el-tooltip :content="item.name" placement="right" :disabled="!isCollapse">
                   <el-icon>
                     <component :is="item.icon || 'Menu'" />
@@ -145,12 +145,12 @@ import FeedbackWidget from '@/components/FeedbackWidget.vue'
 import {
   Monitor, User, Document, Setting, Tools, FolderOpened,
   House, TrendCharts, Star, MagicStick, ShoppingCart,
-  ChatDotRound, Shield, WarnTriangleFilled, DocumentChecked,
+  ChatDotRound, WarnTriangleFilled, DocumentChecked,
   UserFilled, Lock, View, Fold, Expand, Bell, ArrowDown,
   OfficeBuilding, Key, Avatar, Refresh, Connection, DataBoard,
   Check, Picture, Operation, CircleCheck, DataLine,
   ShoppingBag, Warning, Menu, EditPen, Reading, Sunny, Moon, Search,
-  Grid, Clock
+  Grid, Clock, Collection, Box, PriceTag
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -246,27 +246,28 @@ const iconMapping: Record<string, string> = {
   'Avatar': 'Avatar',
   'Refresh': 'Refresh',
   'Goods': 'ShoppingBag', // 替换不存在的图标
-  'DocumentChecked': 'DocumentChecked'
+  'DocumentChecked': 'DocumentChecked',
+  'Collection': 'Collection',
+  'Box': 'Box',
+  'PriceTag': 'PriceTag'
 }
 
 const menuList = computed(() => {
   try {
-    console.log('=== Layout组件菜单数据详细分析 ===')
-    console.log('用户登录状态:', authStore.isLoggedIn)
-    console.log('用户权限数量:', authStore.permissions.length)
-    console.log('用户角色:', getUserRole.value)
-    console.log('角色显示名称:', getRoleDisplayName(getUserRole.value))
+    // console.log('=== Layout组件菜单数据详细分析 ===')
+    // console.log('用户登录状态:', authStore.isLoggedIn)
+    // console.log('用户权限数量:', authStore.permissions.length)
+    // console.log('用户角色:', getUserRole.value)
+    // console.log('角色显示名称:', getRoleDisplayName(getUserRole.value))
 
     // 使用基于角色过滤后的菜单，并映射图标名称
     const menus = filteredMenus.value.map(menu => {
       const mappedIcon = iconMapping[menu.icon || ''] || 'Menu'
-      console.log(`映射图标: ${menu.icon} -> ${mappedIcon}`)
       return {
         ...menu,
         icon: mappedIcon,
         children: menu.children?.map(child => {
           const childMappedIcon = iconMapping[child.icon || ''] || 'Document'
-          console.log(`子菜单映射图标: ${child.icon} -> ${childMappedIcon}`)
           return {
             ...child,
             icon: childMappedIcon
@@ -274,15 +275,6 @@ const menuList = computed(() => {
         })
       }
     })
-    
-    console.log('过滤后的菜单数量:', menus.length)
-    console.log('过滤后菜单详情:', menus.map(m => ({
-      name: m.name,
-      path: m.path,
-      icon: m.icon,
-      childrenCount: m.children?.length || 0,
-      children: m.children?.map(c => ({ name: c.name, path: c.path, icon: c.icon })) || []
-    })))
 
     return menus
   } catch (error) {

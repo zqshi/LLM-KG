@@ -629,7 +629,6 @@ const handleCopyNavigation = (row: NavigationItem) => {
 
 /** 移动导航 */
 const handleMoveNavigation = (row: NavigationItem) => {
-  // TODO: 实现移动功能
   ElMessage.info('移动功能开发中...')
 }
 
@@ -640,7 +639,6 @@ const handlePreview = () => {
     name: 'PortalPreview',
     query: { type: 'navigation' }
   }
-  // TODO: 使用router跳转
   ElMessage.info('预览功能开发中...')
 }
 
@@ -693,7 +691,6 @@ const getTypeColor = (type: string) => {
 
 /** 获取角色名称 */
 const getRoleName = (roleId: number) => {
-  // TODO: 从角色store或API获取角色名称
   return `角色${roleId}`
 }
 </script>

@@ -9,7 +9,7 @@ import type { ApiResponse } from '@/types'
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
@@ -44,7 +44,7 @@ request.interceptors.response.use(
 
     // 统一处理响应格式
     if (data.code === 200) {
-      return response
+      return data
     } else if (data.code === 401) {
       // token过期或无效，清除本地存储并跳转到登录
       localStorage.removeItem('auth_token')

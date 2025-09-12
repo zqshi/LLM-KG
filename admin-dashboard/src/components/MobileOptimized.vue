@@ -96,8 +96,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Button from '@/components/common/Button.vue'
-// 临时注释掉 useBreakpoints 导入，因为缺少 @vueuse/core 依赖
-// import { useBreakpoints } from '@vueuse/core'
+import { useBreakpoints } from '@vueuse/core'
 
 interface Tab {
   key: string

@@ -447,8 +447,6 @@ const calculateTotalDuration = (item: TrackingItem) => {
   }
 }
 
-// isWorkflowComplete函数现在由UnifiedWorkflowViewer组件处理
-
 const viewWorkflowDiagram = (item: TrackingItem) => {
   const { workflowData, bannerInfo } = transformToWorkflowData(item)
   currentWorkflow.value = workflowData

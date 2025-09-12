@@ -13,30 +13,30 @@
     </UnifiedPageHeader>
 
     <!-- 核心指标卡片 -->
-    <el-row :gutter="20" class="metrics-cards">
+    <el-row :gutter="16" class="stats-row">
       <el-col :span="6">
-        <el-card class="metrics-card" shadow="hover">
-          <div class="card-content">
-            <div class="metrics-icon total">
-              <el-icon size="32"><Document /></el-icon>
+        <el-card class="stats-card" shadow="hover">
+          <div class="stats-content">
+            <div class="stats-icon total">
+              <el-icon><Document /></el-icon>
             </div>
-            <div class="metrics-info">
-              <div class="metrics-number">{{ formatNumber(contentStats.total) }}</div>
-              <div class="metrics-label">内容总数</div>
+            <div class="stats-info">
+              <div class="stats-value">{{ formatNumber(contentStats.total) }}</div>
+              <div class="stats-label">内容总数</div>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="6">
-        <el-card class="metrics-card" shadow="hover">
-          <div class="card-content">
-            <div class="metrics-icon today">
-              <el-icon size="32"><Calendar /></el-icon>
+        <el-card class="stats-card" shadow="hover">
+          <div class="stats-content">
+            <div class="stats-icon today">
+              <el-icon><Calendar /></el-icon>
             </div>
-            <div class="metrics-info">
-              <div class="metrics-number">{{ contentStats.today }}</div>
-              <div class="metrics-label">今日新增</div>
+            <div class="stats-info">
+              <div class="stats-value">{{ contentStats.today }}</div>
+              <div class="stats-label">今日新增</div>
             </div>
           </div>
         </el-card>
@@ -44,19 +44,19 @@
 
       <el-col :span="6">
         <el-card 
-          class="metrics-card pending-card" 
+          class="stats-card pending-card" 
           shadow="hover"
           @click="goToPendingList"
         >
-          <div class="card-content clickable">
-            <div class="metrics-icon pending">
-              <el-icon size="32"><Clock /></el-icon>
+          <div class="stats-content clickable">
+            <div class="stats-icon pending">
+              <el-icon><Clock /></el-icon>
             </div>
-            <div class="metrics-info">
-              <div class="metrics-number">{{ contentStats.pending }}</div>
-              <div class="metrics-label">待审数量</div>
+            <div class="stats-info">
+              <div class="stats-value">{{ contentStats.pending }}</div>
+              <div class="stats-label">待审数量</div>
             </div>
-            <div class="card-action">
+            <div class="stats-action">
               <el-icon><ArrowRight /></el-icon>
             </div>
           </div>
@@ -64,14 +64,14 @@
       </el-col>
 
       <el-col :span="6">
-        <el-card class="metrics-card" shadow="hover">
-          <div class="card-content">
-            <div class="metrics-icon week">
-              <el-icon size="32"><TrendCharts /></el-icon>
+        <el-card class="stats-card" shadow="hover">
+          <div class="stats-content">
+            <div class="stats-icon week">
+              <el-icon><TrendCharts /></el-icon>
             </div>
-            <div class="metrics-info">
-              <div class="metrics-number">{{ contentStats.thisWeek }}</div>
-              <div class="metrics-label">本周互动量</div>
+            <div class="stats-info">
+              <div class="stats-value">{{ contentStats.thisWeek }}</div>
+              <div class="stats-label">本周互动量</div>
             </div>
           </div>
         </el-card>
@@ -225,7 +225,7 @@ import { useContentStore } from '@/stores/content'
 import type { ContentPreview } from '@/types'
 import {
   Refresh, Document, Calendar, Clock, TrendCharts, ArrowRight,
-  ArrowDown, View, Star, Notebook, ChatDotRound, Newspaper,
+  ArrowDown, View, Star, Notebook, ChatDotRound,
   ShoppingCart, ChatDotSquare, House
 } from '@element-plus/icons-vue'
 
@@ -316,7 +316,7 @@ const moduleStats = computed(() => {
       key: 'news',
       name: '资讯',
       count: stats.news,
-      icon: 'Newspaper',
+      icon: 'Document',
       color: '#E6A23C'
     },
     {
@@ -360,8 +360,8 @@ const getTypeName = (type: string): string => {
   return typeMap[type] || type
 }
 
-const getTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
+const getTypeColor = (type: string): 'primary' | 'success' | 'info' | 'warning' | 'danger' => {
+  const colorMap: Record<string, 'primary' | 'success' | 'info' | 'warning' | 'danger'> = {
     article: 'primary',
     post: 'success',
     comment: 'info',
@@ -436,79 +436,113 @@ onMounted(() => {
   margin: 0;
 }
 
-.metrics-cards {
+.stats-row {
   margin-bottom: 20px;
 }
 
-.metrics-card {
-  height: 120px;
+.stats-card {
+  min-height: 80px;
+  cursor: pointer;
   transition: all 0.3s ease;
-}
 
-.metrics-card:hover {
-  transform: translateY(-2px);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .stats-content {
+    display: flex;
+    align-items: center;
+    min-height: 80px;
+    position: relative;
+
+    &.clickable {
+      cursor: pointer;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 4px;
+      }
+    }
+  }
+
+  .stats-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    color: #fff;
+    font-size: 20px;
+
+    &.total {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    &.today {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+
+    &.pending {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    &.week {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+  }
+
+  .stats-info {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .stats-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+    line-height: 1;
+  }
+
+  .stats-label {
+    color: var(--el-text-color-secondary);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  .stats-action {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--el-text-color-secondary);
+    transition: all 0.2s;
+    
+    .el-icon {
+      font-size: 16px;
+    }
+  }
 }
 
 .pending-card {
   cursor: pointer;
-}
-
-.card-content {
-  display: flex;
-  align-items: center;
-  height: 88px;
-  position: relative;
-}
-
-.card-content.clickable:hover {
-  background-color: #f5f7fa;
-}
-
-.metrics-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-  color: #fff;
-}
-
-.metrics-icon.total {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.metrics-icon.today {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.metrics-icon.pending {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.metrics-icon.week {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-}
-
-.metrics-number {
-  font-size: 28px;
-  font-weight: 600;
-  color: #303133;
-  line-height: 1;
-}
-
-.metrics-label {
-  color: #909399;
-  font-size: 14px;
-  margin-top: 4px;
-}
-
-.card-action {
-  position: absolute;
-  right: 16px;
-  color: #909399;
-  font-size: 20px;
+  
+  &:hover {
+    .stats-content {
+      background: linear-gradient(135deg, rgba(240, 147, 251, 0.08) 0%, rgba(245, 87, 108, 0.08) 100%);
+    }
+    
+    .stats-action {
+      color: var(--el-color-primary);
+      transform: translateY(-50%) translateX(2px);
+    }
+  }
+  
+  &:active {
+    transform: translateY(-1px);
+  }
 }
 
 .content-section {
@@ -653,36 +687,69 @@ onMounted(() => {
 
 .module-stats-card {
   margin-bottom: 20px;
+  
+  .el-row {
+    margin: 0;
+  }
+  
+  .el-col {
+    padding: 0 8px;
+  }
 }
 
 .module-item {
   display: flex;
   align-items: center;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.module-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #e4e7ed;
+  height: 80px;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: #c0c4cc;
+  }
 }
 
 .module-icon {
+  width: 40px;
+  height: 40px;
   margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  flex-shrink: 0;
+  
+  .el-icon {
+    font-size: 20px !important;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.module-info {
+  flex: 1;
+  overflow: hidden;
 }
 
 .module-name {
-  font-size: 14px;
-  color: #606266;
+  font-size: 13px;
+  color: var(--el-text-color-regular);
   margin-bottom: 4px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .module-count {
-  font-size: 20px;
-  font-weight: 600;
-  color: #303133;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--el-text-color-primary);
+  line-height: 1;
 }
 
 .preview-content {
@@ -736,5 +803,66 @@ onMounted(() => {
 
 .preview-loading {
   padding: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .stats-row .el-col {
+    width: 50% !important;
+    max-width: 50% !important;
+    flex: 0 0 50% !important;
+    margin-bottom: 16px;
+  }
+  
+  .module-stats-card {
+    .el-col {
+      margin-bottom: 12px;
+    }
+  }
+  
+  .module-item {
+    height: 70px;
+    padding: 12px;
+    
+    .module-icon {
+      width: 36px;
+      height: 36px;
+      
+      .el-icon {
+        font-size: 16px !important;
+        width: 16px;
+        height: 16px;
+      }
+    }
+    
+    .module-name {
+      font-size: 12px;
+    }
+    
+    .module-count {
+      font-size: 18px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-row .el-col {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin-bottom: 12px;
+  }
+  
+  .module-stats-card {
+    .el-row {
+      flex-direction: column;
+    }
+    
+    .el-col {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 0 0 100% !important;
+      margin-bottom: 8px;
+    }
+  }
 }
 </style>

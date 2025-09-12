@@ -94,12 +94,12 @@ export default defineConfig({
     cors: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3010',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false
       },
       '/flea-market': {
-        target: 'http://localhost:3010',
+        target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/flea-market/, '/api/flea-market')

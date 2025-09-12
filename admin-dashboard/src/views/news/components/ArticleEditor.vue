@@ -123,13 +123,13 @@
             <div class="editor-toolbar">
               <el-button-group size="small">
                 <el-button @click="execCommand('bold')">
-                  <el-icon><Bold /></el-icon>
+                  <el-icon><EditPen /></el-icon>
                 </el-button>
                 <el-button @click="execCommand('italic')">
-                  <el-icon><Italic /></el-icon>
+                  <el-icon><Edit /></el-icon>
                 </el-button>
                 <el-button @click="execCommand('underline')">
-                  <el-icon><Underline /></el-icon>
+                  <el-icon><Document /></el-icon>
                 </el-button>
               </el-button-group>
               
@@ -343,9 +343,9 @@ import type { FormInstance, FormRules, UploadProps } from 'element-plus'
 import { 
   MagicStick,
   View, 
-  Bold,
-  Italic,
-  Underline,
+  EditPen,
+  Edit,
+  Document,
   Link,
   Picture,
   Grid,

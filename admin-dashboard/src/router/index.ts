@@ -115,16 +115,23 @@ const routes: RouteRecordRaw[] = [
             meta: { title: '编辑内容', hideInMenu: true, permission: 'content:edit' }
           },
           {
-            path: 'create',
-            name: 'ContentCreate',
-            component: () => import('@/views/content/Create.vue'),
-            meta: { title: '创建内容', hideInMenu: true, permission: 'content:create' }
+            path: 'feature-requests',
+            name: 'ContentFeatureRequests',
+            component: () => import('@/views/content/FeatureRequests.vue'),
+            meta: { title: '置顶/加精申请', icon: 'Star', permission: 'content:feature:review' }
           },
+
           {
             path: 'category/:code',
             name: 'ContentCategoryHome',
             component: () => import('@/views/content/Category.vue'),
             meta: { title: '版块专属页', hideInMenu: true, permission: 'content:view' }
+          },
+          {
+            path: 'category/:categoryId/:categoryName',
+            name: 'ContentCategory',
+            component: () => import('@/views/content/Category.vue'),
+            meta: { title: '版块详情', hideInMenu: true, permission: 'content:view' }
           }
         ]
       },
@@ -281,6 +288,38 @@ const routes: RouteRecordRaw[] = [
             name: 'OperationDashboard',
             component: () => import('@/views/operation/Dashboard.vue'),
             meta: { title: '数据看板', icon: 'DataBoard' }
+          },
+          {
+            path: 'ai-tools',
+            name: 'AITools',
+            redirect: '/operation/ai-tools/tools',
+            meta: { title: '工具箱管理', icon: 'Tools' },
+            children: [
+              {
+                path: 'tags',
+                name: 'AIToolTags',
+                component: () => import('@/views/operation/ai-tools/Tags.vue'),
+                meta: { title: '工具标签', icon: 'Collection' }
+              },
+              {
+                path: 'tools',
+                name: 'AIToolsList',
+                component: () => import('@/views/operation/ai-tools/Tools.vue'),
+                meta: { title: '工具列表', icon: 'Box' }
+              }
+            ]
+          },
+          {
+            path: 'feedback',
+            name: 'FeedbackManagement',
+            component: () => import('@/views/operation/feedback/List.vue'),
+            meta: { title: '问题反馈管理', icon: 'ChatDotRound' }
+          },
+          {
+            path: 'feedback/:id',
+            name: 'FeedbackDetail',
+            component: () => import('@/views/operation/feedback/Detail.vue'),
+            meta: { title: '反馈详情', hideInMenu: true }
           }
         ]
       },

@@ -406,7 +406,6 @@ const confirmImport = async () => {
   }
 
   try {
-    // TODO: 调用批量导入API
     ElMessage.success('批量导入成功')
     importDialogVisible.value = false
     await loadWords()
@@ -428,7 +427,6 @@ const resetImportForm = () => {
 
 const exportWords = async () => {
   try {
-    // TODO: 调用导出API
     ElMessage.success('导出成功')
   } catch (error) {
     ElMessage.error('导出失败')

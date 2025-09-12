@@ -34,10 +34,10 @@
               <el-icon><FontSize /></el-icon>
             </el-button>
             <el-button @click="execCommand('italic')">
-              <el-icon><Italic /></el-icon>
+              <el-icon><Edit /></el-icon>
             </el-button>
             <el-button @click="execCommand('underline')">
-              <el-icon><Underline /></el-icon>
+              <el-icon><Document /></el-icon>
             </el-button>
           </el-button-group>
         </div>
@@ -177,7 +177,7 @@
 <script setup lang="ts">
 import { ref, reactive, nextTick, watch, computed } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
-import { FontSize, Italic, Underline } from '@element-plus/icons-vue'
+import { FontSize, Edit, Document } from '@element-plus/icons-vue'
 import type { QuotationForm, User } from '@/types'
 import { useQuotationStore } from '@/stores/quotation'
 import { rbacApi } from '@/api'
