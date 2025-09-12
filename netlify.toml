@@ -1,5 +1,5 @@
 [build]
-  command = "cd admin-dashboard && npm run build"
+  command = "cd admin-dashboard && npm install && npm run build"
   publish = "admin-dashboard/dist"
   base = "/"
 
@@ -8,16 +8,13 @@
   to = "/index.html"
   status = 200
 
-[[redirects]]
-  from = "/api/*"
-  to = "http://localhost:3001/api/:splat"
-  status = 200
-  force = true
-
 [functions]
-  included_files = ["admin-dashboard/dist/**"]
+  node_version = "18"
 
-[dev]
-  command = "cd admin-dashboard && npm run dev"
-  port = 3000
-  targetPort = 3000
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"

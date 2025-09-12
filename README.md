@@ -94,6 +94,37 @@ cd user-portal && npm run build
 cd admin-dashboard && npm run build
 ```
 
+### Netlify 部署
+
+管理后台已经配置好可以通过 Netlify 进行托管演示：
+
+1. 确保已安装 Netlify CLI：
+   ```bash
+   npm install -g netlify-cli
+   ```
+
+2. 登录 Netlify：
+   ```bash
+   netlify login
+   ```
+
+3. 进入管理后台目录并部署：
+   ```bash
+   cd admin-dashboard
+   ./deploy-netlify.sh
+   ```
+
+   或者手动部署：
+   ```bash
+   cd admin-dashboard
+   npm run build
+   netlify deploy --prod
+   ```
+
+4. 部署完成后，Netlify 会提供一个公共 URL 来访问您的演示站点。
+
+注意：由于演示模式已正确配置，访问者可以直接使用"演示模式"按钮进入系统，无需后端服务支持。
+
 ## 许可证
 
 MIT License

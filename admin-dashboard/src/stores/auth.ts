@@ -150,6 +150,10 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const currentUser = computed(() => user.value)
   const hasPermission = computed(() => (permission: string) => {
+    // 演示模式下拥有所有权限
+    if (token.value === 'demo-token') {
+      return true;
+    }
     return permissions.value.includes(permission)
   })
 
@@ -440,11 +444,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查权限
   function checkPermission(permission: string): boolean {
+    // 演示模式下拥有所有权限
+    if (token.value === 'demo-token') {
+      return true;
+    }
     return hasUserPermission(user.value, permission)
   }
 
   // 检查多个权限（AND关系）
   function checkPermissions(perms: string[]): boolean {
+    // 演示模式下拥有所有权限
+    if (token.value === 'demo-token') {
+      return true;
+    }
     // 超级管理员拥有所有权限
     if (isSuperAdmin(user.value)) return true
     return perms.every(perm => hasUserPermission(user.value, perm))
@@ -452,6 +464,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查多个权限（OR关系）
   function checkAnyPermission(perms: string[]): boolean {
+    // 演示模式下拥有所有权限
+    if (token.value === 'demo-token') {
+      return true;
+    }
     // 超级管理员拥有所有权限
     if (isSuperAdmin(user.value)) return true
     return perms.some(perm => hasUserPermission(user.value, perm))

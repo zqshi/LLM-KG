@@ -47,7 +47,9 @@ export function setupRouterGuards(router: Router) {
       
       // 权限检查 - 只对明确设置了权限的路由进行检查
       const permission = to.meta?.permission as string
-      if (permission) {
+      // 演示模式下跳过权限检查
+      
+      if (permission && !isDemoMode) {
         console.log(`检查权限: ${permission}`)
         console.log('用户权限列表:', authStore.permissions)
         
@@ -92,7 +94,7 @@ export function setupRouterGuards(router: Router) {
           console.log('权限检查通过')
         }
       } else {
-        console.log('该路由无需权限检查')
+        console.log('该路由无需权限检查或处于演示模式')
       }
       
       console.log('已登录，权限验证通过，允许访问')
@@ -126,12 +128,21 @@ export function setupRouterGuards(router: Router) {
 // 权限验证函数
 export function hasPermission(permission: string): boolean {
   const authStore = useAuthStore()
+  // 演示模式下拥有所有权限
+  if (authStore.token === 'demo-token') {
+    return true;
+  }
   return authStore.checkPermission(permission)
 }
 
 // 权限验证指令（用于v-permission）
 export function checkPermission(permission: string | string[]): boolean {
   const authStore = useAuthStore()
+  
+  // 演示模式下拥有所有权限
+  if (authStore.token === 'demo-token') {
+    return true;
+  }
   
   if (Array.isArray(permission)) {
     return authStore.checkAnyPermission(permission)
