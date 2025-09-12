@@ -238,10 +238,68 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       console.log('=== 开始初始化Auth状态 ===')
 
+      // 演示模式：如果localStorage中没有登录信息，则自动进入演示模式
+      const storedToken = localStorage.getItem('auth_token')
+      const storedUser = localStorage.getItem('user_info')
+      const storedPermissions = localStorage.getItem('permissions')
+      const storedMenus = localStorage.getItem('menus')
+
+      console.log('存储的token:', storedToken ? '存在' : '不存在')
+      console.log('存储的用户信息:', storedUser ? '存在' : '不存在')
+      console.log('存储的权限信息:', storedPermissions ? '存在' : '不存在')
+      console.log('存储的菜单信息:', storedMenus ? '存在' : '不存在')
+
+      // 如果没有存储的登录信息，进入演示模式
+      if (!storedToken || !storedUser || !storedPermissions) {
+        console.log('未检测到登录信息，进入演示模式')
+        
+        // 设置演示用户信息
+        token.value = 'demo-token'
+        user.value = {
+          id: 1,
+          username: 'demo',
+          name: '演示用户',
+          email: 'demo@example.com',
+          phone: '13800138000',
+          avatar: '',
+          groupId: 1,
+          status: 1,
+          roles: [
+            {
+              id: 1,
+              code: 'demo_user',
+              name: '演示用户',
+              description: '演示用户角色',
+              permissions: [],
+              dataScope: 'all' as any,
+              status: 1,
+              createTime: new Date().toISOString(),
+              updateTime: new Date().toISOString()
+            }
+          ],
+          createTime: new Date().toISOString(),
+          updateTime: new Date().toISOString()
+        }
+        
+        // 设置所有权限（演示模式）
+        permissions.value = SUPER_ADMIN_PERMISSIONS
+        
+        // 设置菜单
+        menus.value = generateDefaultMenus()
+        
+        // 保存到localStorage
+        localStorage.setItem('auth_token', token.value)
+        localStorage.setItem('user_info', JSON.stringify(user.value))
+        localStorage.setItem('permissions', JSON.stringify(permissions.value))
+        localStorage.setItem('menus', JSON.stringify(menus.value))
+        
+        console.log('演示模式初始化完成')
+        return
+      }
+
       // 开发模式自动登录
       if (import.meta.env.DEV) {
         console.log('开发模式：检查是否需要自动登录')
-        const storedToken = localStorage.getItem('auth_token')
         
         // 强制更新菜单数据 - 清除旧的菜单缓存
         console.log('🔄 强制更新菜单数据，清除旧的缓存')
@@ -295,11 +353,6 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       // 强制清除可能损坏的缓存数据
-      const storedToken = localStorage.getItem('auth_token')
-      const storedUser = localStorage.getItem('user_info')
-      const storedPermissions = localStorage.getItem('permissions')
-      const storedMenus = localStorage.getItem('menus')
-
       console.log('存储的token:', storedToken ? '存在' : '不存在')
       console.log('存储的用户信息:', storedUser ? '存在' : '不存在')
       console.log('存储的权限信息:', storedPermissions ? '存在' : '不存在')

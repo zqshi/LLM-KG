@@ -48,6 +48,17 @@
             登录
           </el-button>
         </el-form-item>
+        
+        <el-form-item>
+          <el-button
+            type="success"
+            size="large"
+            style="width: 100%"
+            @click="handleDemoLogin"
+          >
+            演示模式
+          </el-button>
+        </el-form-item>
       </el-form>
       
       <div class="login-footer">
@@ -121,6 +132,29 @@ const handleLogin = async () => {
       }
     }
   })
+}
+
+// 演示模式登录
+const handleDemoLogin = async () => {
+  loading.value = true
+  
+  try {
+    // 清除现有认证信息
+    authStore.logout()
+    
+    // 初始化演示模式
+    authStore.initAuth()
+    
+    ElMessage.success('已进入演示模式')
+    
+    // 跳转到仪表盘
+    router.push('/dashboard')
+  } catch (error) {
+    ElMessage.error('进入演示模式失败')
+    console.error('演示模式登录失败:', error)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -198,12 +232,5 @@ const handleLogin = async () => {
 
 .login-footer {
   text-align: center;
-  color: var(--color-text-tertiary);
-  font-size: 13px;
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background: var(--color-primary-light);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
 }
 </style>

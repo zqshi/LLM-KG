@@ -29,8 +29,11 @@ export function setupRouterGuards(router: Router) {
       // 白名单路由（不需要登录）
       const whiteList = ['/login', '/404', '/']
       
-      if (whiteList.includes(to.path)) {
-        console.log('白名单路由，直接通过')
+      // 演示模式：允许访问所有路由
+      const isDemoMode = authStore.token === 'demo-token';
+      
+      if (whiteList.includes(to.path) || isDemoMode) {
+        console.log(isDemoMode ? '演示模式，直接通过' : '白名单路由，直接通过')
         next()
         return
       }
