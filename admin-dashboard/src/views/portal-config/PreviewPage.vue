@@ -26,8 +26,8 @@
           <el-icon><Refresh /></el-icon>
           刷新预览
         </el-button>
-      </div>
-    </div>
+      </template>
+    </UnifiedPageHeader>
 
     <div class="preview-container">
       <PreviewPanel 

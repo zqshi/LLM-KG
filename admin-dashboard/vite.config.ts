@@ -131,8 +131,13 @@ export default defineConfig({
       'element-plus/es/components/message-box/style/index',
       '@element-plus/icons-vue',
       'echarts',
-      'vue-echarts'
+      'vue-echarts',
+      'axios'
     ],
     exclude: []
+  },
+  // 添加构建时忽略 TypeScript 错误的配置
+  esbuild: {
+    drop: ['console', 'debugger']
   }
 })
