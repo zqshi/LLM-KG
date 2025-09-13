@@ -1,5 +1,5 @@
 [build]
-  command = "cd admin-dashboard && pnpm install --no-frozen-lockfile && pnpm run build"
+  command = "cd admin-dashboard && pnpm install --no-frozen-lockfile --prod=false && pnpm run build"
   publish = "admin-dashboard/dist"
   base = "/"
 

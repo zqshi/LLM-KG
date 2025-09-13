@@ -20,7 +20,7 @@ export VITE_API_BASE_URL=
 
 # 安装依赖
 echo "安装依赖..."
-pnpm install --no-frozen-lockfile
+pnpm install --no-frozen-lockfile --prod=false
 
 # 检查vite是否安装成功
 if ! command -v vite &> /dev/null
