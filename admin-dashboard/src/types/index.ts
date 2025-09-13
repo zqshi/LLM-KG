@@ -1110,17 +1110,7 @@ export interface SensitiveWordCheckResult {
   processedContent?: string
 }
 
-// 审核日志接口
-export interface AuditLog {
-  id: number
-  taskId: string
-  auditorId: number
-  auditorName: string
-  action: 'approve' | 'reject' | 'transfer'
-  reason?: string
-  detail?: string
-  createTime: string
-}
+
 
 // ======================== 审核节点相关类型定义 ========================
 
@@ -1446,8 +1436,9 @@ export type CascaderValue = (string | number)[]
 // 组织架构树节点接口
 export interface OrganizationNode {
   id: string
-  label: string
-  value: string
+  name: string
+  parentId?: string
+  type: 'company' | 'department' | 'team'
   children?: OrganizationNode[]
 }
 

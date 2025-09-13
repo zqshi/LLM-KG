@@ -21,7 +21,7 @@
               <el-icon><Document /></el-icon>
             </div>
             <div class="stats-info">
-              <div class="stats-value">{{ formatNumber(contentStats.total) }}</div>
+              <div class="stats-value">{{ formatNumber(contentStats?.total || 0) }}</div>
               <div class="stats-label">内容总数</div>
             </div>
           </div>
@@ -35,7 +35,7 @@
               <el-icon><Calendar /></el-icon>
             </div>
             <div class="stats-info">
-              <div class="stats-value">{{ contentStats.today }}</div>
+              <div class="stats-value">{{ contentStats?.today || 0 }}</div>
               <div class="stats-label">今日新增</div>
             </div>
           </div>
@@ -53,7 +53,7 @@
               <el-icon><Clock /></el-icon>
             </div>
             <div class="stats-info">
-              <div class="stats-value">{{ contentStats.pending }}</div>
+              <div class="stats-value">{{ contentStats?.pending || 0 }}</div>
               <div class="stats-label">待审数量</div>
             </div>
             <div class="stats-action">
@@ -70,7 +70,7 @@
               <el-icon><TrendCharts /></el-icon>
             </div>
             <div class="stats-info">
-              <div class="stats-value">{{ contentStats.thisWeek }}</div>
+              <div class="stats-value">{{ contentStats?.thisWeek || 0 }}</div>
               <div class="stats-label">本周互动量</div>
             </div>
           </div>
@@ -253,83 +253,83 @@ const hotContentPeriodText = computed(() => {
 })
 
 const typeDistribution = computed(() => {
-  const stats = contentStats.value
+  const stats = contentStats.value || {}
   const total = stats.total || 1
   
   return [
     {
       type: 'article',
       name: '文章',
-      count: stats.articles,
-      percentage: Math.round((stats.articles / total) * 100),
+      count: stats.articles || 0,
+      percentage: Math.round(((stats.articles || 0) / total) * 100),
       color: '#409EFF'
     },
     {
       type: 'post', 
       name: '帖子',
-      count: stats.posts,
-      percentage: Math.round((stats.posts / total) * 100),
+      count: stats.posts || 0,
+      percentage: Math.round(((stats.posts || 0) / total) * 100),
       color: '#67C23A'
     },
     {
       type: 'news',
       name: '资讯',
-      count: stats.news,
-      percentage: Math.round((stats.news / total) * 100),
+      count: stats.news || 0,
+      percentage: Math.round(((stats.news || 0) / total) * 100),
       color: '#E6A23C'
     },
     {
       type: 'goods',
       name: '商品',
-      count: stats.goods,
-      percentage: Math.round((stats.goods / total) * 100),
+      count: stats.goods || 0,
+      percentage: Math.round(((stats.goods || 0) / total) * 100),
       color: '#F56C6C'
     },
     {
       type: 'quote',
       name: '名言',
-      count: stats.quotes,
-      percentage: Math.round((stats.quotes / total) * 100),
+      count: stats.quotes || 0,
+      percentage: Math.round(((stats.quotes || 0) / total) * 100),
       color: '#909399'
     }
   ].filter(item => item.count > 0)
 })
 
 const moduleStats = computed(() => {
-  const stats = contentStats.value
+  const stats = contentStats.value || {}
   return [
     {
       key: 'knowledge',
       name: '知识库',
-      count: stats.articles,
+      count: stats.articles || 0,
       icon: 'Notebook',
       color: '#409EFF'
     },
     {
       key: 'forum',
       name: '论坛',
-      count: stats.posts,
+      count: stats.posts || 0,
       icon: 'ChatDotRound',
       color: '#67C23A'
     },
     {
       key: 'news',
       name: '资讯',
-      count: stats.news,
+      count: stats.news || 0,
       icon: 'Document',
       color: '#E6A23C'
     },
     {
       key: 'flea-market',
       name: '跳蚤市场',
-      count: stats.goods,
+      count: stats.goods || 0,
       icon: 'ShoppingCart',
       color: '#F56C6C'
     },
     {
       key: 'operation',
       name: '运营内容',
-      count: stats.quotes,
+      count: stats.quotes || 0,
       icon: 'House',
       color: '#909399'
     }

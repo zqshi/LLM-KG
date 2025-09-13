@@ -142,8 +142,12 @@ export const apiAdapter = {
             )
             console.log('Paginated data:', paginatedData)
             return successResponse({
-              list: paginatedData.list,
-              total: paginatedData.total
+              items: paginatedData.list,
+              total: paginatedData.total,
+              page: options?.paginationParams?.page || 1,
+              pageSize: options?.paginationParams?.pageSize || 10,
+              hasNext: paginatedData.page < paginatedData.totalPages,
+              hasPrev: paginatedData.page > 1
             } as any)
           }
           // 如果数据是数组
@@ -156,16 +160,24 @@ export const apiAdapter = {
             )
             console.log('Paginated array data:', paginatedData)
             return successResponse({
-              list: paginatedData.list,
-              total: paginatedData.total
+              items: paginatedData.list,
+              total: paginatedData.total,
+              page: options?.paginationParams?.page || 1,
+              pageSize: options?.paginationParams?.pageSize || 10,
+              hasNext: paginatedData.page < paginatedData.totalPages,
+              hasPrev: paginatedData.page > 1
             } as any)
           }
           // 如果数据不是数组也不是分页格式，但需要分页处理，则将其包装为分页格式
           else {
             console.log('Non-array data, returning empty list')
             return successResponse({
-              list: [],
-              total: 0
+              items: [],
+              total: 0,
+              page: 1,
+              pageSize: options?.paginationParams?.pageSize || 10,
+              hasNext: false,
+              hasPrev: false
             } as any)
           }
         }

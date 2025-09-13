@@ -72,8 +72,23 @@ export const useContentStore = defineStore('content', () => {
   const loadStats = async () => {
     try {
       statsLoading.value = true
-      const { data } = await contentApi.getStats()
-      contentStats.value = data
+      const response = await contentApi.getStats()
+      // 确保数据存在再赋值
+      if (response && response.data) {
+        contentStats.value = {
+          total: response.data.total || 0,
+          articles: response.data.articles || 0,
+          posts: response.data.posts || 0,
+          comments: response.data.comments || 0,
+          news: response.data.news || 0,
+          goods: response.data.goods || 0,
+          quotes: response.data.quotes || 0,
+          pending: response.data.pending || 0,
+          today: response.data.today || 0,
+          thisWeek: response.data.thisWeek || 0,
+          thisMonth: response.data.thisMonth || 0
+        }
+      }
     } catch (error) {
       console.error('加载统计数据失败:', error)
       // 检查是否是静态模式下的错误

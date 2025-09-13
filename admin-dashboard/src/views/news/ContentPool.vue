@@ -145,7 +145,7 @@
                 </div>
               </div>
               <div class="article-content">
-                {{ truncateContent(row.content, 100) }}
+                {{ truncateContent(row.cleanContent || row.rawContent, 100) }}
               </div>
               <div class="article-tags" v-if="row.autoTags && row.autoTags.length">
                 <el-tag 
@@ -217,9 +217,8 @@
               <div class="card-content">
                 <div class="card-header">
                   <el-checkbox 
-                    v-model="selectedIds" 
-                    :value="article.id"
-                    @change="updateSelection"
+                    :checked="selectedIds.includes(article.id)"
+                    @change="val => handleArticleSelection(article.id, !!val)"
                   />
                   <el-tag size="small" :type="getSourceTypeColor(article.sourceType)">
                     {{ article.sourceName }}
@@ -227,7 +226,7 @@
                   <span class="fetch-time">{{ article.fetchTime }}</span>
                 </div>
                 <h4 class="card-title" @click="previewArticle(article)">{{ article.title }}</h4>
-                <p class="card-content-text">{{ truncateContent(article.content, 120) }}</p>
+                <p class="card-content-text">{{ truncateContent(article.cleanContent || article.rawContent, 120) }}</p>
                 <div class="card-tags" v-if="article.autoTags && article.autoTags.length">
                   <el-tag 
                     v-for="tag in article.autoTags.slice(0, 2)" 
@@ -291,7 +290,7 @@
         
         <div class="preview-content">
           <h3>文章内容</h3>
-          <div class="content-text" v-html="selectedArticle.cleanContent || selectedArticle.content"></div>
+          <div class="content-text" v-html="selectedArticle.cleanContent || selectedArticle.rawContent"></div>
         </div>
 
         <div class="preview-tags">
@@ -412,16 +411,16 @@ const articleList = computed(() => newsStore.articleList)
 const sourceList = computed(() => newsStore.sourceList)
 
 const getSourceTypeColor = (type: string) => {
-  const colorMap: Record<string, string> = {
+  const colorMap: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     rss: 'primary',
     api: 'success',
     crawler: 'warning'
   }
-  return colorMap[type] || ''
+  return colorMap[type] || 'info'
 }
 
-const truncateContent = (content: string, maxLength: number) => {
-  if (content.length <= maxLength) return content
+const truncateContent = (content: string | undefined, maxLength: number) => {
+  if (!content || content.length <= maxLength) return content || ''
   return content.substring(0, maxLength) + '...'
 }
 
@@ -452,6 +451,17 @@ const updateSelection = () => {
   )
 }
 
+const handleArticleSelection = (id: number, checked: boolean) => {
+  if (checked) {
+    if (!selectedIds.value.includes(id)) {
+      selectedIds.value.push(id)
+    }
+  } else {
+    selectedIds.value = selectedIds.value.filter(item => item !== id)
+  }
+  updateSelection()
+}
+
 const batchApprove = async () => {
   try {
     await ElMessageBox.confirm(
@@ -468,7 +478,9 @@ const batchApprove = async () => {
     await newsStore.batchAuditNews(ids, 'approve')
     selectedArticles.value = []
     selectedIds.value = []
-  } catch {}
+  } catch (error) {
+    console.error('批量审核失败:', error)
+  }
 }
 
 const batchReject = () => {
@@ -504,7 +516,9 @@ const approveArticle = async (article: NewsArticle) => {
     )
     
     await newsStore.auditNews(article.id, 'approve')
-  } catch {}
+  } catch (error) {
+    console.error('审核失败:', error)
+  }
 }
 
 const rejectArticle = (article: NewsArticle) => {

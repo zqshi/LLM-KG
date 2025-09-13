@@ -346,6 +346,15 @@ const refreshData = async () => {
 const loadPollList = async () => {
   loading.value = true
   try {
+    console.log('Loading poll list with params:', {
+      page: currentPage.value,
+      pageSize: pageSize.value,
+      keyword: searchKeyword.value,
+      status: statusFilter.value,
+      categoryId: categoryFilter.value,
+      dateRange: dateRange.value
+    })
+    
     const params: PollQueryParams = {
       page: currentPage.value,
       pageSize: pageSize.value,
@@ -355,17 +364,26 @@ const loadPollList = async () => {
       dateRange: dateRange.value
     }
 
+    console.log('Calling PollAdminAPI.getPollPosts with params:', params)
     const response = await PollAdminAPI.getPollPosts(params)
-    console.log('API Response:', response)
+    console.log('API Response received:', response)
+    
+    // 确保正确处理响应数据
     pollList.value = response.items || []
     total.value = response.total || 0
-    console.log('Poll List:', pollList.value.length, 'items loaded')
+    console.log('Poll List updated:', pollList.value.length, 'items loaded')
+    console.log('Poll List Data:', pollList.value)
   } catch (error: any) {
-    console.error('API 不可用，使用Mock数据:', error)
+    console.error('Failed to load poll list:', error)
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
     // 无论什么错误，都使用mock数据确保页面正常显示
     pollList.value = mockPollList()
     total.value = pollList.value.length
-    console.log('使用Mock数据，加载', pollList.value.length, '条记录')
+    console.log('Using mock data, loaded', pollList.value.length, 'items')
     
     // 只在开发环境下显示提示
     if (process.env.NODE_ENV === 'development') {
@@ -638,7 +656,7 @@ const formatDateTime = (dateTime: string) => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   // 确保统计数据在页面加载时显示
   console.log('Polls页面正在加载，初始化统计数据...')
   
@@ -651,15 +669,16 @@ onMounted(() => {
   })
   
   // 并行加载所有数据
-  Promise.all([
-    loadPollList(),
-    loadCategories(),
-    loadOverviewStats()
-  ]).then(() => {
+  try {
+    await Promise.all([
+      loadPollList(),
+      loadCategories(),
+      loadOverviewStats()
+    ])
     console.log('Polls页面数据加载完成，当前统计数据:', pollStats)
-  }).catch(error => {
+  } catch (error) {
     console.error('页面数据加载过程中发生错误:', error)
-  })
+  }
 })
 </script>
 
@@ -844,4 +863,5 @@ onMounted(() => {
     margin-bottom: 12px;
   }
 }
+
 </style>

@@ -176,7 +176,9 @@ export const useAuditStore = defineStore('audit', () => {
     try {
       const response = await auditTaskApi.getStats()
       // 由于axios响应拦截器返回完整response，需要访问response.data.data
-      Object.assign(dashboardStats, response.data)
+      if (response && response.data) {
+        Object.assign(dashboardStats, response.data)
+      }
     } catch (error) {
       // 检查是否是静态模式下的错误
       const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 

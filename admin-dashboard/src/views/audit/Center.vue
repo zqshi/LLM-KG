@@ -30,11 +30,11 @@
     <el-row :gutter="16" class="dashboard-row">
       <el-col :span="6">
         <StatsCard
-          :value="dashboardStats.pendingTotal"
+          :value="dashboardStats?.pendingTotal || 0"
           label="待审核总量"
           :icon="Clock"
           type="primary"
-          :trend="dashboardStats.todayNew"
+          :trend="dashboardStats?.todayNew || 0"
           trend-label="今日新增"
           trend-type="up"
         />
@@ -42,11 +42,11 @@
 
       <el-col :span="6">
         <StatsCard
-          :value="dashboardStats.todayProcessed"
+          :value="dashboardStats?.todayProcessed || 0"
           label="今日已处理"
           :icon="Check"
           type="info"
-          :trend="dashboardStats.avgProcessTime"
+          :trend="dashboardStats?.avgProcessTime || 0"
           trend-label="平均处理时长"
           trend-type="neutral"
         />
@@ -54,11 +54,11 @@
 
       <el-col :span="6">
         <StatsCard
-          :value="`${dashboardStats.approvalRate}%`"
+          :value="dashboardStats ? `${dashboardStats.approvalRate || 0}%` : '0%'"
           label="审核通过率"
           :icon="CircleCheck"
           type="success"
-          :trend="dashboardStats.todayApproved"
+          :trend="dashboardStats?.todayApproved || 0"
           trend-label="今日通过"
           trend-type="up"
         />
@@ -66,11 +66,11 @@
 
       <el-col :span="6">
         <StatsCard
-          :value="dashboardStats.todayRejected"
+          :value="dashboardStats?.todayRejected || 0"
           label="今日拒绝"
           :icon="Close"
           type="danger"
-          :trend="dashboardStats.rejectionRate"
+          :trend="dashboardStats?.rejectionRate || 0"
           trend-label="拒绝率"
           trend-type="down"
         />
@@ -223,7 +223,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="详细说明" v-if="rejectForm.reason === 'other'">
-          <el-input v-model="rejectForm.detail" type="textarea" rows="3" placeholder="请详细说明拒绝原因" />
+          <el-input v-model="rejectForm.detail" type="textarea" :rows="3" placeholder="请详细说明拒绝原因" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -241,7 +241,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="转交原因">
-          <el-input v-model="transferForm.reason" type="textarea" rows="3" placeholder="请说明转交原因" />
+          <el-input v-model="transferForm.reason" type="textarea" :rows="3" placeholder="请说明转交原因" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -329,13 +329,13 @@ const performanceMonitorVisible = ref(false)
 
 // 表单数据
 const rejectForm = reactive({
-  reason: '',
-  detail: ''
+  reason: '' as string,
+  detail: '' as string
 })
 
 const transferForm = reactive({
-  assigneeId: null,
-  reason: ''
+  assigneeId: null as number | null,
+  reason: '' as string
 })
 
 // 从store获取数据 - 使用storeToRefs保持响应式

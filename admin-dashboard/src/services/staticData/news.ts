@@ -368,7 +368,7 @@ export const organizations = async (): Promise<OrganizationNode[]> => {
       id: '1',
       name: '总部',
       type: 'department',
-      parentId: null,
+      parentId: undefined,
       children: [
         {
           id: '2',

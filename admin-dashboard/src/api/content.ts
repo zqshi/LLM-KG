@@ -1,13 +1,5 @@
 import { http } from './request'
 import { apiAdapter } from './adapter'
-import { 
-  categories, 
-  posts, 
-  polls, 
-  featureRequests, 
-  tags, 
-  contentStats 
-} from '@/services/staticData'
 import type { 
   ApiResponse, 
   Content, 
@@ -29,7 +21,47 @@ export const contentApi = {
   getStats(): Promise<ApiResponse<ContentStats>> {
     return apiAdapter.get(
       () => http.get('/content/stats'),
-      () => contentStats()
+      async () => {
+        try {
+          // 从静态数据中获取统计数据
+          const statsModule = await import('@/services/staticData/content')
+          const stats = statsModule.contentStats
+          
+          // 转换为ContentStats格式
+          const result: ContentStats = {
+            total: stats.totalPosts || 0,
+            articles: Math.floor(stats.totalPosts * 0.3) || 0,
+            posts: Math.floor(stats.totalPosts * 0.5) || 0,
+            comments: Math.floor(stats.totalPosts * 0.1) || 0,
+            news: Math.floor(stats.totalPosts * 0.05) || 0,
+            goods: Math.floor(stats.totalPosts * 0.03) || 0,
+            quotes: Math.floor(stats.totalPosts * 0.02) || 0,
+            pending: 23, // 固定值用于演示
+            today: stats.todayPosts || 0,
+            thisWeek: Math.floor(stats.todayPosts * 7) || 0,
+            thisMonth: Math.floor(stats.todayPosts * 30) || 0
+          }
+          
+          return result
+        } catch (error) {
+          console.error('加载静态统计数据失败:', error)
+          // 返回默认值
+          const defaultStats: ContentStats = {
+            total: 0,
+            articles: 0,
+            posts: 0,
+            comments: 0,
+            news: 0,
+            goods: 0,
+            quotes: 0,
+            pending: 0,
+            today: 0,
+            thisWeek: 0,
+            thisMonth: 0
+          }
+          return defaultStats
+        }
+      }
     )
   },
 
@@ -38,8 +70,41 @@ export const contentApi = {
     return apiAdapter.get(
       () => http.get('/content/list', { params }),
       async () => {
-        const allPosts = await posts()
-        return { list: allPosts, total: allPosts.length }
+        const allPosts = await import('@/services/staticData/content').then(m => m.posts)
+        // 转换静态数据为Content类型
+        const contentList: Content[] = allPosts.map((post: any) => ({
+          id: post.id,
+          title: post.title,
+          type: 'post', // 默认类型
+          module: 'forum', // 默认模块
+          category: post.category?.name || '默认分类',
+          author: {
+            id: post.author.id,
+            username: post.author.name,
+            name: post.author.name,
+            email: 'example@example.com', // 静态数据中没有邮箱字段
+            phone: '',
+            avatar: post.author.avatar || '',
+            groupId: 1,
+            status: 1,
+            roles: [],
+            createTime: post.createTime,
+            updateTime: post.updateTime || post.createTime
+          },
+          status: post.status,
+          content: post.content,
+          tags: post.tags || [],
+          viewCount: post.viewCount || 0,
+          likeCount: post.likeCount || 0,
+          commentCount: post.commentCount || 0,
+          isTop: post.isTop || false,
+          isElite: post.isEssence || false,
+          isLocked: false,
+          createdAt: post.createTime,
+          updatedAt: post.updateTime || post.createTime,
+          publishedAt: post.publishTime || post.createTime
+        }))
+        return { list: contentList, total: contentList.length }
       },
       { mockPagination: true, paginationParams: params }
     )
@@ -50,12 +115,46 @@ export const contentApi = {
     return apiAdapter.get(
       () => http.get(`/content/${id}`),
       async () => {
-        const allPosts = await posts()
-        const post = allPosts.find(p => p.id === id)
+        const allPosts = await import('@/services/staticData/content').then(m => m.posts)
+        const post: any = allPosts.find((p: any) => p.id === id)
         if (!post) {
           throw new Error('内容不存在')
         }
-        return post
+        
+        // 转换为Content类型
+        const content: Content = {
+          id: post.id,
+          title: post.title,
+          type: 'post', // 默认类型
+          module: 'forum', // 默认模块
+          category: post.category?.name || '默认分类',
+          author: {
+            id: post.author.id,
+            username: post.author.name,
+            name: post.author.name,
+            email: 'example@example.com',
+            phone: '',
+            avatar: post.author.avatar || '',
+            groupId: 1,
+            status: 1,
+            roles: [],
+            createTime: post.createTime,
+            updateTime: post.updateTime || post.createTime
+          },
+          status: post.status,
+          content: post.content,
+          tags: post.tags || [],
+          viewCount: post.viewCount || 0,
+          likeCount: post.likeCount || 0,
+          commentCount: post.commentCount || 0,
+          isTop: post.isTop || false,
+          isElite: post.isEssence || false,
+          isLocked: false,
+          createdAt: post.createTime,
+          updatedAt: post.updateTime || post.createTime,
+          publishedAt: post.publishTime || post.createTime
+        }
+        return content
       }
     )
   },
@@ -64,36 +163,38 @@ export const contentApi = {
   create(data: ContentForm): Promise<ApiResponse<Content>> {
     return apiAdapter.post(
       () => http.post('/content', data),
-      async () => {
-        const newContent: Content = {
-          id: Date.now(),
-          title: data.title,
-          content: data.content,
-          type: data.type || 'post',
-          module: data.module || 'forum',
-          categoryId: data.categoryId,
-          categoryName: '默认分类',
-          author: {
-            id: 1,
-            username: 'admin',
-            name: '管理员',
-            avatar: ''
-          },
+      {
+        id: Date.now(),
+        title: data.title,
+        type: (data.type as 'article' | 'post' | 'comment' | 'news' | 'goods' | 'quote') || 'post',
+        module: (data.module as 'knowledge' | 'forum' | 'news' | 'flea-market' | 'operation') || 'forum',
+        category: data.category,
+        author: {
+          id: 1,
+          username: 'admin',
+          name: '管理员',
+          email: 'admin@example.com',
+          phone: '',
+          avatar: '',
+          groupId: 1,
           status: 1,
-          statusName: '已发布',
-          isTop: false,
-          isElite: false,
-          isLocked: false,
-          viewCount: 0,
-          likeCount: 0,
-          commentCount: 0,
-          shareCount: 0,
+          roles: [],
           createTime: new Date().toISOString(),
-          updateTime: new Date().toISOString(),
-          tags: data.tags || []
-        }
-        return newContent
-      }
+          updateTime: new Date().toISOString()
+        },
+        status: (data.status as 1 | 2 | 3 | 4) || 1,
+        content: data.content,
+        tags: data.tags || [],
+        viewCount: 0,
+        likeCount: 0,
+        commentCount: 0,
+        isTop: data.isTop || false,
+        isElite: data.isElite || false,
+        isLocked: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...(data.contentHtml && { contentHtml: data.contentHtml })
+      } as Content
     )
   },
 
@@ -101,26 +202,24 @@ export const contentApi = {
   update(id: number, data: Partial<ContentForm>): Promise<ApiResponse<Content>> {
     return apiAdapter.put(
       () => http.put(`/content/${id}`, data),
-      async () => {
-        const allPosts = await posts()
-        const post = allPosts.find(p => p.id === id)
-        if (!post) {
-          throw new Error('内容不存在')
-        }
-        return {
-          ...post,
-          ...data,
-          updateTime: new Date().toISOString()
-        }
-      }
+      id,
+      {
+        title: data.title,
+        category: data.category,
+        status: data.status as 1 | 2 | 3 | 4,
+        content: data.content,
+        tags: data.tags,
+        isTop: data.isTop,
+        isElite: data.isElite,
+        ...(data.contentHtml && { contentHtml: data.contentHtml })
+      } as Partial<Content>
     )
   },
 
   // 删除内容
-  delete(id: number, reason?: string): Promise<ApiResponse<void>> {
+  delete(id: number, reason?: string): Promise<ApiResponse<null>> {
     return apiAdapter.delete(
-      () => http.delete(`/content/${id}`, { data: { reason } }),
-      async () => undefined
+      () => http.delete(`/content/${id}`, { data: { reason } })
     )
   },
 
@@ -128,50 +227,45 @@ export const contentApi = {
   batchOperation(data: BatchContentOperation): Promise<ApiResponse<{ successCount: number, failCount: number }>> {
     return apiAdapter.post(
       () => http.post('/content/batch', data),
-      async () => ({
-        successCount: data.ids?.length || 0,
+      {
+        successCount: data.contentIds?.length || 0,
         failCount: 0
-      })
+      }
     )
   },
 
   // 审核内容
-  audit(id: number, action: 'approve' | 'reject', reason?: string): Promise<ApiResponse<void>> {
+  audit(id: number, action: 'approve' | 'reject', reason?: string): Promise<ApiResponse<null>> {
     return apiAdapter.post(
-      () => http.post(`/content/${id}/audit`, { action, reason }),
-      async () => undefined
+      () => http.post(`/content/${id}/audit`, { action, reason })
     )
   },
 
   // 置顶内容
-  setTop(id: number, isTop: boolean, expiry?: string): Promise<ApiResponse<void>> {
+  setTop(id: number, isTop: boolean, expiry?: string): Promise<ApiResponse<null>> {
     return apiAdapter.post(
-      () => http.post(`/content/${id}/top`, { isTop, expiry }),
-      async () => undefined
+      () => http.post(`/content/${id}/top`, { isTop, expiry })
     )
   },
 
   // 设置精华
-  setElite(id: number, isElite: boolean): Promise<ApiResponse<void>> {
+  setElite(id: number, isElite: boolean): Promise<ApiResponse<null>> {
     return apiAdapter.post(
-      () => http.post(`/content/${id}/elite`, { isElite }),
-      async () => undefined
+      () => http.post(`/content/${id}/elite`, { isElite })
     )
   },
 
   // 锁定/解锁内容
-  setLock(id: number, isLocked: boolean): Promise<ApiResponse<void>> {
+  setLock(id: number, isLocked: boolean): Promise<ApiResponse<null>> {
     return apiAdapter.post(
-      () => http.post(`/content/${id}/lock`, { isLocked }),
-      async () => undefined
+      () => http.post(`/content/${id}/lock`, { isLocked })
     )
   },
 
   // 移动版块
-  moveCategory(contentIds: number[], categoryId: string): Promise<ApiResponse<void>> {
+  moveCategory(contentIds: number[], categoryId: string): Promise<ApiResponse<null>> {
     return apiAdapter.post(
-      () => http.post('/content/move-category', { contentIds, categoryId }),
-      async () => undefined
+      () => http.post('/content/move-category', { contentIds, categoryId })
     )
   },
 
@@ -180,20 +274,25 @@ export const contentApi = {
     return apiAdapter.get(
       () => http.get(`/content/${id}/preview`),
       async () => {
-        const allPosts = await posts()
-        const post = allPosts.find(p => p.id === id)
+        const allPosts = await import('@/services/staticData/content').then(m => m.posts)
+        const post: any = allPosts.find((p: any) => p.id === id)
         if (!post) {
           throw new Error('内容不存在')
         }
-        return {
+        const preview: ContentPreview = {
+          id: post.id,
           title: post.title,
           content: post.content,
+          type: 'post',
+          module: 'forum',
+          category: post.category?.name || '默认分类',
           author: post.author,
-          createTime: post.createTime,
-          viewCount: post.viewCount,
-          likeCount: post.likeCount,
-          commentCount: post.commentCount
+          status: post.status,
+          tags: post.tags || [],
+          createdAt: post.createTime,
+          updatedAt: post.updateTime || post.createTime
         }
+        return preview
       }
     )
   },
@@ -203,18 +302,21 @@ export const contentApi = {
     return apiAdapter.get(
       () => http.get('/content/hot', { params: { days, limit } }),
       async () => {
-        const allPosts = await posts()
-        return allPosts.slice(0, limit).map(post => ({
+        const allPosts = await import('@/services/staticData/content').then(m => m.posts)
+        const hotContents: HotContent[] = allPosts.slice(0, limit).map((post: any) => ({
           id: post.id,
           title: post.title,
-          type: post.type,
+          type: 'post',
+          module: 'forum',
+          category: post.category?.name || '默认分类',
+          author: post.author,
           viewCount: post.viewCount,
           likeCount: post.likeCount,
           commentCount: post.commentCount,
           score: post.viewCount + post.likeCount * 10 + post.commentCount * 5,
-          createTime: post.createTime,
-          author: post.author
+          createdAt: post.createTime
         }))
+        return hotContents
       }
     )
   },
@@ -223,7 +325,22 @@ export const contentApi = {
   getCategories(module?: string): Promise<ApiResponse<ContentCategory[]>> {
     return apiAdapter.get(
       () => http.get('/content/categories', { params: { module } }),
-      () => categories()
+      async () => {
+        const categories = await import('@/services/staticData/content').then(m => m.categories)
+        // 转换为ContentCategory类型
+        return categories.map((cat: any) => ({
+          id: cat.id,
+          name: cat.name,
+          module: 'forum', // 默认模块
+          parentId: cat.parentId,
+          level: 1, // 默认层级
+          sort: cat.sort,
+          status: cat.status,
+          contentCount: cat.postCount,
+          createdAt: cat.createTime,
+          updatedAt: cat.updateTime
+        })) as ContentCategory[]
+      }
     )
   },
 
@@ -231,50 +348,9 @@ export const contentApi = {
   exportData(params: ContentQueryParams): Promise<ApiResponse<{ downloadUrl: string }>> {
     return apiAdapter.post(
       () => http.post('/content/export', params),
-      async () => ({
+      {
         downloadUrl: '/mock/content_export_' + Date.now() + '.xlsx'
-      })
-    )
-  },
-
-  // 获取内容类型映射
-  getTypeMapping(): Promise<ApiResponse<{ [key: string]: { name: string, color: string } }>> {
-    return apiAdapter.get(
-      () => http.get('/content/type-mapping'),
-      async () => ({
-        'post': { name: '帖子', color: '#409eff' },
-        'article': { name: '文章', color: '#67c23a' },
-        'news': { name: '资讯', color: '#e6a23c' },
-        'poll': { name: '投票', color: '#f56c6c' },
-        'feature_request': { name: '需求', color: '#909399' }
-      })
-    )
-  },
-
-  // 获取模块映射
-  getModuleMapping(): Promise<ApiResponse<{ [key: string]: { name: string, icon: string } }>> {
-    return apiAdapter.get(
-      () => http.get('/content/module-mapping'),
-      async () => ({
-        'forum': { name: '论坛', icon: 'ChatDotRound' },
-        'knowledge': { name: '知识库', icon: 'Document' },
-        'news': { name: '资讯', icon: 'Reading' },
-        'marketplace': { name: '交易市场', icon: 'Shop' }
-      })
-    )
-  },
-
-  // 获取状态映射
-  getStatusMapping(): Promise<ApiResponse<{ [key: number]: { name: string, color: string } }>> {
-    return apiAdapter.get(
-      () => http.get('/content/status-mapping'),
-      async () => ({
-        0: { name: '草稿', color: '#909399' },
-        1: { name: '已发布', color: '#67c23a' },
-        2: { name: '待审核', color: '#e6a23c' },
-        3: { name: '已拒绝', color: '#f56c6c' },
-        4: { name: '已隐藏', color: '#909399' }
-      })
+      }
     )
   },
 
@@ -284,29 +360,38 @@ export const contentApi = {
   createAdminPost(data: AdminPostForm): Promise<ApiResponse<ForumPost>> {
     return apiAdapter.post(
       () => http.post('/forum/admin/posts', data),
-      async () => ({
+      {
         id: Date.now(),
         title: data.title,
         content: data.content,
-        categoryId: data.categoryId,
-        categoryName: '默认分类',
+        type: 'post',
+        module: 'forum',
+        category: '默认分类',
         author: {
           id: 1,
           username: 'admin',
           name: '管理员',
+          email: 'admin@example.com',
+          phone: '',
           avatar: '',
-          isOfficial: true
+          groupId: 1,
+          status: 1,
+          roles: [],
+          createTime: new Date().toISOString(),
+          updateTime: new Date().toISOString()
         },
-        isTop: data.isTop || false,
-        isElite: data.isElite || false,
+        status: 1,
         tags: data.tags || [],
         viewCount: 0,
         likeCount: 0,
         commentCount: 0,
-        createTime: new Date().toISOString(),
-        updateTime: new Date().toISOString(),
-        status: 1
-      })
+        isTop: false,
+        isElite: false,
+        isLocked: false,
+        officialFlag: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      } as ForumPost
     )
   },
 
@@ -361,23 +446,26 @@ export const contentApi = {
       () => http.get('/organization/tree'),
       async () => [
         {
-          id: 1,
-          name: '总公司',
+          id: '1',
+          label: '总公司',
+          value: '1',
           children: [
             {
-              id: 11,
-              name: '技术部',
+              id: '11',
+              label: '技术部',
+              value: '11',
               children: [
-                { id: 111, name: '前端组' },
-                { id: 112, name: '后端组' }
+                { id: '111', label: '前端组', value: '111' },
+                { id: '112', label: '后端组', value: '112' }
               ]
             },
             {
-              id: 12,
-              name: '产品部',
+              id: '12',
+              label: '产品部',
+              value: '12',
               children: [
-                { id: 121, name: '产品设计组' },
-                { id: 122, name: '用户体验组' }
+                { id: '121', label: '产品设计组', value: '121' },
+                { id: '122', label: '用户体验组', value: '122' }
               ]
             }
           ]
@@ -401,12 +489,12 @@ export const contentApi = {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
       },
-      async () => ({
+      {
         url: '/mock/uploads/' + file.name,
         filename: file.name,
         size: file.size,
         type: file.type
-      })
+      }
     )
   },
 
@@ -429,7 +517,7 @@ export const contentApi = {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
       },
-      async () => files.map(file => ({
+      files.map(file => ({
         url: '/mock/uploads/' + file.name,
         filename: file.name,
         size: file.size,
@@ -450,14 +538,14 @@ export const contentApi = {
   }>> {
     return apiAdapter.post(
       () => http.post('/forum/posts/preview', data),
-      async () => ({
+      {
         title: data.title,
         contentHtml: data.content,
         categoryPath: '技术讨论 / 前端开发',
         tags: data.tags || [],
         visibleRange: data.visibleRange || ['全体'],
         estimatedReadTime: Math.ceil(data.content.length / 200)
-      })
+      }
     )
   },
 
@@ -492,18 +580,17 @@ export const contentApi = {
   }>> {
     return apiAdapter.post(
       () => http.post('/forum/posts/save-draft', data),
-      async () => ({
+      {
         draftId: data.draftId || 'draft_' + Date.now(),
         savedAt: new Date().toISOString()
-      })
+      }
     )
   },
 
   // 删除帖子草稿
-  deletePostDraft(draftId: string): Promise<ApiResponse<void>> {
+  deletePostDraft(draftId: string): Promise<ApiResponse<null>> {
     return apiAdapter.delete(
-      () => http.delete(`/forum/posts/drafts/${draftId}`),
-      async () => undefined
+      () => http.delete(`/forum/posts/drafts/${draftId}`)
     )
   },
 
@@ -516,8 +603,6 @@ export const contentApi = {
         content: '草稿内容...',
         categoryId: 11,
         tags: ['前端', '开发'],
-        isTop: false,
-        isElite: false,
         visibleRange: ['全体']
       })
     )
@@ -543,7 +628,7 @@ export const contentApi = {
   getRecommendedTags(content: string, categoryId?: number): Promise<ApiResponse<string[]>> {
     return apiAdapter.post(
       () => http.post('/forum/posts/recommend-tags', { content, categoryId }),
-      async () => ['推荐标签1', '推荐标签2', '推荐标签3']
+      ['推荐标签1', '推荐标签2', '推荐标签3']
     )
   },
 
@@ -559,11 +644,11 @@ export const contentApi = {
   }>> {
     return apiAdapter.post(
       () => http.post('/forum/posts/validate-content', { content }),
-      async () => ({
+      {
         valid: true,
         issues: [],
         processedContent: content
-      })
+      }
     )
   },
 
@@ -608,18 +693,17 @@ export const contentApi = {
   }>> {
     return apiAdapter.post(
       () => http.post('/forum/posts/schedule', data),
-      async () => ({
+      {
         postId: Date.now(),
         scheduledAt: data.publishAt
-      })
+      }
     )
   },
 
   // 取消定时发布
-  cancelScheduledPost(postId: number): Promise<ApiResponse<void>> {
+  cancelScheduledPost(postId: number): Promise<ApiResponse<null>> {
     return apiAdapter.delete(
-      () => http.delete(`/forum/posts/${postId}/schedule`),
-      async () => undefined
+      () => http.delete(`/forum/posts/${postId}/schedule`)
     )
   },
 
@@ -639,7 +723,7 @@ export const contentApi = {
           title: '定时发布的帖子标题',
           categoryPath: '技术讨论 / 前端开发',
           scheduledAt: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(),
-          status: 'pending'
+          status: 'pending' as const
         }
       ]
     )

@@ -20,8 +20,10 @@ import type {
   PollResultExport,
   PollNotificationConfig,
   PollApiResponse,
-  PaginatedPollResponse
+  PaginatedPollResponse,
+  PollType
 } from '@/types/poll'
+import type { User } from '@/types'
 
 // HTTP请求工具
 import { request } from './request'
@@ -35,24 +37,65 @@ class PollAdminAPI {
    * 获取投票帖列表
    */
   static async getPollPosts(params: PollQueryParams): Promise<PaginatedPollResponse<PollPostListItem>> {
-    return apiAdapter.get(
-      () => request.get('/admin/polls', { params }),
+    console.log('PollAdminAPI.getPollPosts called with params:', params)
+    const response = await apiAdapter.get(
+      () => request.get('/admin/polls', { params }).then(res => res.data),
       async () => {
-        const allPolls = await polls()
-        return { list: allPolls, total: allPolls.length }
+        console.log('Loading static polls data...')
+        const allPolls = await polls
+        console.log('Loaded polls data:', allPolls)
+        
+        // 转换静态数据结构以匹配 PollPostListItem 接口
+        const pollListItems: PollPostListItem[] = allPolls.map(poll => ({
+          id: poll.id,
+          title: poll.title,
+          question: poll.description || '',
+          status: poll.status === 1 ? 'ongoing' : 'ended',
+          type: poll.type as PollType,
+          startTime: poll.startTime,
+          endTime: poll.endTime,
+          totalVotes: poll.totalVotes,
+          participantCount: poll.totalVotes, // 简单处理，实际应该有独立的参与人数统计
+          hasRewards: false, // 静态数据中没有奖励信息
+          creator: {
+            id: poll.author.id,
+            name: poll.author.name,
+            username: poll.author.name,
+            email: '',
+            groupId: 1,
+            status: 1,
+            avatar: poll.author.avatar,
+            roles: [],
+            createTime: poll.createTime,
+            updateTime: poll.updateTime || poll.createTime
+          } as User,
+          categoryName: poll.category?.name || '',
+          createdAt: poll.createTime
+        }))
+        
+        // 确保返回正确的分页格式
+        return { 
+          items: pollListItems,
+          total: pollListItems.length,
+          page: params.page || 1,
+          pageSize: params.pageSize || 10,
+          hasNext: false,
+          hasPrev: false
+        }
       },
       { mockPagination: true, paginationParams: params }
     )
+    return response as unknown as PaginatedPollResponse<PollPostListItem>
   }
   
   /**
    * 获取投票帖详情
    */
   static async getPollPost(id: number): Promise<PollApiResponse<PollPost>> {
-    return apiAdapter.get(
-      () => request.get(`/admin/polls/${id}`),
+    const response = await apiAdapter.get(
+      () => request.get(`/admin/polls/${id}`).then(res => res.data),
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const poll = allPolls.find(p => p.id === id)
         if (!poll) {
           throw new Error('投票帖不存在')
@@ -60,50 +103,65 @@ class PollAdminAPI {
         return poll
       }
     )
+    return response as unknown as PollApiResponse<PollPost>
   }
   
   /**
    * 创建投票帖
    */
   static async createPollPost(data: CreatePollPostForm): Promise<PollApiResponse<PollPost>> {
-    return apiAdapter.post(
-      () => request.post('/admin/polls', data),
+    const response = await apiAdapter.post(
+      () => request.post('/admin/polls', data).then(res => res.data),
       async () => ({
         id: Date.now(),
         title: data.title,
         content: data.content,
+        question: data.question,
         options: data.options,
         type: data.type || 'single',
-        anonymous: data.anonymous || false,
-        allowChangeVote: data.allowChangeVote || false,
-        showResultsBeforeEnd: data.showResultsBeforeEnd || false,
+        maxChoices: data.maxChoices,
         startTime: data.startTime || new Date().toISOString(),
         endTime: data.endTime,
+        duration: 0,
+        scopeConfig: data.scopeConfig,
+        resultVisibility: data.resultVisibility,
+        rewards: data.rewards,
+        hasRewards: data.rewards && data.rewards.length > 0,
         status: 'draft',
-        categoryId: data.categoryId,
-        categoryName: '默认分类',
-        author: {
+        totalVotes: 0,
+        participantCount: 0,
+        viewCount: 0,
+        creatorId: 1,
+        creator: {
           id: 1,
           username: 'admin',
           name: '管理员',
-          avatar: ''
+          avatar: '',
+          email: '',
+          groupId: 1,
+          status: 1,
+          roles: [],
+          createTime: new Date().toISOString(),
+          updateTime: new Date().toISOString()
         },
-        totalVotes: 0,
-        participantCount: 0,
-        createTime: new Date().toISOString(),
-        updateTime: new Date().toISOString()
+        categoryId: data.categoryId,
+        categoryName: '默认分类',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       })
     )
+    return response as unknown as PollApiResponse<PollPost>
   }
   
   /**
    * 更新投票帖
    */
   static async updatePollPost(data: UpdatePollPostForm): Promise<PollApiResponse<PollPost>> {
-    return apiAdapter.put(
-      () => request.put(`/admin/polls/${data.id}`, data),
+    const response = await apiAdapter.put(
+      () => request.put(`/admin/polls/${data.id}`, data).then(res => res.data),
+      data.id,
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const poll = allPolls.find(p => p.id === data.id)
         if (!poll) {
           throw new Error('投票帖不存在')
@@ -115,26 +173,27 @@ class PollAdminAPI {
         }
       }
     )
+    return response as unknown as PollApiResponse<PollPost>
   }
   
   /**
    * 删除投票帖
    */
   static async deletePollPost(id: number): Promise<PollApiResponse<void>> {
-    return apiAdapter.delete(
-      () => request.delete(`/admin/polls/${id}`),
-      async () => undefined
+    const response = await apiAdapter.delete(
+      () => request.delete(`/admin/polls/${id}`).then(res => res.data)
     )
+    return response as unknown as PollApiResponse<void>
   }
   
   /**
    * 发布投票帖
    */
   static async publishPollPost(id: number): Promise<PollApiResponse<PollPost>> {
-    return apiAdapter.post(
-      () => request.post(`/admin/polls/${id}/publish`),
+    const response = await apiAdapter.post(
+      () => request.post(`/admin/polls/${id}/publish`).then(res => res.data),
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const poll = allPolls.find(p => p.id === id)
         if (!poll) {
           throw new Error('投票帖不存在')
@@ -146,16 +205,17 @@ class PollAdminAPI {
         }
       }
     )
+    return response as unknown as PollApiResponse<PollPost>
   }
   
   /**
    * 结束投票帖
    */
   static async endPollPost(id: number, reason?: string): Promise<PollApiResponse<PollPost>> {
-    return apiAdapter.post(
-      () => request.post(`/admin/polls/${id}/end`, { reason }),
+    const response = await apiAdapter.post(
+      () => request.post(`/admin/polls/${id}/end`, { reason }).then(res => res.data),
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const poll = allPolls.find(p => p.id === id)
         if (!poll) {
           throw new Error('投票帖不存在')
@@ -168,16 +228,17 @@ class PollAdminAPI {
         }
       }
     )
+    return response as unknown as PollApiResponse<PollPost>
   }
   
   /**
    * 取消投票帖
    */
   static async cancelPollPost(id: number, reason: string): Promise<PollApiResponse<PollPost>> {
-    return apiAdapter.post(
-      () => request.post(`/admin/polls/${id}/cancel`, { reason }),
+    const response = await apiAdapter.post(
+      () => request.post(`/admin/polls/${id}/cancel`, { reason }).then(res => res.data),
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const poll = allPolls.find(p => p.id === id)
         if (!poll) {
           throw new Error('投票帖不存在')
@@ -190,25 +251,28 @@ class PollAdminAPI {
         }
       }
     )
+    return response as unknown as PollApiResponse<PollPost>
   }
   
   /**
    * 批量操作投票帖
    */
   static async batchOperation(data: PollBatchOperation): Promise<PollApiResponse<void>> {
-    return apiAdapter.post(
-      () => request.post('/admin/polls/batch', data),
+    const response = await apiAdapter.post(
+      () => request.post('/admin/polls/batch', data).then(res => res.data),
       async () => undefined
     )
+    return response as unknown as PollApiResponse<void>
   }
   
   /**
    * 获取投票统计数据
    */
   static async getPollStatistics(pollId: number): Promise<PollApiResponse<PollStatistics>> {
-    return apiAdapter.get(
-      () => request.get(`/admin/polls/${pollId}/statistics`),
+    const response = await apiAdapter.get(
+      () => request.get(`/admin/polls/${pollId}/statistics`).then(res => res.data),
       async () => ({
+        pollId,
         totalVotes: 256,
         participantCount: 189,
         participationRate: 73.8,
@@ -217,102 +281,144 @@ class PollAdminAPI {
           { optionId: 2, optionText: '选项B', voteCount: 78, percentage: 30.5 },
           { optionId: 3, optionText: '选项C', voteCount: 50, percentage: 19.5 }
         ],
-        demographics: {
-          byDepartment: [
-            { department: '技术部', count: 89, percentage: 47.1 },
-            { department: '产品部', count: 56, percentage: 29.6 },
-            { department: '运营部', count: 44, percentage: 23.3 }
-          ]
-        },
-        timeline: [
-          { date: '2024-01-15', votes: 45 },
-          { date: '2024-01-16', votes: 89 },
-          { date: '2024-01-17', votes: 122 }
+        departmentStats: [
+          { department: '技术部', voteCount: 89, percentage: 47.1 },
+          { department: '产品部', voteCount: 56, percentage: 29.6 },
+          { department: '运营部', voteCount: 44, percentage: 23.3 }
+        ],
+        hourlyStats: [
+          { hour: '09:00', voteCount: 45 },
+          { hour: '10:00', voteCount: 89 },
+          { hour: '11:00', voteCount: 122 }
+        ],
+        regionStats: [
+          { region: '北京', voteCount: 156 },
+          { region: '上海', voteCount: 98 },
+          { region: '广州', voteCount: 67 }
         ]
       })
     )
+    return response as unknown as PollApiResponse<PollStatistics>
   }
   
   /**
    * 获取投票记录列表
    */
   static async getVoteRecords(params: VoteRecordQueryParams): Promise<PaginatedPollResponse<UserPollVote>> {
-    return apiAdapter.get(
-      () => request.get('/admin/polls/votes', { params }),
+    const response = await apiAdapter.get(
+      () => request.get('/admin/polls/votes', { params }).then(res => res.data),
       async () => ({
-        list: [
+        items: [
           {
             id: 1,
             pollId: 1,
             userId: 1,
-            userName: '张三',
+            user: {
+              id: 1,
+              username: 'zhangsan',
+              name: '张三',
+              email: 'zhangsan@example.com',
+              phone: '13800138000',
+              avatar: '',
+              groupId: 1,
+              status: 1,
+              roles: [],
+              createTime: new Date().toISOString(),
+              updateTime: new Date().toISOString()
+            },
             selectedOptions: [1],
-            voteTime: new Date().toISOString(),
-            ipAddress: '192.168.1.100'
+            votedAt: new Date().toISOString(),
+            ipAddress: '192.168.1.100',
+            userAgent: 'Mozilla/5.0'
           },
           {
             id: 2,
             pollId: 1,
             userId: 2,
-            userName: '李四',
+            user: {
+              id: 2,
+              username: 'lisi',
+              name: '李四',
+              email: 'lisi@example.com',
+              phone: '13800138001',
+              avatar: '',
+              groupId: 1,
+              status: 1,
+              roles: [],
+              createTime: new Date().toISOString(),
+              updateTime: new Date().toISOString()
+            },
             selectedOptions: [2],
-            voteTime: new Date().toISOString(),
-            ipAddress: '192.168.1.101'
+            votedAt: new Date().toISOString(),
+            ipAddress: '192.168.1.101',
+            userAgent: 'Mozilla/5.0'
           }
         ],
-        total: 2
+        total: 2,
+        page: params.page || 1,
+        pageSize: params.pageSize || 10,
+        hasNext: false,
+        hasPrev: false
       }),
       { mockPagination: true, paginationParams: params }
     )
+    return response as unknown as PaginatedPollResponse<UserPollVote>
   }
   
   /**
    * 导出投票结果
    */
   static async exportPollResult(data: PollResultExport): Promise<Blob> {
-    return apiAdapter.post(
+    const response = await apiAdapter.post(
       () => request.post(`/admin/polls/${data.pollId}/export`, data, {
         responseType: 'blob'
-      }),
+      }).then(res => res.data),
       async () => new Blob(['投票结果导出数据'], { type: 'text/plain' })
-    ).then(response => response.data)
+    )
+    return response as unknown as Blob
   }
   
   /**
    * 获取投票帖通知配置
    */
   static async getNotificationConfig(pollId: number): Promise<PollApiResponse<PollNotificationConfig>> {
-    return apiAdapter.get(
-      () => request.get(`/admin/polls/${pollId}/notification-config`),
+    const response = await apiAdapter.get(
+      () => request.get(`/admin/polls/${pollId}/notification-config`).then(res => res.data),
       async () => ({
         pollId,
+        sendReminder: true,
+        reminderTime: 24,
         enableNotification: true,
         notifyOnStart: true,
         notifyOnEnd: true,
-        reminderBeforeEnd: 24,
+        notifyResults: true,
         customMessage: ''
       })
     )
+    return response as unknown as PollApiResponse<PollNotificationConfig>
   }
   
   /**
    * 更新投票帖通知配置
    */
   static async updateNotificationConfig(config: PollNotificationConfig): Promise<PollApiResponse<void>> {
-    return apiAdapter.put(
-      () => request.put(`/admin/polls/${config.pollId}/notification-config`, config),
+    const response = await apiAdapter.put(
+      () => request.put(`/admin/polls/${config.pollId}/notification-config`, config).then(res => res.data),
+      config.pollId,
       async () => undefined
     )
+    return response as unknown as PollApiResponse<void>
   }
   
   /**
    * 手动发送投票提醒
    */
   static async sendVoteReminder(pollId: number, message?: string): Promise<PollApiResponse<void>> {
-    return apiAdapter.post(
-      () => request.post(`/admin/polls/${pollId}/send-reminder`, { message }),
+    const response = await apiAdapter.post(
+      () => request.post(`/admin/polls/${pollId}/send-reminder`, { message }).then(res => res.data),
       async () => undefined
     )
+    return response as unknown as PollApiResponse<void>
   }
   
   /**
@@ -327,8 +433,8 @@ class PollAdminAPI {
     todayPolls: number
     todayVotes: number
   }>> {
-    return apiAdapter.get(
-      () => request.get('/admin/polls/overview-stats'),
+    const response = await apiAdapter.get(
+      () => request.get('/admin/polls/overview-stats').then(res => res.data),
       async () => ({
         totalPolls: 45,
         ongoingPolls: 12,
@@ -339,6 +445,15 @@ class PollAdminAPI {
         todayVotes: 89
       })
     )
+    return response as unknown as PollApiResponse<{
+      totalPolls: number
+      ongoingPolls: number
+      endedPolls: number
+      totalVotes: number
+      avgParticipationRate: number
+      todayPolls: number
+      todayVotes: number
+    }>
   }
 }
 
@@ -357,19 +472,53 @@ class PollUserAPI {
     status?: 'ongoing' | 'ended'
     hasRewards?: boolean
   }): Promise<PaginatedPollResponse<PollPostListItem>> {
-    return apiAdapter.get(
-      () => request.get('/user/polls', { params }),
+    const response = await apiAdapter.get(
+      () => request.get('/user/polls', { params }).then(res => res.data),
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const filtered = allPolls.filter(poll => {
-          if (params.status && poll.status !== params.status) return false
+          // 修复状态比较问题
+          if (params.status && poll.status !== (params.status === 'ongoing' ? 1 : 2)) return false
           if (params.categoryId && poll.categoryId !== params.categoryId) return false
           return true
         })
-        return { list: filtered, total: filtered.length }
+        return { 
+          items: filtered.map(poll => ({
+            id: poll.id,
+            title: poll.title,
+            question: poll.description || '',
+            status: poll.status === 1 ? 'ongoing' : 'ended',
+            type: poll.type as PollType,
+            startTime: poll.startTime,
+            endTime: poll.endTime,
+            totalVotes: poll.totalVotes,
+            participantCount: poll.totalVotes,
+            hasRewards: false,
+            creator: {
+              id: poll.author.id,
+              name: poll.author.name,
+              username: poll.author.name,
+              email: '',
+              groupId: 1,
+              status: 1,
+              avatar: poll.author.avatar,
+              roles: [],
+              createTime: poll.createTime,
+              updateTime: poll.updateTime || poll.createTime
+            } as User,
+            categoryName: poll.category?.name || '',
+            createdAt: poll.createTime
+          })), 
+          total: filtered.length,
+          page: params.page || 1,
+          pageSize: params.pageSize || 10,
+          hasNext: false,
+          hasPrev: false
+        }
       },
       { mockPagination: true, paginationParams: params }
     )
+    return response as unknown as PaginatedPollResponse<PollPostListItem>
   }
   
   /**
@@ -381,10 +530,10 @@ class PollUserAPI {
     canVote: boolean
     canViewResult: boolean
   }>> {
-    return apiAdapter.get(
-      () => request.get(`/user/polls/${id}`),
+    const response = await apiAdapter.get(
+      () => request.get(`/user/polls/${id}`).then(res => res.data),
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const poll = allPolls.find(p => p.id === id)
         if (!poll) {
           throw new Error('投票帖不存在')
@@ -397,6 +546,12 @@ class PollUserAPI {
         }
       }
     )
+    return response as unknown as PollApiResponse<PollPost & {
+      userVoted: boolean
+      userVote?: UserPollVote
+      canVote: boolean
+      canViewResult: boolean
+    }>
   }
   
   /**
@@ -407,10 +562,10 @@ class PollUserAPI {
     vote: UserPollVote
     updatedPoll: PollPost
   }>> {
-    return apiAdapter.post(
-      () => request.post('/user/polls/vote', data),
+    const response = await apiAdapter.post(
+      () => request.post('/user/polls/vote', data).then(res => res.data),
       async () => {
-        const allPolls = await polls()
+        const allPolls = await polls
         const poll = allPolls.find(p => p.id === data.pollId)
         if (!poll) {
           throw new Error('投票帖不存在')
@@ -419,15 +574,28 @@ class PollUserAPI {
           id: Date.now(),
           pollId: data.pollId,
           userId: 1,
-          userName: '当前用户',
-          selectedOptions: data.selectedOptions,
-          voteTime: new Date().toISOString(),
-          ipAddress: '127.0.0.1'
+          user: {
+            id: 1,
+            username: 'current_user',
+            name: '当前用户',
+            email: 'user@example.com',
+            phone: '13800138000',
+            avatar: '',
+            groupId: 1,
+            status: 1,
+            roles: [],
+            createTime: new Date().toISOString(),
+            updateTime: new Date().toISOString()
+          },
+          selectedOptions: data.optionIds,
+          votedAt: new Date().toISOString(),
+          ipAddress: '127.0.0.1',
+          userAgent: 'Mozilla/5.0'
         }
         const updatedPoll = {
           ...poll,
           totalVotes: poll.totalVotes + 1,
-          participantCount: poll.participantCount + 1
+          participantCount: (poll as any).participantCount ? (poll as any).participantCount + 1 : poll.totalVotes + 1
         }
         return {
           success: true,
@@ -436,16 +604,21 @@ class PollUserAPI {
         }
       }
     )
+    return response as unknown as PollApiResponse<{
+      success: boolean
+      vote: UserPollVote
+      updatedPoll: PollPost
+    }>
   }
   
   /**
    * 取消投票（如果允许）
    */
   static async cancelVote(pollId: number): Promise<PollApiResponse<void>> {
-    return apiAdapter.delete(
-      () => request.delete(`/user/polls/${pollId}/vote`),
-      async () => undefined
+    const response = await apiAdapter.delete(
+      () => request.delete(`/user/polls/${pollId}/vote`).then(res => res.data)
     )
+    return response as unknown as PollApiResponse<void>
   }
   
   /**
@@ -459,26 +632,47 @@ class PollUserAPI {
     pollTitle: string
     pollStatus: string
   }>> {
-    return apiAdapter.get(
-      () => request.get('/user/polls/my-votes', { params }),
+    const response = await apiAdapter.get(
+      () => request.get('/user/polls/my-votes', { params }).then(res => res.data),
       async () => ({
-        list: [
+        items: [
           {
             id: 1,
             pollId: 1,
             userId: 1,
-            userName: '当前用户',
+            user: {
+              id: 1,
+              username: 'current_user',
+              name: '当前用户',
+              email: 'user@example.com',
+              phone: '13800138000',
+              avatar: '',
+              groupId: 1,
+              status: 1,
+              roles: [],
+              createTime: new Date().toISOString(),
+              updateTime: new Date().toISOString()
+            },
             selectedOptions: [1],
-            voteTime: new Date().toISOString(),
+            votedAt: new Date().toISOString(),
             ipAddress: '127.0.0.1',
+            userAgent: 'Mozilla/5.0',
             pollTitle: '团队建设活动投票',
             pollStatus: 'ongoing'
           }
         ],
-        total: 1
+        total: 1,
+        page: params.page || 1,
+        pageSize: params.pageSize || 10,
+        hasNext: false,
+        hasPrev: false
       }),
       { mockPagination: true, paginationParams: params }
     )
+    return response as unknown as PaginatedPollResponse<UserPollVote & {
+      pollTitle: string
+      pollStatus: string
+    }>
   }
   
   /**
@@ -488,21 +682,26 @@ class PollUserAPI {
     canVote: boolean
     reason?: string
   }>> {
-    return apiAdapter.get(
-      () => request.get(`/user/polls/${pollId}/check-permission`),
+    const response = await apiAdapter.get(
+      () => request.get(`/user/polls/${pollId}/check-permission`).then(res => res.data),
       async () => ({
         canVote: true
       })
     )
+    return response as unknown as PollApiResponse<{
+      canVote: boolean
+      reason?: string
+    }>
   }
   
   /**
    * 获取投票结果（如果有权限）
    */
   static async getPollResult(pollId: number): Promise<PollApiResponse<PollStatistics>> {
-    return apiAdapter.get(
-      () => request.get(`/user/polls/${pollId}/result`),
+    const response = await apiAdapter.get(
+      () => request.get(`/user/polls/${pollId}/result`).then(res => res.data),
       async () => ({
+        pollId,
         totalVotes: 256,
         participantCount: 189,
         participationRate: 73.8,
@@ -511,20 +710,24 @@ class PollUserAPI {
           { optionId: 2, optionText: '选项B', voteCount: 78, percentage: 30.5 },
           { optionId: 3, optionText: '选项C', voteCount: 50, percentage: 19.5 }
         ],
-        demographics: {
-          byDepartment: [
-            { department: '技术部', count: 89, percentage: 47.1 },
-            { department: '产品部', count: 56, percentage: 29.6 },
-            { department: '运营部', count: 44, percentage: 23.3 }
-          ]
-        },
-        timeline: [
-          { date: '2024-01-15', votes: 45 },
-          { date: '2024-01-16', votes: 89 },
-          { date: '2024-01-17', votes: 122 }
+        departmentStats: [
+          { department: '技术部', voteCount: 89, percentage: 47.1 },
+          { department: '产品部', voteCount: 56, percentage: 29.6 },
+          { department: '运营部', voteCount: 44, percentage: 23.3 }
+        ],
+        hourlyStats: [
+          { hour: '09:00', voteCount: 45 },
+          { hour: '10:00', voteCount: 89 },
+          { hour: '11:00', voteCount: 122 }
+        ],
+        regionStats: [
+          { region: '北京', voteCount: 156 },
+          { region: '上海', voteCount: 98 },
+          { region: '广州', voteCount: 67 }
         ]
       })
     )
+    return response as unknown as PollApiResponse<PollStatistics>
   }
 }
 
@@ -542,16 +745,22 @@ class PollCommonAPI {
     department: string
     avatar?: string
   }[]>> {
-    return apiAdapter.get(
+    const response = await apiAdapter.get(
       () => request.get('/common/users/search', {
         params: { keyword, limit }
-      }),
+      }).then(res => res.data),
       async () => [
         { id: 1, name: '张三', department: '技术部', avatar: '' },
         { id: 2, name: '李四', department: '产品部', avatar: '' },
         { id: 3, name: '王五', department: '运营部', avatar: '' }
       ].filter(user => user.name.includes(keyword)).slice(0, limit)
     )
+    return response as unknown as PollApiResponse<{
+      id: number
+      name: string
+      department: string
+      avatar?: string
+    }[]>
   }
   
   /**
@@ -562,8 +771,8 @@ class PollCommonAPI {
     name: string
     parentId?: string
   }[]>> {
-    return apiAdapter.get(
-      () => request.get('/common/departments'),
+    const response = await apiAdapter.get(
+      () => request.get('/common/departments').then(res => res.data),
       async () => [
         { id: '1', name: '技术部' },
         { id: '2', name: '产品部' },
@@ -571,6 +780,11 @@ class PollCommonAPI {
         { id: '4', name: '市场部' }
       ]
     )
+    return response as unknown as PollApiResponse<{
+      id: string
+      name: string
+      parentId?: string
+    }[]>
   }
   
   /**
@@ -581,14 +795,19 @@ class PollCommonAPI {
     name: string
     code: string
   }[]>> {
-    return apiAdapter.get(
-      () => request.get('/common/roles'),
+    const response = await apiAdapter.get(
+      () => request.get('/common/roles').then(res => res.data),
       async () => [
         { id: 1, name: '管理员', code: 'admin' },
         { id: 2, name: '普通用户', code: 'user' },
         { id: 3, name: '审核员', code: 'moderator' }
       ]
     )
+    return response as unknown as PollApiResponse<{
+      id: number
+      name: string
+      code: string
+    }[]>
   }
   
   /**
@@ -599,14 +818,19 @@ class PollCommonAPI {
     name: string
     code: string
   }[]>> {
-    return apiAdapter.get(
-      () => request.get('/common/categories'),
+    const response = await apiAdapter.get(
+      () => request.get('/common/categories').then(res => res.data),
       async () => [
         { id: 1, name: '技术讨论', code: 'tech' },
         { id: 2, name: '产品交流', code: 'product' },
         { id: 3, name: '团队建设', code: 'team' }
       ]
     )
+    return response as unknown as PollApiResponse<{
+      id: number
+      name: string
+      code: string
+    }[]>
   }
   
   /**
@@ -616,19 +840,23 @@ class PollCommonAPI {
     url: string
     filename: string
   }>> {
-    return apiAdapter.post(
+    const response = await apiAdapter.post(
       () => {
         const formData = new FormData()
         formData.append('file', file)
         return request.post('/common/upload/poll-option', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
-        })
+        }).then(res => res.data)
       },
       async () => ({
         url: '/mock/poll-options/' + file.name,
         filename: file.name
       })
     )
+    return response as unknown as PollApiResponse<{
+      url: string
+      filename: string
+    }>
   }
   
   /**
@@ -637,12 +865,15 @@ class PollCommonAPI {
   static async previewPollContent(content: string): Promise<PollApiResponse<{
     html: string
   }>> {
-    return apiAdapter.post(
-      () => request.post('/common/preview/poll-content', { content }),
+    const response = await apiAdapter.post(
+      () => request.post('/common/preview/poll-content', { content }).then(res => res.data),
       async () => ({
         html: `<p>${content}</p>`
       })
     )
+    return response as unknown as PollApiResponse<{
+      html: string
+    }>
   }
   
   /**
@@ -653,14 +884,19 @@ class PollCommonAPI {
     errors: string[]
     warnings: string[]
   }>> {
-    return apiAdapter.post(
-      () => request.post('/common/validate/poll-config', config),
+    const response = await apiAdapter.post(
+      () => request.post('/common/validate/poll-config', config).then(res => res.data),
       async () => ({
         valid: true,
-        errors: [],
-        warnings: []
+        errors: [] as string[],
+        warnings: [] as string[]
       })
     )
+    return response as unknown as PollApiResponse<{
+      valid: boolean
+      errors: string[]
+      warnings: string[]
+    }>
   }
 }
 
