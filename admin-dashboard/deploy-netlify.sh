@@ -20,18 +20,18 @@ export VITE_API_BASE_URL=
 
 # 安装依赖
 echo "安装依赖..."
-npm ci
+pnpm install --no-frozen-lockfile
 
 # 检查vite是否安装成功
 if ! command -v vite &> /dev/null
 then
     echo "vite未找到，尝试重新安装..."
-    npm install vite --save-dev
+    pnpm install vite --save-dev
 fi
 
 # 构建项目
 echo "构建项目..."
-npm run build
+pnpm run build
 
 # 检查构建是否成功
 if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
