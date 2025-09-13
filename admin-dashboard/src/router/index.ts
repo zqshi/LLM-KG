@@ -4,20 +4,22 @@ import type { RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/dashboard'
-  },
-  {
-    path: '/login',
     name: 'Login',
     component: () => import('@/views/auth/Login.vue'),
     meta: { title: '登录', hideInMenu: true }
   },
   {
-    path: '/',
+    path: '/login',
+    name: 'LoginRedirect',
+    component: () => import('@/views/auth/Login.vue'),
+    meta: { title: '登录', hideInMenu: true }
+  },
+  {
+    path: '/dashboard',
     component: () => import('@/layout/index.vue'),
     children: [
       {
-        path: 'dashboard',
+        path: '',
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index.vue'),
         meta: { title: '全局仪表盘', icon: 'Monitor', permission: 'dashboard:view' }
