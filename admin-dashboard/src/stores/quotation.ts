@@ -104,7 +104,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       
       return response
     } catch (error) {
-      ElMessage.error('获取名言列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取名言列表失败')
+      }
       throw error
     } finally {
       loading.value = false
@@ -119,7 +126,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       currentQuotation.value = response.data
       return response.data
     } catch (error) {
-      ElMessage.error('获取名言详情失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取名言详情失败')
+      }
       throw error
     } finally {
       detailLoading.value = false
@@ -139,7 +153,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       
       return response.data
     } catch (error) {
-      ElMessage.error('创建名言失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('创建名言失败')
+      }
       throw error
     } finally {
       submitLoading.value = false
@@ -193,7 +214,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       
     } catch (error) {
       if (error !== 'cancel') {
-        ElMessage.error('删除失败')
+        // 检查是否是静态模式下的错误
+        const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+          import.meta.env.VITE_API_BASE_URL === '' || 
+          !import.meta.env.VITE_API_BASE_URL
+        
+        if (!isStaticMode) {
+          ElMessage.error('删除失败')
+        }
         throw error
       }
     }
@@ -233,7 +261,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       return response
     } catch (error) {
       if (error !== 'cancel') {
-        ElMessage.error('批量操作失败')
+        // 检查是否是静态模式下的错误
+        const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+          import.meta.env.VITE_API_BASE_URL === '' || 
+          !import.meta.env.VITE_API_BASE_URL
+        
+        if (!isStaticMode) {
+          ElMessage.error('批量操作失败')
+        }
         throw error
       }
     }
@@ -253,7 +288,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       
       return response
     } catch (error) {
-      ElMessage.error('获取待审核列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取待审核列表失败')
+      }
       throw error
     } finally {
       pendingLoading.value = false
@@ -277,7 +319,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       await loadStats()
       
     } catch (error) {
-      ElMessage.error('审核操作失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('审核操作失败')
+      }
       throw error
     }
   }
@@ -378,7 +427,14 @@ export const useQuotationStore = defineStore('quotation', () => {
       quotationStats.value = response.data
       return response.data
     } catch (error) {
-      ElMessage.error('获取统计数据失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取统计数据失败')
+      }
       throw error
     } finally {
       statsLoading.value = false

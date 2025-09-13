@@ -284,7 +284,7 @@ const handleCurrentChange = (page: number) => {
 
 // 跳转到标签管理
 const handleGoToTags = () => {
-  router.push('/operation/ai-tools/tags')
+  router.push('/dashboard/operation/ai-tools/tags')
 }
 
 // 新增工具

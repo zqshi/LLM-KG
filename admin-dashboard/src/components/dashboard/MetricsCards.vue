@@ -246,10 +246,10 @@ const handleCardClick = (type: string) => {
 
   // 根据卡片类型跳转到相应页面
   const routeMap: Record<string, string> = {
-    users: '/rbac/users',
-    content: '/content/list', // 修复路由路径
-    audit: '/audit/center',
-    system: '/system/settings'
+    users: '/dashboard/rbac/users',
+    content: '/dashboard/content/list',
+    audit: '/dashboard/audit/center',
+    system: '/dashboard/system/settings'
   }
 
   const path = routeMap[type]

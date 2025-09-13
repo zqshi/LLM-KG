@@ -6,6 +6,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { resolve } from 'path'
 
 export default defineConfig({
+  base: '/',
   plugins: [
     vue({
       script: {
@@ -103,7 +104,14 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 4173,
-    cors: true
+    cors: true,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:3001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      }
+    }
   },
   css: {
     preprocessorOptions: {

@@ -318,7 +318,7 @@ const handlePageSizeChange = (size: number) => {
 }
 
 const handleViewDetail = (id: number) => {
-  router.push(`/operation/feedback/${id}`)
+  router.push({ name: 'FeedbackDetail', params: { id } })
 }
 
 onMounted(async () => {

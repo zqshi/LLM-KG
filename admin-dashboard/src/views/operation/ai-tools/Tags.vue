@@ -202,7 +202,7 @@ const handleCurrentChange = (page: number) => {
 
 // 跳转到工具管理
 const handleGoToTools = () => {
-  router.push('/operation/ai-tools/tools')
+  router.push('/dashboard/operation/ai-tools/tools')
 }
 
 // 新增标签

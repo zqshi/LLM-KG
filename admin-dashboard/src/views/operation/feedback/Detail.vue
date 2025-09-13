@@ -1,31 +1,21 @@
 <template>
   <div class="feedback-detail-page">
-    <!-- 页面头部 -->
     <div class="page-header">
       <div class="page-header-left">
-        <el-button @click="goBack" style="margin-right: 16px">
-          <el-icon><ArrowLeft /></el-icon>
-          返回列表
-        </el-button>
-        <div>
-          <h1 class="page-title">反馈详情</h1>
-          <p class="page-description">查看和处理用户反馈</p>
+        <el-button @click="goBack" :icon="ArrowLeft" circle />
+        <div style="margin-left: 12px">
+          <h1>反馈详情</h1>
+          <p>查看和处理用户反馈详情</p>
         </div>
       </div>
     </div>
 
-    <div v-loading="detailLoading">
-      <div v-if="currentFeedback" class="detail-content">
+    <div v-loading="detailLoading" class="detail-content">
+      <div v-if="currentFeedback">
         <el-row :gutter="24">
-          <!-- 左侧：反馈基本信息 -->
+          <!-- 左侧：反馈信息 -->
           <el-col :span="16">
             <el-card class="feedback-info-card">
-              <template #header>
-                <div class="card-header">
-                  <span>反馈基本信息</span>
-                </div>
-              </template>
-              
               <div class="info-section">
                 <div class="info-row">
                   <label>反馈ID：</label>
@@ -228,29 +218,32 @@
               <!-- 设置优先级 -->
               <div class="action-section">
                 <h4>设置优先级</h4>
-                <el-select
-                  v-model="selectedPriority"
-                  placeholder="选择优先级"
-                  style="width: 100%"
-                  @change="handlePriorityChange"
-                >
-                  <el-option
-                    v-for="option in priorityOptions"
-                    :key="option.value"
-                    :label="option.label"
-                    :value="option.value"
-                  />
-                </el-select>
+                <div style="margin-bottom: 16px">
+                  <el-radio-group 
+                    v-model="selectedPriority" 
+                    @change="(val) => handlePriorityChange(val as FeedbackPriority)"
+                    style="display: flex; flex-direction: column; gap: 8px"
+                  >
+                    <el-radio 
+                      v-for="option in priorityOptions" 
+                      :key="option.value"
+                      :label="option.value"
+                      border
+                    >
+                      <span :style="{ color: option.color }">{{ option.label }}</span>
+                    </el-radio>
+                  </el-radio-group>
+                </div>
               </div>
               
-              <!-- 更新处理状态 -->
+              <!-- 更新状态 -->
               <div class="action-section">
-                <h4>更新处理状态</h4>
+                <h4>更新状态</h4>
                 <el-form :model="statusForm" @submit.prevent="handleStatusUpdate">
                   <el-form-item>
                     <el-select v-model="statusForm.status" placeholder="选择状态" style="width: 100%">
                       <el-option
-                        v-for="option in statusOptions"
+                        v-for="option in statusOptions.filter(opt => currentFeedback && opt.value !== currentFeedback.status)"
                         :key="option.value"
                         :label="option.label"
                         :value="option.value"
@@ -262,13 +255,12 @@
                       v-model="statusForm.processNote"
                       type="textarea"
                       :rows="3"
-                      placeholder="处理说明（必填）"
-                      required
+                      placeholder="处理说明"
                     />
                   </el-form-item>
                   <el-form-item>
                     <el-button type="primary" @click="handleStatusUpdate" style="width: 100%">
-                      保存
+                      更新状态
                     </el-button>
                   </el-form-item>
                 </el-form>
@@ -327,28 +319,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useFeedbackManagementStore } from '@/stores/feedbackManagement'
 import { storeToRefs } from 'pinia'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Document, Right } from '@element-plus/icons-vue'
-import type { AssignFormData, ProcessFormData, CommentFormData, ReplyFormData, FeedbackPriority } from '@/types/feedbackManagement'
+import type { AssignFormData, ProcessFormData, CommentFormData, ReplyFormData, FeedbackPriority, FeedbackType, FeedbackStatus } from '@/types/feedbackManagement'
 
 const route = useRoute()
 const router = useRouter()
 const feedbackStore = useFeedbackManagementStore()
 
+// 直接从store获取函数，而不是通过storeToRefs
 const {
   currentFeedback,
   availableProcessors,
   detailLoading,
   statusOptions,
-  priorityOptions,
-  getTypeLabel,
-  getStatusConfig,
-  getPriorityConfig
+  priorityOptions
 } = storeToRefs(feedbackStore)
+
+// 直接从store获取函数
+const getTypeLabel = (type: FeedbackType) => feedbackStore.getTypeLabel(type)
+const getStatusConfig = (status: FeedbackStatus) => feedbackStore.getStatusConfig(status)
+const getPriorityConfig = (priority: FeedbackPriority) => feedbackStore.getPriorityConfig(priority)
 
 const feedbackId = computed(() => Number(route.params.id))
 const selectedPriority = ref<FeedbackPriority>()
@@ -385,7 +380,7 @@ const formatFileSize = (bytes: number) => {
 }
 
 const goBack = () => {
-  router.back()
+  router.push({ name: 'FeedbackManagement' })
 }
 
 const handleAssign = async () => {
@@ -450,6 +445,16 @@ onMounted(async () => {
   if (currentFeedback.value) {
     selectedPriority.value = currentFeedback.value.priority
   }
+})
+
+// 组件卸载时清理资源
+onUnmounted(() => {
+  // 清理表单数据
+  assignForm.value = { processerId: 0, note: '' }
+  statusForm.value = { status: undefined, processNote: '' }
+  commentForm.value = { content: '' }
+  replyForm.value = { content: '', sendNotification: true }
+  selectedPriority.value = undefined
 })
 </script>
 
@@ -599,14 +604,21 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.current-status {
-  margin-bottom: 20px;
+.action-section {
+  margin-bottom: 24px;
+}
+
+.action-section h4 {
+  margin: 0 0 16px 0;
+  color: #303133;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .status-item label {
@@ -615,30 +627,7 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-.action-section {
-  margin-bottom: 24px;
-}
-
-.action-section h4 {
-  margin: 0 0 12px 0;
-  color: #303133;
-  font-size: 14px;
-  font-weight: 600;
-}
-
 .notification-status {
   margin-top: 8px;
-}
-
-.comment {
-  background: #f9f9f9;
-  padding: 12px;
-  border-radius: 4px;
-}
-
-.reply {
-  background: #f0f9ff;
-  padding: 12px;
-  border-radius: 4px;
 }
 </style>

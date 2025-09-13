@@ -41,6 +41,13 @@ echarts.use([
 ])
 
 console.log('=== 应用开始启动 ===')
+console.log('=== 环境信息诊断 ===')
+console.log('BASE_URL:', import.meta.env.BASE_URL)
+console.log('VITE_STATIC_MODE:', import.meta.env.VITE_STATIC_MODE)
+console.log('VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
+console.log('当前URL:', window.location.href)
+console.log('Hash值:', window.location.hash)
+console.log('=== 环境信息诊断结束 ===')
 
 const app = createApp(App)
 const pinia = createPinia()

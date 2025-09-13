@@ -15,7 +15,9 @@
     "test": "pnpm -r run test || true",
     "test:ci": "pnpm -r run test:ci || pnpm -r run test || true",
     "build": "cd admin-dashboard && npm run build",
-    "dev": "cd admin-dashboard && npm run dev"
+    "dev": "cd admin-dashboard && npm run dev",
+    "build:netlify": "cd admin-dashboard && npm run build",
+    "preview:netlify": "cd admin-dashboard && npm run preview"
   },
   "dependencies": {
     "vue": "^3.5.21",

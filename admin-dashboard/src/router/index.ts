@@ -39,7 +39,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'rbac',
         name: 'RBAC',
-        redirect: '/rbac/organizations',
+        redirect: 'rbac/organizations',
         meta: { title: '认证与权限管理', icon: 'Lock' },
         children: [
           {
@@ -83,7 +83,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'content',
         name: 'Content',
-        redirect: '/content/categories',
+        redirect: 'content/categories',
         meta: { title: '内容管理', icon: 'Document', permission: 'content:view' },
         children: [
           {
@@ -146,7 +146,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'news',
         name: 'News',
-        redirect: '/news/sources',
+        redirect: 'news/sources',
         meta: { title: '资讯聚合管理', icon: 'Newspaper' },
         children: [
           {
@@ -172,7 +172,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'banner',
         name: 'Banner',
-        redirect: '/banner/list',
+        redirect: 'banner/list',
         meta: { title: 'Banner管理', icon: 'Picture' },
         children: [
           {
@@ -204,7 +204,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'flea-market',
         name: 'FleaMarket',
-        redirect: '/flea-market/categories',
+        redirect: 'flea-market/categories',
         meta: { title: '跳蚤市场管理', icon: 'ShoppingCart' },
         children: [
           {
@@ -236,7 +236,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'quotation',
         name: 'Quotation',
-        redirect: '/quotation/list',
+        redirect: 'quotation/list',
         meta: { title: '领导名言管理', icon: 'ChatDotRound' },
         children: [
           {
@@ -256,7 +256,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'audit',
         name: 'Audit',
-        redirect: '/audit/center',
+        redirect: 'audit/center',
         meta: { title: '统一审核中心', icon: 'Check', permission: 'audit:view' },
         children: [
           {
@@ -270,7 +270,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'operation',
         name: 'Operation',
-        redirect: '/operation/homepage',
+        redirect: 'operation/homepage',
         meta: { title: '运营与推荐管理', icon: 'Setting' },
         children: [
           {
@@ -300,7 +300,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'ai-tools',
             name: 'AITools',
-            redirect: '/operation/ai-tools/tools',
+            redirect: '/dashboard/operation/ai-tools/tools',
             meta: { title: '工具箱管理', icon: 'Tools' },
             children: [
               {
@@ -334,7 +334,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'portal-config',
         name: 'PortalConfig',
-        redirect: '/portal-config/navigation',
+        redirect: 'portal-config/navigation',
         meta: { title: '门户配置管理', icon: 'Grid', permission: 'portal:config:view' },
         children: [
           {
@@ -373,7 +373,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'system',
         name: 'System',
-        redirect: '/system/settings',
+        redirect: 'system/settings',
         meta: { title: '配置与审计', icon: 'Tools' },
         children: [
           {
@@ -401,8 +401,28 @@ const routes: RouteRecordRaw[] = [
             meta: { title: '权限验证', icon: 'Key', permission: 'system:settings:view', hideInMenu: true }
           }
         ]
+      },
+      // 测试页面
+      {
+        path: 'test',
+        name: 'TestPage',
+        component: () => import('@/views/test/TestPage.vue'),
+        meta: { title: '测试页面', icon: 'Test' }
       }
     ]
+  },
+  // 便捷访问路径的重定向规则
+  {
+    path: '/tools',
+    redirect: '/dashboard/operation/ai-tools/tools'
+  },
+  {
+    path: '/ai-tools',
+    redirect: '/dashboard/operation/ai-tools/tools'
+  },
+  {
+    path: '/ai-tools/tools',
+    redirect: '/dashboard/operation/ai-tools/tools'
   },
   // 明确禁止访问的审计日志路径
   {
@@ -430,9 +450,19 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  // 强制使用 Hash 模式以解决 Netlify 部署的路由问题
-  history: createWebHashHistory(import.meta.env.BASE_URL),
-  routes
+  // 使用 History 模式以支持 Netlify 部署
+  history: createWebHistory('/'),
+  routes,
+  // 严格模式，确保路由匹配精确
+  strict: true,
+  // 开启滚动行为
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
 })
 
 export default router

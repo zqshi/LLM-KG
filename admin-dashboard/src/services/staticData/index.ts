@@ -14,6 +14,15 @@ export * from './dashboard'
 // 其他模块数据
 export * from './other'
 
+// AI工具数据
+export * from './aiTools'
+
+// 反馈管理数据
+export * from './feedback'
+
+// 门户配置管理数据
+export * from './portalConfig'
+
 // 统一的静态数据集合
 export const staticData = {
   // 用户管理
@@ -50,7 +59,23 @@ export const staticData = {
   auditCenter: () => import('./other').then(m => m.auditCenter),
   operation: () => import('./other').then(m => m.operation),
   portalConfig: () => import('./other').then(m => m.portalConfig),
-  systemConfig: () => import('./other').then(m => m.systemConfig)
+  systemConfig: () => import('./other').then(m => m.systemConfig),
+  aiTools: () => import('./aiTools').then(m => m.aiTools),
+  aiToolTags: () => import('./aiTools').then(m => m.aiToolTags),
+  
+  // 反馈管理
+  feedbackItems: () => import('./feedback').then(m => m.feedbackItems),
+  feedbackDetails: () => import('./feedback').then(m => m.feedbackDetails),
+  feedbackStatistics: () => import('./feedback').then(m => m.feedbackStatistics),
+  availableProcessors: () => import('./feedback').then(m => m.availableProcessors),
+  
+  // 门户配置管理
+  navigationItems: () => import('./portalConfig').then(m => m.navigationItems),
+  entryPanels: () => import('./portalConfig').then(m => m.entryPanels),
+  entryItems: () => import('./portalConfig').then(m => m.entryItems),
+  configVersions: () => import('./portalConfig').then(m => m.configVersions),
+  auditLogs: () => import('./portalConfig').then(m => m.auditLogs),
+  portalStatistics: () => import('./portalConfig').then(m => m.portalStatistics)
 }
 
 // 静态数据类型定义

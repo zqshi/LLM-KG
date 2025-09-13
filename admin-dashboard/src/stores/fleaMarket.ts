@@ -88,7 +88,14 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
       }
     } catch (error) {
       console.error('获取商品列表失败:', error)
-      ElMessage.error('获取商品列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取商品列表失败')
+      }
     } finally {
       goodsLoading.value = false
     }
@@ -106,7 +113,14 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
       return response.data
     } catch (error) {
       console.error('获取商品详情失败:', error)
-      ElMessage.error('获取商品详情失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取商品详情失败')
+      }
       throw error
     }
   }
@@ -124,7 +138,14 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
       }
     } catch (error) {
       console.error('创建商品失败:', error)
-      ElMessage.error('创建商品失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('创建商品失败')
+      }
       throw error
     }
   }
@@ -311,7 +332,14 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
       }
     } catch (error) {
       console.error('获取分类列表失败:', error)
-      ElMessage.error('获取分类列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取分类列表失败')
+      }
     } finally {
       categoryLoading.value = false
     }
@@ -393,7 +421,14 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
       }
     } catch (error) {
       console.error('获取举报列表失败:', error)
-      ElMessage.error('获取举报列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取举报列表失败')
+      }
     } finally {
       reportLoading.value = false
     }
@@ -402,7 +437,7 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
   /**
    * 处理举报
    */
-  const handleReport = async (id: number, data: { handleRemark: string; action: string }) => {
+  const handleReport = async (id: number, data: { handleRemark: string; action: 'dismiss' | 'warn' | 'ban' | 'remove' }) => {
     try {
       const response = await fleaMarketApi.reports.handle(id, data)
       if (response.code === 200) {
@@ -434,7 +469,14 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
       }
     } catch (error) {
       console.error('获取统计数据失败:', error)
-      ElMessage.error('获取统计数据失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取统计数据失败')
+      }
     } finally {
       statisticsLoading.value = false
     }
@@ -451,7 +493,14 @@ export const useFleaMarketStore = defineStore('fleaMarket', () => {
       }
     } catch (error) {
       console.error('获取用户统计失败:', error)
-      ElMessage.error('获取用户统计失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取用户统计失败')
+      }
     }
   }
 

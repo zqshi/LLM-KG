@@ -16,6 +16,11 @@ const request: AxiosInstance = axios.create({
   }
 })
 
+// 检查是否为静态模式
+const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+  import.meta.env.VITE_API_BASE_URL === '' || 
+  !import.meta.env.VITE_API_BASE_URL
+
 // 请求拦截器
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -39,12 +44,12 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
+  (response: AxiosResponse<ApiResponse<any>>) => {
     const { data } = response
 
     // 统一处理响应格式
     if (data.code === 200) {
-      return data
+      return response
     } else if (data.code === 401) {
       // token过期或无效，清除本地存储并跳转到登录
       localStorage.removeItem('auth_token')
@@ -58,11 +63,14 @@ request.interceptors.response.use(
       return Promise.reject(new Error('认证失败，请重新登录'))
     } else {
       // 其他业务错误
-      ElMessage.error(data.message || '请求失败')
+      if (!isStaticMode) {
+        ElMessage.error(data.message || '请求失败')
+      }
       return Promise.reject(new Error(data.message || '请求失败'))
     }
   },
   error => {
+    console.error('API请求错误:', error)
     // 网络错误或其他错误
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token')
@@ -72,17 +80,35 @@ request.interceptors.response.use(
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'
       }
+      return Promise.reject(new Error('认证失败，请重新登录'))
     } else if (error.response?.status === 403) {
-      ElMessage.error('没有权限执行此操作')
+      if (!isStaticMode) {
+        ElMessage.error('没有权限执行此操作')
+      }
+      return Promise.reject(new Error('没有权限执行此操作'))
     } else if (error.response?.status >= 500) {
-      ElMessage.error('服务器错误，请稍后重试')
+      if (!isStaticMode) {
+        ElMessage.error('服务器错误，请稍后重试')
+      }
+      return Promise.reject(new Error('服务器错误，请稍后重试'))
     } else if (error.code === 'ECONNABORTED') {
-      ElMessage.error('请求超时，请稍后重试')
+      if (!isStaticMode) {
+        ElMessage.error('请求超时，请稍后重试')
+      }
+      return Promise.reject(new Error('请求超时，请稍后重试'))
+    } else if (error.message === 'Network Error') {
+      // 在静态模式下，不显示网络错误，因为这是预期的行为
+      if (!isStaticMode) {
+        ElMessage.error('网络连接失败，请检查网络设置')
+      }
+      return Promise.reject(new Error('网络连接失败，请检查网络设置'))
     } else {
-      ElMessage.error(error.message || '网络错误')
+      // 在静态模式下，不显示网络错误，因为这是预期的行为
+      if (!isStaticMode) {
+        ElMessage.error(error.message || '网络错误')
+      }
+      return Promise.reject(new Error(error.message || '网络错误'))
     }
-
-    return Promise.reject(error)
   }
 )
 

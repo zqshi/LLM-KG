@@ -15,7 +15,7 @@ export function setupRouterGuards(router: Router) {
     const blockedPaths = ['/rbac/audit-logs', '/content/audit-logs', '/audit/logs']
     if (blockedPaths.includes(to.path)) {
       console.log('阻止访问已废弃的审计日志路径:', to.path)
-      next('/system/logs') // 重定向到全局审计日志
+      next('/dashboard/system/logs') // 重定向到全局审计日志
       return
     }
     

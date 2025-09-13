@@ -80,10 +80,17 @@ export const useAuditStore = defineStore('audit', () => {
       
       const response = await auditTaskApi.getTasks(queryParams)
       // 由于axios响应拦截器返回完整response，需要访问response.data.data
-      taskList.value = response.data.data.list
-      pagination.total = response.data.data.total
+      taskList.value = response.data.list
+      pagination.total = response.data.total
     } catch (error) {
-      ElMessage.error('加载任务列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载任务列表失败')
+      }
       console.error('加载任务列表失败:', error)
     } finally {
       loading.value = false
@@ -93,10 +100,17 @@ export const useAuditStore = defineStore('audit', () => {
   const loadTaskDetail = async (taskId: string) => {
     try {
       const response = await auditTaskApi.getTask(taskId)
-      selectedTask.value = response.data.data
-      return response.data.data
+      selectedTask.value = response.data
+      return response.data
     } catch (error) {
-      ElMessage.error('加载任务详情失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载任务详情失败')
+      }
       console.error('加载任务详情失败:', error)
       return null
     }
@@ -162,9 +176,16 @@ export const useAuditStore = defineStore('audit', () => {
     try {
       const response = await auditTaskApi.getStats()
       // 由于axios响应拦截器返回完整response，需要访问response.data.data
-      Object.assign(dashboardStats, response.data.data)
+      Object.assign(dashboardStats, response.data)
     } catch (error) {
-      console.error('加载统计数据失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        console.error('加载统计数据失败:', error)
+      }
     }
   }
   
@@ -172,9 +193,16 @@ export const useAuditStore = defineStore('audit', () => {
   const loadPolicies = async () => {
     try {
       const response = await auditPolicyApi.getPolicies()
-      policyList.value = response.data.data
+      policyList.value = response.data
     } catch (error) {
-      ElMessage.error('加载策略列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载策略列表失败')
+      }
       console.error('加载策略列表失败:', error)
     }
   }
@@ -235,10 +263,17 @@ export const useAuditStore = defineStore('audit', () => {
   const loadWords = async (params?: { keyword?: string, action?: string, page?: number, size?: number }) => {
     try {
       const response = await sensitiveWordApi.getWords(params)
-      wordsList.value = response.data.data.list
-      pagination.total = response.data.data.total
+      wordsList.value = response.data.list
+      pagination.total = response.data.total
     } catch (error) {
-      ElMessage.error('加载敏感词列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载敏感词列表失败')
+      }
       console.error('加载敏感词列表失败:', error)
     }
   }
@@ -327,9 +362,16 @@ export const useAuditStore = defineStore('audit', () => {
   const loadAuditors = async (params?: { keyword?: string, role?: string, page?: number, size?: number }) => {
     try {
       const response = await auditorApi.getAuditors(params)
-      auditorsList.value = response.data.data.list
+      auditorsList.value = response.data.list
     } catch (error) {
-      ElMessage.error('加载审核员列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载审核员列表失败')
+      }
       console.error('加载审核员列表失败:', error)
     }
   }
@@ -389,7 +431,7 @@ export const useAuditStore = defineStore('audit', () => {
   const getAuditorStats = async (auditorId: number, dateRange?: [string, string]): Promise<AuditorStats | null> => {
     try {
       const response = await auditorApi.getAuditorStats(auditorId, dateRange)
-      return response.data.data
+      return response.data
     } catch (error) {
       console.error('获取审核员统计失败:', error)
       return null
@@ -398,7 +440,7 @@ export const useAuditStore = defineStore('audit', () => {
   
   const batchAssign = async (data: AssignForm) => {
     try {
-      await auditorApi.batchAssign(data)
+      await auditorApi.assignTasks(data)
       ElMessage.success('批量分配成功')
       await loadTasks()
       return true

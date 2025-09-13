@@ -5,7 +5,10 @@
 import type { ApiResponse } from '@/types'
 
 // 检查是否启用静态数据模式
-const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true'
+const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+  import.meta.env.VITE_API_BASE_URL === '' || 
+  !import.meta.env.VITE_API_BASE_URL
+console.log('API Adapter - Static Mode:', isStaticMode)
 
 // 模拟API响应延迟
 const mockDelay = (min = 100, max = 500) => {
@@ -17,14 +20,16 @@ const mockDelay = (min = 100, max = 500) => {
 const successResponse = <T>(data: T, message = '操作成功'): ApiResponse<T> => ({
   code: 200,
   message,
-  data
+  data,
+  success: true
 })
 
 // 通用的错误响应格式化
 const errorResponse = (message = '操作失败', code = 500): ApiResponse<null> => ({
   code,
   message,
-  data: null
+  data: null,
+  success: false
 })
 
 // 模拟分页功能
@@ -116,55 +121,63 @@ export const apiAdapter = {
       paginationParams?: Record<string, any>
     }
   ): Promise<ApiResponse<T>> => {
+    console.log('apiAdapter.get called - isStaticMode:', isStaticMode)
     if (isStaticMode) {
       await mockDelay()
       try {
+        console.log('Loading static data...')
         const data = await staticDataGetter()
+        console.log('Static data loaded:', data)
         
         // 如果需要分页处理
         if (options?.mockPagination) {
+          console.log('Applying pagination with params:', options.paginationParams)
           // 如果数据本身就是分页格式（包含list和total属性）
           if (data && typeof data === 'object' && 'list' in data && 'total' in data) {
             const paginatedData = mockPagination(
               (data as any).list as any[],
-              options.paginationParams?.page,
-              options.paginationParams?.pageSize,
+              options.paginationParams?.page || 1,
+              options.paginationParams?.pageSize || 10,
               options.paginationParams
             )
+            console.log('Paginated data:', paginatedData)
             return successResponse({
-              ...(data as object),
               list: paginatedData.list,
               total: paginatedData.total
-            } as T)
+            } as any)
           }
           // 如果数据是数组
           else if (Array.isArray(data)) {
             const paginatedData = mockPagination(
               data as any[],
-              options.paginationParams?.page,
-              options.paginationParams?.pageSize,
+              options.paginationParams?.page || 1,
+              options.paginationParams?.pageSize || 10,
               options.paginationParams
             )
+            console.log('Paginated array data:', paginatedData)
             return successResponse({
               list: paginatedData.list,
               total: paginatedData.total
-            } as T)
+            } as any)
           }
           // 如果数据不是数组也不是分页格式，但需要分页处理，则将其包装为分页格式
           else {
+            console.log('Non-array data, returning empty list')
             return successResponse({
               list: [],
               total: 0
-            } as T)
+            } as any)
           }
         }
         
+        console.log('Returning static data without pagination')
         return successResponse(data)
       } catch (error) {
         console.error('Static data loading error:', error)
         return errorResponse('静态数据加载失败') as unknown as ApiResponse<T>
       }
     } else {
+      console.log('Calling real API')
       return realApiCall()
     }
   },

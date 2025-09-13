@@ -29,12 +29,15 @@ import type {
   AIToolTagForm,
   AIToolQueryParams,
   AIToolTagQueryParams,
+  AIToolListResponse,
+  AIToolTagListResponse,
   AIToolBatchOperation,
   CaseAssociation,
   ForumPost,
   ForumPostQueryParams,
   ForumCategory,
-  AIToolStatistics
+  AIToolStatistics,
+  TagDeleteCheckResult
 } from '@/types/aiTools'
 import { ElMessage } from 'element-plus'
 
@@ -82,13 +85,17 @@ export const useAIToolsStore = defineStore('aiTools', () => {
     try {
       tagsLoading.value = true
       const response = await getTagList(params)
-      if (response.data.code === 200) {
-        tags.value = response.data.data.list
-        tagsTotal.value = response.data.data.total
+      console.log('fetchTagList response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        tags.value = response.data.list as AIToolTag[]
+        tagsTotal.value = response.data.total as number
       }
+      return response
     } catch (error) {
       console.error('获取标签列表失败:', error)
       ElMessage.error('获取标签列表失败')
+      throw error
     } finally {
       tagsLoading.value = false
     }
@@ -98,11 +105,23 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const fetchAllTags = async () => {
     try {
       const response = await getAllTags()
-      if (response.data.code === 200) {
-        allTags.value = response.data.data
+      console.log('fetchAllTags response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        allTags.value = response.data as AIToolTag[]
       }
+      return response
     } catch (error) {
       console.error('获取标签选项失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取标签选项失败')
+      }
+      throw error
     }
   }
   
@@ -110,15 +129,18 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const createNewTag = async (data: AIToolTagForm) => {
     try {
       const response = await createTag(data)
-      if (response.data.code === 200) {
+      console.log('createNewTag response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('标签创建成功')
         await fetchTagList() // 刷新列表
         await fetchAllTags() // 刷新选项
-        return response.data.data
+        return response.data as AIToolTag
       }
+      throw new Error(response?.message || '创建标签失败')
     } catch (error) {
       console.error('创建标签失败:', error)
-      ElMessage.error('创建标签失败')
+      ElMessage.error(error instanceof Error ? error.message : '创建标签失败')
       throw error
     }
   }
@@ -127,15 +149,18 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const updateExistingTag = async (id: number, data: AIToolTagForm) => {
     try {
       const response = await updateTag(id, data)
-      if (response.data.code === 200) {
+      console.log('updateExistingTag response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('标签更新成功')
         await fetchTagList() // 刷新列表
         await fetchAllTags() // 刷新选项
-        return response.data.data
+        return response.data as AIToolTag
       }
+      throw new Error(response?.message || '更新标签失败')
     } catch (error) {
       console.error('更新标签失败:', error)
-      ElMessage.error('更新标签失败')
+      ElMessage.error(error instanceof Error ? error.message : '更新标签失败')
       throw error
     }
   }
@@ -144,9 +169,12 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const checkTagDeletion = async (id: number) => {
     try {
       const response = await checkTagCanDelete(id)
-      if (response.data.code === 200) {
-        return response.data.data
+      console.log('checkTagDeletion response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        return response.data as TagDeleteCheckResult
       }
+      throw new Error(response?.message || '检查标签删除状态失败')
     } catch (error) {
       console.error('检查标签删除状态失败:', error)
       throw error
@@ -157,14 +185,18 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const removeTag = async (id: number) => {
     try {
       const response = await deleteTag(id)
-      if (response.data.code === 200) {
+      console.log('removeTag response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('标签删除成功')
         await fetchTagList() // 刷新列表
         await fetchAllTags() // 刷新选项
+        return
       }
+      throw new Error(response?.message || '删除标签失败')
     } catch (error) {
       console.error('删除标签失败:', error)
-      ElMessage.error('删除标签失败')
+      ElMessage.error(error instanceof Error ? error.message : '删除标签失败')
       throw error
     }
   }
@@ -175,14 +207,27 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const fetchToolList = async (params?: AIToolQueryParams) => {
     try {
       toolsLoading.value = true
+      console.log('fetchToolList called with params:', params)
       const response = await getToolList(params)
-      if (response.data.code === 200) {
-        tools.value = response.data.data.list
-        toolsTotal.value = response.data.data.total
+      console.log('getToolList response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        console.log('Setting tools data:', response.data)
+        tools.value = response.data.list as AITool[]
+        toolsTotal.value = response.data.total as number
       }
+      return response
     } catch (error) {
       console.error('获取工具列表失败:', error)
-      ElMessage.error('获取工具列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取工具列表失败')
+      }
+      throw error
     } finally {
       toolsLoading.value = false
     }
@@ -192,13 +237,16 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const fetchToolDetail = async (id: number) => {
     try {
       const response = await getToolDetail(id)
-      if (response.data.code === 200) {
-        currentTool.value = response.data.data
-        return response.data.data
+      console.log('fetchToolDetail response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        currentTool.value = response.data as AITool
+        return response.data as AITool
       }
+      throw new Error(response?.message || '获取工具详情失败')
     } catch (error) {
       console.error('获取工具详情失败:', error)
-      ElMessage.error('获取工具详情失败')
+      ElMessage.error(error instanceof Error ? error.message : '获取工具详情失败')
       throw error
     }
   }
@@ -207,14 +255,17 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const createNewTool = async (data: AIToolForm) => {
     try {
       const response = await createTool(data)
-      if (response.data.code === 200) {
+      console.log('createNewTool response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('工具创建成功')
         await fetchToolList() // 刷新列表
-        return response.data.data
+        return response.data as AITool
       }
+      throw new Error(response?.message || '创建工具失败')
     } catch (error) {
       console.error('创建工具失败:', error)
-      ElMessage.error('创建工具失败')
+      ElMessage.error(error instanceof Error ? error.message : '创建工具失败')
       throw error
     }
   }
@@ -223,14 +274,17 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const updateExistingTool = async (id: number, data: AIToolForm) => {
     try {
       const response = await updateTool(id, data)
-      if (response.data.code === 200) {
+      console.log('updateExistingTool response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('工具更新成功')
         await fetchToolList() // 刷新列表
-        return response.data.data
+        return response.data as AITool
       }
+      throw new Error(response?.message || '更新工具失败')
     } catch (error) {
       console.error('更新工具失败:', error)
-      ElMessage.error('更新工具失败')
+      ElMessage.error(error instanceof Error ? error.message : '更新工具失败')
       throw error
     }
   }
@@ -239,13 +293,17 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const removeTool = async (id: number) => {
     try {
       const response = await deleteTool(id)
-      if (response.data.code === 200) {
+      console.log('removeTool response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('工具删除成功')
         await fetchToolList() // 刷新列表
+        return
       }
+      throw new Error(response?.message || '删除工具失败')
     } catch (error) {
       console.error('删除工具失败:', error)
-      ElMessage.error('删除工具失败')
+      ElMessage.error(error instanceof Error ? error.message : '删除工具失败')
       throw error
     }
   }
@@ -254,14 +312,18 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const changeToolStatus = async (id: number, status: 'enabled' | 'disabled') => {
     try {
       const response = await toggleToolStatus(id, status)
-      if (response.data.code === 200) {
+      console.log('changeToolStatus response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         const statusText = status === 'enabled' ? '启用' : '禁用'
         ElMessage.success(`工具${statusText}成功`)
         await fetchToolList() // 刷新列表
+        return
       }
+      throw new Error(response?.message || '切换工具状态失败')
     } catch (error) {
       console.error('切换工具状态失败:', error)
-      ElMessage.error('切换工具状态失败')
+      ElMessage.error(error instanceof Error ? error.message : '切换工具状态失败')
       throw error
     }
   }
@@ -270,13 +332,17 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const batchOperateToolList = async (data: AIToolBatchOperation) => {
     try {
       const response = await batchOperateTools(data)
-      if (response.data.code === 200) {
+      console.log('batchOperateToolList response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('批量操作成功')
         await fetchToolList() // 刷新列表
+        return
       }
+      throw new Error(response?.message || '批量操作失败')
     } catch (error) {
       console.error('批量操作失败:', error)
-      ElMessage.error('批量操作失败')
+      ElMessage.error(error instanceof Error ? error.message : '批量操作失败')
       throw error
     }
   }
@@ -287,13 +353,16 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const fetchToolCases = async (toolId: number) => {
     try {
       const response = await getToolCases(toolId)
-      if (response.data.code === 200) {
-        currentToolCases.value = response.data.data
-        return response.data.data
+      console.log('fetchToolCases response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        currentToolCases.value = response.data as any[]
+        return response.data as any[]
       }
+      throw new Error(response?.message || '获取工具案例失败')
     } catch (error) {
       console.error('获取工具案例失败:', error)
-      ElMessage.error('获取工具案例失败')
+      ElMessage.error(error instanceof Error ? error.message : '获取工具案例失败')
       throw error
     }
   }
@@ -302,13 +371,17 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const associateToolCase = async (data: CaseAssociation) => {
     try {
       const response = await associateCase(data)
-      if (response.data.code === 200) {
+      console.log('associateToolCase response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('案例关联成功')
         await fetchToolCases(data.toolId) // 刷新案例列表
+        return
       }
+      throw new Error(response?.message || '关联案例失败')
     } catch (error) {
       console.error('关联案例失败:', error)
-      ElMessage.error('关联案例失败')
+      ElMessage.error(error instanceof Error ? error.message : '关联案例失败')
       throw error
     }
   }
@@ -317,13 +390,17 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const removeToolCase = async (toolId: number, postId: number) => {
     try {
       const response = await removeCase(toolId, postId)
-      if (response.data.code === 200) {
+      console.log('removeToolCase response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
         ElMessage.success('案例移除成功')
         await fetchToolCases(toolId) // 刷新案例列表
+        return
       }
+      throw new Error(response?.message || '移除案例失败')
     } catch (error) {
       console.error('移除案例失败:', error)
-      ElMessage.error('移除案例失败')
+      ElMessage.error(error instanceof Error ? error.message : '移除案例失败')
       throw error
     }
   }
@@ -334,12 +411,16 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const fetchForumCategories = async () => {
     try {
       const response = await getForumCategories()
-      if (response.data.code === 200) {
-        forumCategories.value = response.data.data
+      console.log('fetchForumCategories response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        forumCategories.value = response.data as ForumCategory[]
       }
+      return response
     } catch (error) {
       console.error('获取论坛版块失败:', error)
       ElMessage.error('获取论坛版块失败')
+      throw error
     }
   }
   
@@ -348,13 +429,24 @@ export const useAIToolsStore = defineStore('aiTools', () => {
     try {
       forumPostsLoading.value = true
       const response = await searchForumPosts(params)
-      if (response.data.code === 200) {
-        forumPosts.value = response.data.data.list
-        forumPostsTotal.value = response.data.data.total
+      console.log('searchPosts response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        forumPosts.value = response.data.list as ForumPost[]
+        forumPostsTotal.value = response.data.total as number
       }
+      return response
     } catch (error) {
       console.error('搜索帖子失败:', error)
-      ElMessage.error('搜索帖子失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('搜索帖子失败')
+      }
+      throw error
     } finally {
       forumPostsLoading.value = false
     }
@@ -366,11 +458,15 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const fetchStatistics = async () => {
     try {
       const response = await getToolStatistics()
-      if (response.data.code === 200) {
-        statistics.value = response.data.data
+      console.log('fetchStatistics response:', response)
+      // 类型检查 - 正确处理API响应结构
+      if (response && response.code === 200) {
+        statistics.value = response.data as AIToolStatistics
       }
+      return response
     } catch (error) {
       console.error('获取统计信息失败:', error)
+      throw error
     }
   }
   
@@ -380,12 +476,13 @@ export const useAIToolsStore = defineStore('aiTools', () => {
   const uploadLogo = async (file: File) => {
     try {
       const response = await uploadToolLogo(file)
-      if (response.data.code === 200) {
-        return response.data.data.url
+      if (response && response.code === 200) {
+        return response.data.url
       }
+      throw new Error(response?.message || '上传Logo失败')
     } catch (error) {
       console.error('上传Logo失败:', error)
-      ElMessage.error('上传Logo失败')
+      ElMessage.error(error instanceof Error ? error.message : '上传Logo失败')
       throw error
     }
   }

@@ -50,6 +50,14 @@ export const useNewsStore = defineStore('news', () => {
       }
     } catch (error) {
       console.error('获取统计数据失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取统计数据失败')
+      }
     }
   }
 
@@ -68,8 +76,15 @@ export const useNewsStore = defineStore('news', () => {
         pagination.value.total = response.data.total
       }
     } catch (error) {
-      ElMessage.error('获取资讯列表失败')
       console.error('获取资讯列表失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取资讯列表失败')
+      }
     } finally {
       loading.value = false
     }
@@ -84,6 +99,14 @@ export const useNewsStore = defineStore('news', () => {
       }
     } catch (error) {
       console.error('获取资讯源列表失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取资讯源列表失败')
+      }
     }
   }
 
@@ -96,6 +119,14 @@ export const useNewsStore = defineStore('news', () => {
       }
     } catch (error) {
       console.error('获取组织架构失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取组织架构失败')
+      }
     }
   }
 
@@ -243,8 +274,15 @@ export const useNewsStore = defineStore('news', () => {
       }
       return null
     } catch (error) {
-      ElMessage.error('获取资讯详情失败')
       console.error('获取资讯详情失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取资讯详情失败')
+      }
       return null
     }
   }

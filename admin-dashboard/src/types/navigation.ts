@@ -230,8 +230,8 @@ export enum AuditStatus {
   PENDING = 'pending'
 }
 
-// 审计日志接口
-export interface AuditLog extends BaseEntity {
+// 审计日志接口 (使用不同的名称避免冲突)
+export interface PortalAuditLog extends BaseEntity {
   user_id: number                // 用户ID
   user_name?: string            // 用户名称
   action: AuditAction           // 操作类型
@@ -336,8 +336,8 @@ export interface EntryPanelQueryParams extends PaginationParams {
   keyword?: string
 }
 
-// 审计日志查询参数接口
-export interface AuditLogQueryParams extends PaginationParams {
+// 审计日志查询参数接口 (使用不同的名称避免冲突)
+export interface PortalAuditLogQueryParams extends PaginationParams {
   startTime?: string
   endTime?: string
   action?: AuditAction

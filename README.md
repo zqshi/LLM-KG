@@ -129,7 +129,7 @@ npm run build
 
 ### Netlify 部署
 
-管理后台已经配置好可以通过 Netlify 进行托管演示：
+管理后台已经配置好可以通过 Netlify 进行托管演示。详细的部署指南请参考 [README_NETLIFY.md](README_NETLIFY.md) 文件。
 
 ```bash
 cd admin-dashboard

@@ -76,7 +76,14 @@ export const useContentStore = defineStore('content', () => {
       contentStats.value = data
     } catch (error) {
       console.error('加载统计数据失败:', error)
-      ElMessage.error('加载统计数据失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载统计数据失败')
+      }
     } finally {
       statsLoading.value = false
     }
@@ -100,7 +107,14 @@ export const useContentStore = defineStore('content', () => {
       
     } catch (error) {
       console.error('加载内容列表失败:', error)
-      ElMessage.error('加载内容列表失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载内容列表失败')
+      }
     } finally {
       loading.value = false
     }
@@ -112,6 +126,14 @@ export const useContentStore = defineStore('content', () => {
       categories.value = Array.isArray(data) ? data : []
     } catch (error) {
       console.error('加载版块列表失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载版块列表失败')
+      }
       categories.value = []
     }
   }
@@ -122,6 +144,14 @@ export const useContentStore = defineStore('content', () => {
       hotContents.value = data
     } catch (error) {
       console.error('加载热门内容失败:', error)
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('加载热门内容失败')
+      }
     }
   }
 
@@ -132,7 +162,14 @@ export const useContentStore = defineStore('content', () => {
       return data
     } catch (error) {
       console.error('获取内容详情失败:', error)
-      ElMessage.error('获取内容详情失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取内容详情失败')
+      }
       return null
     } finally {
       detailLoading.value = false
@@ -146,7 +183,14 @@ export const useContentStore = defineStore('content', () => {
       return data
     } catch (error) {
       console.error('获取内容预览失败:', error)
-      ElMessage.error('获取内容预览失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      if (!isStaticMode) {
+        ElMessage.error('获取内容预览失败')
+      }
       return null
     }
   }

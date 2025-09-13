@@ -19,12 +19,12 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/rbac',
       icon: 'Lock',
       children: [
-        { id: 11, name: '组织架构', path: '/rbac/organizations', icon: 'OfficeBuilding' },
-        { id: 12, name: '用户管理', path: '/rbac/users', icon: 'User' },
-        { id: 13, name: '角色管理', path: '/rbac/roles', icon: 'UserFilled' },
-        { id: 14, name: '权限点管理', path: '/rbac/permissions', icon: 'Key' },
-        { id: 15, name: '用户授权', path: '/rbac/user-roles', icon: 'Avatar' },
-        { id: 16, name: '数据同步配置', path: '/rbac/sync-config', icon: 'Refresh' }
+        { id: 11, name: '组织架构', path: '/dashboard/rbac/organizations', icon: 'OfficeBuilding' },
+        { id: 12, name: '用户管理', path: '/dashboard/rbac/users', icon: 'User' },
+        { id: 13, name: '角色管理', path: '/dashboard/rbac/roles', icon: 'UserFilled' },
+        { id: 14, name: '权限点管理', path: '/dashboard/rbac/permissions', icon: 'Key' },
+        { id: 15, name: '用户授权', path: '/dashboard/rbac/user-roles', icon: 'Avatar' },
+        { id: 16, name: '数据同步配置', path: '/dashboard/rbac/sync-config', icon: 'Refresh' }
       ]
     },
     {
@@ -33,10 +33,10 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/content',
       icon: 'Document',
       children: [
-        { id: 21, name: '版块管理', path: '/content/categories', icon: 'FolderOpened' },
-        { id: 24, name: '投票管理', path: '/content/polls', icon: 'DataBoard' },
-        { id: 26, name: '置顶/加精申请', path: '/content/feature-requests', icon: 'Star' },
-        { id: 23, name: '数据看板', path: '/content/dashboard', icon: 'DataBoard' }
+        { id: 21, name: '版块管理', path: '/dashboard/content/categories', icon: 'FolderOpened' },
+        { id: 24, name: '投票管理', path: '/dashboard/content/polls', icon: 'DataBoard' },
+        { id: 26, name: '置顶/加精申请', path: '/dashboard/content/feature-requests', icon: 'Star' },
+        { id: 23, name: '数据看板', path: '/dashboard/content/dashboard', icon: 'DataBoard' }
       ]
     },
     {
@@ -45,9 +45,9 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/news',
       icon: 'Newspaper',
       children: [
-        { id: 31, name: '资讯源管理', path: '/news/sources', icon: 'Connection' },
-        { id: 32, name: '资讯内容池', path: '/news/content-pool', icon: 'DataBoard' },
-        { id: 34, name: '任务监控', path: '/news/task-monitor', icon: 'Monitor' }
+        { id: 31, name: '资讯源管理', path: '/dashboard/news/sources', icon: 'Connection' },
+        { id: 32, name: '资讯内容池', path: '/dashboard/news/content-pool', icon: 'DataBoard' },
+        { id: 34, name: '任务监控', path: '/dashboard/news/task-monitor', icon: 'Monitor' }
       ]
     },
     {
@@ -56,10 +56,10 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/banner',
       icon: 'Picture',
       children: [
-        { id: 41, name: 'Banner列表', path: '/banner/list', icon: 'Picture' },
-        { id: 43, name: '我的待办', path: '/banner/my-todo', icon: 'Bell' },
-        { id: 44, name: '我的已办', path: '/banner/my-done', icon: 'CircleCheck' },
-        { id: 45, name: '状态追踪', path: '/banner/status-tracking', icon: 'DataLine' }
+        { id: 41, name: 'Banner列表', path: '/dashboard/banner/list', icon: 'Picture' },
+        { id: 43, name: '我的待办', path: '/dashboard/banner/my-todo', icon: 'Bell' },
+        { id: 44, name: '我的已办', path: '/dashboard/banner/my-done', icon: 'CircleCheck' },
+        { id: 45, name: '状态追踪', path: '/dashboard/banner/status-tracking', icon: 'DataLine' }
       ]
     },
     {
@@ -68,10 +68,10 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/flea-market',
       icon: 'ShoppingCart',
       children: [
-        { id: 61, name: '分类管理', path: '/flea-market/categories', icon: 'Menu' },
-        { id: 62, name: '商品管理', path: '/flea-market/goods', icon: 'Goods' },
-        { id: 63, name: '举报管理', path: '/flea-market/reports', icon: 'Warning' },
-        { id: 64, name: '数据看板', path: '/flea-market/dashboard', icon: 'DataBoard' }
+        { id: 61, name: '分类管理', path: '/dashboard/flea-market/categories', icon: 'Menu' },
+        { id: 62, name: '商品管理', path: '/dashboard/flea-market/goods', icon: 'Goods' },
+        { id: 63, name: '举报管理', path: '/dashboard/flea-market/reports', icon: 'Warning' },
+        { id: 64, name: '数据看板', path: '/dashboard/flea-market/dashboard', icon: 'DataBoard' }
       ]
     },
     {
@@ -80,8 +80,8 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/quotation',
       icon: 'ChatDotRound',
       children: [
-        { id: 71, name: '名言管理', path: '/quotation/list', icon: 'ChatDotRound' },
-        { id: 73, name: '展示配置', path: '/quotation/display', icon: 'Setting' }
+        { id: 71, name: '名言管理', path: '/dashboard/quotation/list', icon: 'ChatDotRound' },
+        { id: 73, name: '展示配置', path: '/dashboard/quotation/display', icon: 'Setting' }
       ]
     },
     {
@@ -89,29 +89,29 @@ function generateDefaultMenus(): MenuNode[] {
       name: '统一审核中心',
       path: '/audit',
       icon: 'Check',
-      children: [{ id: 81, name: '审核中心', path: '/audit/center', icon: 'Check' }]
+      children: [{ id: 81, name: '审核中心', path: '/dashboard/audit/center', icon: 'Check' }]
     },
     {
       id: 8,
       name: '运营与推荐管理',
-      path: '/operation',
+      path: '/dashboard/operation',
       icon: 'Setting',
       children: [
-        { id: 91, name: '首页配置', path: '/operation/homepage', icon: 'House' },
-        { id: 92, name: '推荐位管理', path: '/operation/recommendations', icon: 'Star' },
-        { id: 93, name: '榜单管理', path: '/operation/rankings', icon: 'TrendCharts' },
-        { id: 94, name: '数据看板', path: '/operation/dashboard', icon: 'DataBoard' },
+        { id: 91, name: '首页配置', path: '/dashboard/operation/homepage', icon: 'House' },
+        { id: 92, name: '推荐位管理', path: '/dashboard/operation/recommendations', icon: 'Star' },
+        { id: 93, name: '榜单管理', path: '/dashboard/operation/rankings', icon: 'TrendCharts' },
+        { id: 94, name: '数据看板', path: '/dashboard/operation/dashboard', icon: 'DataBoard' },
         {
           id: 95,
           name: '工具箱管理',
-          path: '/operation/ai-tools',
+          path: '/dashboard/operation/ai-tools',
           icon: 'Tools',
           children: [
-            { id: 951, name: '工具标签管理', path: '/operation/ai-tools/tags', icon: 'Collection' },
-            { id: 952, name: '工具列表', path: '/operation/ai-tools/tools', icon: 'Box' }
+            { id: 951, name: '工具标签管理', path: '/dashboard/operation/ai-tools/tags', icon: 'Collection' },
+            { id: 952, name: '工具列表', path: '/dashboard/operation/ai-tools/tools', icon: 'Box' }
           ]
         },
-        { id: 96, name: '问题反馈管理', path: '/operation/feedback', icon: 'ChatDotRound' }
+        { id: 96, name: '问题反馈管理', path: '/dashboard/operation/feedback', icon: 'ChatDotRound' }
       ]
     },
     {
@@ -120,10 +120,10 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/portal-config',
       icon: 'Grid',
       children: [
-        { id: 111, name: '导航管理', path: '/portal-config/navigation', icon: 'Menu' },
-        { id: 112, name: '入口面板', path: '/portal-config/entry-panel', icon: 'Grid' },
-        { id: 113, name: '版本管理', path: '/portal-config/version-control', icon: 'Clock' },
-        { id: 115, name: '性能监控', path: '/portal-config/performance', icon: 'Monitor' }
+        { id: 111, name: '导航管理', path: '/dashboard/portal-config/navigation', icon: 'Menu' },
+        { id: 112, name: '入口面板', path: '/dashboard/portal-config/entry-panel', icon: 'Grid' },
+        { id: 113, name: '版本管理', path: '/dashboard/portal-config/version-control', icon: 'Clock' },
+        { id: 115, name: '性能监控', path: '/dashboard/portal-config/performance', icon: 'Monitor' }
       ]
     },
     {
@@ -132,10 +132,10 @@ function generateDefaultMenus(): MenuNode[] {
       path: '/system',
       icon: 'Tools',
       children: [
-        { id: 121, name: '系统配置', path: '/system/settings', icon: 'Setting' },
-        { id: 122, name: '审计日志', path: '/system/logs', icon: 'DocumentChecked' },
-        { id: 123, name: '操作告警', path: '/system/alerts', icon: 'Bell' },
-        { id: 124, name: '权限验证', path: '/system/permissions-test', icon: 'Key', meta: { hideInMenu: true } }
+        { id: 121, name: '系统配置', path: '/dashboard/system/settings', icon: 'Setting' },
+        { id: 122, name: '审计日志', path: '/dashboard/system/logs', icon: 'DocumentChecked' },
+        { id: 123, name: '操作告警', path: '/dashboard/system/alerts', icon: 'Bell' },
+        { id: 124, name: '权限验证', path: '/dashboard/system/permissions-test', icon: 'Key', meta: { hideInMenu: true } }
       ]
     }
   ]

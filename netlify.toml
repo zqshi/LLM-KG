@@ -1,12 +1,12 @@
 [build]
-  command = "cd admin-dashboard && npm install && npm run build"
+  command = "cd admin-dashboard && npm ci && npm run build"
   publish = "admin-dashboard/dist"
   base = "/"
-  node_version = "18"
 
 [build.environment]
   VITE_STATIC_MODE = "true"
   VITE_API_BASE_URL = ""
+  NODE_ENV = "production"
 
 [[redirects]]
   from = "/*"

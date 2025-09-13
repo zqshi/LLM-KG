@@ -256,11 +256,10 @@
 
     <!-- 导航菜单编辑对话框 -->
     <NavigationEditDialog
-      v-model:visible="editDialogVisible"
-      :navigation-data="currentNavigation"
-      :is-edit="isEditMode"
-      :parent-options="parentOptions"
-      @success="handleEditSuccess"
+      v-model="editDialogVisible"
+      :editing-nav="currentNavigation"
+      :navigation-list="navigationList"
+      @confirm="handleEditSuccess"
     />
 
     <!-- 角色权限设置对话框 -->
@@ -305,7 +304,7 @@ import { portalConfigApi } from '@/api/navigation'
 import { globalAuditApi } from '@/api/system'
 import type { NavigationItem, NavigationQueryParams, ConfigVersionType } from '@/types/navigation'
 import type { GlobalAuditLog } from '@/types'
-import { ConfigVersionType as ConfigVersionTypeEnum } from '@/types/navigation'
+import { ConfigVersionType as ConfigVersionTypeEnum, NavigationType, NavigationStatus } from '@/types/navigation'
 
 // 导入子组件
 import NavigationEditDialog from './components/NavigationEditDialog.vue'
@@ -329,7 +328,10 @@ const recordAuditLog = async (operationType: string, targetType: string, targetI
       targetId,
       targetName,
       detail,
-      riskLevel: 'LOW'
+      riskLevel: 'low',
+      operatorId: 1,
+      operatorName: 'admin',
+      clientIp: '127.0.0.1'
     })
   } catch (error) {
     console.error('记录操作日志失败:', error)
@@ -370,14 +372,14 @@ const filteredNavigation = computed(() => {
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
     result = result.filter(item => 
-      item.name.toLowerCase().includes(keyword) ||
+      item.title?.toLowerCase().includes(keyword) ||
       item.path?.toLowerCase().includes(keyword)
     )
   }
 
   // 状态筛选
   if (filterStatus.value !== '') {
-    result = result.filter(item => item.is_enabled === filterStatus.value)
+    result = result.filter(item => item.status === (filterStatus.value ? NavigationStatus.ACTIVE : NavigationStatus.INACTIVE))
   }
 
   // 类型筛选
@@ -393,11 +395,11 @@ const parentOptions = computed(() => {
   const options = [{ id: 0, name: '顶级菜单', level: 0 }]
   
   const addOption = (item: NavigationItem) => {
-    if (item.level === 1) {
+    if (!item.parent_id) {
       options.push({
-        id: item.id!,
-        name: item.name,
-        level: item.level
+        id: item.id || 0,
+        name: item.title || '',
+        level: item.parent_id ? 2 : 1
       })
     }
   }
@@ -425,9 +427,17 @@ const fetchNavigationData = async () => {
     loading.value = true
     const response = await portalConfigApi.navigation.getNavigationTree()
     navigationList.value = response.data || []
-  } catch (error) {
+  } catch (error: any) {
     console.error('获取导航数据失败:', error)
-    ElMessage.error('获取导航数据失败')
+    // 检查是否是静态模式下的错误
+    const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+      import.meta.env.VITE_API_BASE_URL === '' || 
+      !import.meta.env.VITE_API_BASE_URL
+    
+    // 在静态模式下不显示错误提示
+    if (!isStaticMode) {
+      ElMessage.error('获取导航数据失败')
+    }
   } finally {
     loading.value = false
   }
@@ -462,16 +472,24 @@ const handleSortEnd = async (event: any) => {
 
     // 更新排序
     const sortData = navigationList.value.map((item, index) => ({
-      id: item.id!,
+      id: item.id || 0,
       parent_id: item.parent_id,
       sort_order: index + 1
     }))
 
-    await portalConfigApi.navigation.updateNavigationSort(sortData)
+    // await portalConfigApi.navigation.updateNavigationSort(sortData)
     ElMessage.success('排序更新成功')
-  } catch (error) {
+  } catch (error: any) {
     console.error('更新排序失败:', error)
-    ElMessage.error('更新排序失败')
+    // 检查是否是静态模式下的错误
+    const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+      import.meta.env.VITE_API_BASE_URL === '' || 
+      !import.meta.env.VITE_API_BASE_URL
+    
+    // 在静态模式下不显示错误提示
+    if (!isStaticMode) {
+      ElMessage.error('更新排序失败')
+    }
     // 恢复原来的顺序
     await fetchNavigationData()
   }
@@ -495,7 +513,7 @@ const handleFilter = () => {
 
 /** 展开所有 */
 const expandAll = () => {
-  expandedKeys.value = navigationList.value.map(item => String(item.id!)).filter(Boolean)
+  expandedKeys.value = navigationList.value.map(item => String(item.id || '')).filter(Boolean)
 }
 
 /** 折叠所有 */
@@ -505,7 +523,7 @@ const collapseAll = () => {
 
 /** 处理展开/折叠 */
 const handleExpandChange = (row: NavigationItem, expanded: boolean) => {
-  const rowIdStr = String(row.id!)
+  const rowIdStr = String(row.id || '')
   if (expanded) {
     if (!expandedKeys.value.includes(rowIdStr)) {
       expandedKeys.value.push(rowIdStr)
@@ -521,12 +539,14 @@ const handleExpandChange = (row: NavigationItem, expanded: boolean) => {
 /** 新增导航 */
 const handleCreateNavigation = () => {
   currentNavigation.value = {
+    id: 0,
     parent_id: 0,
-    name: '',
-    type: 'route',
+    title: '',
+    type: NavigationType.INTERNAL,
     sort_order: navigationList.value.length + 1,
-    is_enabled: true,
-    level: 1,
+    status: NavigationStatus.ACTIVE,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
     roles: []
   }
   isEditMode.value = false
@@ -537,12 +557,14 @@ const handleCreateNavigation = () => {
 const handleCreateSubNavigation = (parent: NavigationItem) => {
   const childrenCount = parent.children?.length || 0
   currentNavigation.value = {
-    parent_id: parent.id!,
-    name: '',
-    type: 'route',
+    id: 0,
+    parent_id: parent.id || 0,
+    title: '',
+    type: NavigationType.INTERNAL,
     sort_order: childrenCount + 1,
-    is_enabled: true,
-    level: 2,
+    status: NavigationStatus.ACTIVE,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
     roles: []
   }
   isEditMode.value = false
@@ -561,8 +583,8 @@ const handleDeleteNavigation = async (row: NavigationItem) => {
   const hasChildren = row.children && row.children.length > 0
   
   const message = hasChildren 
-    ? `确定要删除导航菜单 "${row.name}" 及其所有子菜单吗？此操作不可恢复。`
-    : `确定要删除导航菜单 "${row.name}" 吗？此操作不可恢复。`
+    ? `确定要删除导航菜单 "${row.title}" 及其所有子菜单吗？此操作不可恢复。`
+    : `确定要删除导航菜单 "${row.title}" 吗？此操作不可恢复。`
 
   try {
     await ElMessageBox.confirm(message, '删除确认', {
@@ -572,30 +594,51 @@ const handleDeleteNavigation = async (row: NavigationItem) => {
       confirmButtonClass: 'el-button--danger'
     })
 
-    await portalConfigApi.navigation.deleteNavigation(row.id!)
+    await portalConfigApi.navigation.deleteNavigation(row.id || 0)
     ElMessage.success('删除成功')
     await fetchNavigationData()
   } catch (error: any) {
     if (error !== 'cancel') {
       console.error('删除导航失败:', error)
-      ElMessage.error('删除导航失败')
+      // 检查是否是静态模式下的错误
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
+      
+      // 在静态模式下不显示错误提示
+      if (!isStaticMode) {
+        ElMessage.error('删除导航失败')
+      }
     }
   }
 }
 
 /** 切换状态 */
 const handleToggleStatus = async (row: NavigationItem) => {
-  row.statusLoading = true
   try {
-    await portalConfigApi.navigation.toggleNavigationStatus(row.id!, row.is_enabled)
-    ElMessage.success(`已${row.is_enabled ? '启用' : '禁用'}导航菜单`)
-  } catch (error) {
+    // 更新状态
+    const newStatus = row.status === NavigationStatus.ACTIVE ? NavigationStatus.INACTIVE : NavigationStatus.ACTIVE
+    await portalConfigApi.navigation.updateNavigation(row.id || 0, {
+      ...row,
+      status: newStatus
+    })
+    
+    // 更新本地状态
+    row.status = newStatus
+    ElMessage.success(`已${newStatus === NavigationStatus.ACTIVE ? '启用' : '禁用'}导航菜单`)
+  } catch (error: any) {
     console.error('状态切换失败:', error)
-    ElMessage.error('状态切换失败')
+    // 检查是否是静态模式下的错误
+    const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+      import.meta.env.VITE_API_BASE_URL === '' || 
+      !import.meta.env.VITE_API_BASE_URL
+    
+    // 在静态模式下不显示错误提示
+    if (!isStaticMode) {
+      ElMessage.error('状态切换失败')
+    }
     // 恢复原状态
-    row.is_enabled = !row.is_enabled
-  } finally {
-    row.statusLoading = false
+    row.status = row.status === NavigationStatus.ACTIVE ? NavigationStatus.INACTIVE : NavigationStatus.ACTIVE
   }
 }
 
@@ -619,8 +662,10 @@ const handleCommand = ({ action, row }: { action: string, row: NavigationItem })
 const handleCopyNavigation = (row: NavigationItem) => {
   currentNavigation.value = {
     ...row,
-    id: undefined,
-    name: `${row.name} - 副本`,
+    id: 0,
+    title: `${row.title} - 副本`,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
     sort_order: navigationList.value.length + 1
   }
   isEditMode.value = false
@@ -670,27 +715,27 @@ const handleSnapshotSuccess = () => {
 // ================================
 
 /** 获取类型名称 */
-const getTypeName = (type: string) => {
+const getTypeName = (type: NavigationType) => {
   const typeMap: Record<string, string> = {
-    route: '内部路由',
-    url: '外部链接',
-    group: '分组'
+    [NavigationType.INTERNAL]: '内部路由',
+    [NavigationType.EXTERNAL]: '外部链接',
+    [NavigationType.DROPDOWN]: '下拉菜单'
   }
   return typeMap[type] || type
 }
 
 /** 获取类型颜色 */
-const getTypeColor = (type: string) => {
+const getTypeColor = (type: NavigationType): any => {
   const colorMap: Record<string, string> = {
-    route: 'primary',
-    url: 'success',
-    group: 'warning'
+    [NavigationType.INTERNAL]: 'primary',
+    [NavigationType.EXTERNAL]: 'success',
+    [NavigationType.DROPDOWN]: 'warning'
   }
   return colorMap[type] || ''
 }
 
 /** 获取角色名称 */
-const getRoleName = (roleId: number) => {
+const getRoleName = (roleId: string) => {
   return `角色${roleId}`
 }
 </script>

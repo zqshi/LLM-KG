@@ -5,15 +5,7 @@
 
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
-
-// API 响应数据结构
-export interface ApiResponse<T = any> {
-  code: number
-  message: string
-  data: T
-  success: boolean
-  timestamp?: number
-}
+import type { ApiResponse } from '@/types'
 
 // 创建 axios 实例
 const createAxiosInstance = (): AxiosInstance => {
@@ -22,7 +14,7 @@ const createAxiosInstance = (): AxiosInstance => {
     timeout: 10000,
     headers: {
       'Content-Type': 'application/json'
-    }
+      }
   })
 
   // 请求拦截器
@@ -51,7 +43,7 @@ const createAxiosInstance = (): AxiosInstance => {
 
   // 响应拦截器
   instance.interceptors.response.use(
-    (response: AxiosResponse<ApiResponse>) => {
+    (response: AxiosResponse<ApiResponse<any>>) => {
       const { data } = response
       
       // 检查业务状态码

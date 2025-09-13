@@ -13,38 +13,59 @@ export const authApi = {
       !import.meta.env.VITE_API_BASE_URL
 
     if (isStaticMode) {
-      const allUsers: User[] = await staticData.users()
-      // 在静态模式下，检查用户名和密码
-      const user: User | undefined = allUsers.find((u: User) => u.username === data.username)
-      if (!user) {
-        throw new Error('用户不存在')
-      }
-      // 简单的密码验证（在实际应用中应该使用加密密码）
-      if (data.password !== 'admin123') {
-        throw new Error('密码错误')
-      }
-      
-      // 获取用户权限
-      const userPermissions: string[] = user.roles.reduce((perms: string[], role: any) => {
-        role.permissions.forEach((perm: any) => {
-          if (!perms.includes(perm.code)) {
-            perms.push(perm.code)
+      try {
+        const allUsers: User[] = await staticData.users()
+        // 在静态模式下，检查用户名和密码
+        const user: User | undefined = allUsers.find((u: User) => u.username === data.username)
+        if (!user) {
+          return {
+            code: 401,
+            message: '用户不存在',
+            data: null as any,
+            success: false
           }
-        })
-        return perms
-      }, [])
-      
-      return {
-        code: 200,
-        message: '登录成功',
-        data: {
-          token: 'static_mode_token_' + Date.now(),
-          refreshToken: 'static_mode_refresh_token_' + Date.now(),
-          user: user,
-          permissions: userPermissions,
-          menus: [] // 在静态模式下返回空菜单，由store处理
-        },
-        timestamp: Date.now()
+        }
+        // 简单的密码验证（在实际应用中应该使用加密密码）
+        if (data.password !== 'admin123') {
+          return {
+            code: 401,
+            message: '密码错误',
+            data: null as any,
+            success: false
+          }
+        }
+        
+        // 获取用户权限
+        const permissions: string[] = user.roles.reduce((perms: string[], role: any) => {
+          if (role.permissions) {
+            role.permissions.forEach((perm: any) => {
+              if (perm.code && !perms.includes(perm.code)) {
+                perms.push(perm.code);
+              }
+            });
+          }
+          return perms;
+        }, []);
+        
+        return {
+          code: 200,
+          message: '登录成功',
+          data: {
+            token: 'static_mode_token_' + Date.now(),
+            user: user,
+            permissions: permissions,
+            menus: [] // 在静态模式下返回空菜单，由store处理
+          },
+          success: true
+        }
+      } catch (error) {
+        console.error('静态模式登录错误:', error)
+        return {
+          code: 500,
+          message: '登录处理失败',
+          data: null as any,
+          success: false
+        }
       }
     } else {
       // 调用真实API
@@ -63,8 +84,7 @@ export const authApi = {
       return {
         code: 200,
         message: '登出成功',
-        data: undefined,
-        timestamp: Date.now()
+        data: undefined
       }
     } else {
       // 调用真实API
@@ -87,8 +107,7 @@ export const authApi = {
       return {
         code: 200,
         message: '获取用户信息成功',
-        data: user,
-        timestamp: Date.now()
+        data: user
       }
     } else {
       // 调用真实API
@@ -262,8 +281,7 @@ export const authApi = {
       return {
         code: 200,
         message: '获取用户菜单成功',
-        data: menus,
-        timestamp: Date.now()
+        data: menus
       }
     } else {
       // 调用真实API
@@ -284,8 +302,7 @@ export const authApi = {
         message: 'Token刷新成功',
         data: {
           token: 'static_mode_refreshed_token_' + Date.now()
-        },
-        timestamp: Date.now()
+        }
       }
     } else {
       // 调用真实API
@@ -306,16 +323,14 @@ export const authApi = {
         return {
           code: 400,
           message: '原密码错误',
-          data: undefined,
-          timestamp: Date.now()
+          data: undefined
         }
       }
       
       return {
         code: 200,
         message: '密码修改成功',
-        data: undefined,
-        timestamp: Date.now()
+        data: undefined
       }
     } else {
       // 调用真实API
@@ -336,8 +351,7 @@ export const authApi = {
         message: '权限校验成功',
         data: {
           hasPermission: true // 在静态模式下总是返回true（已移除权限控制）
-        },
-        timestamp: Date.now()
+        }
       }
     } else {
       // 调用真实API
