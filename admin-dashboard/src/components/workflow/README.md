@@ -13,7 +13,7 @@
 
 ## 📦 安装使用
 
-```vue
+``vue
 <template>
   <UnifiedWorkflowViewer
     :workflow-data="workflowData"
@@ -87,7 +87,7 @@ const bannerInfo = {
 
 #### WorkflowData
 
-```typescript
+``typescript
 interface WorkflowData {
   steps: WorkflowStep[]           // 工作流步骤数组
   operationHistory?: OperationRecord[]  // 操作历史记录
@@ -98,7 +98,7 @@ interface WorkflowData {
 
 #### WorkflowStep
 
-```typescript
+``typescript
 interface WorkflowStep {
   id: string | number            // 步骤ID
   name: string                   // 步骤名称
@@ -113,7 +113,7 @@ interface WorkflowStep {
 
 #### BannerInfo
 
-```typescript
+``typescript
 interface BannerInfo {
   id: number                     // Banner ID
   title: string                  // Banner标题
@@ -157,7 +157,7 @@ interface BannerInfo {
 
 ### 基础使用
 
-```vue
+``vue
 <!-- 最简单的使用方式 -->
 <UnifiedWorkflowViewer
   :workflow-data="workflowData"
@@ -167,7 +167,7 @@ interface BannerInfo {
 
 ### 嵌入式使用
 
-```vue
+``vue
 <!-- 作为对话框内容 -->
 <el-dialog title="审批流程" width="1000px">
   <UnifiedWorkflowViewer
@@ -181,7 +181,7 @@ interface BannerInfo {
 
 ### 独立页面使用
 
-```vue
+``vue
 <!-- 作为独立页面展示 -->
 <UnifiedWorkflowViewer
   :workflow-data="workflowData"
@@ -195,7 +195,7 @@ interface BannerInfo {
 
 组件使用CSS变量，支持主题定制：
 
-```css
+``css
 .unified-workflow-viewer {
   --primary-color: #409eff;
   --success-color: #67c23a;
@@ -217,7 +217,7 @@ interface BannerInfo {
 
 ### 从 List.vue 迁移
 
-```vue
+``vue
 <!-- 旧的使用方式 -->
 <div class="workflow-tracking">
   <el-steps :active="getActiveStep(workflowSteps)">
@@ -236,7 +236,7 @@ interface BannerInfo {
 
 ### 从 StatusTracking.vue 迁移
 
-```vue
+``vue
 <!-- 旧的使用方式 -->
 <div class="workflow-diagram">
   <div class="workflow-steps">
@@ -258,17 +258,17 @@ interface BannerInfo {
 
 ### 本地开发
 
-```bash
+```
 # 启动开发服务器
 npm run dev
 
 # 查看示例页面
-# http://localhost:3000/components/workflow/example
+# http://localhost:3108/components/workflow/example
 ```
 
 ### 测试
 
-```bash
+```
 # 运行单元测试
 npm run test
 

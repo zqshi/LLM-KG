@@ -91,7 +91,7 @@ npm run dev:full
 
 # 或者分别启动
 npm run mock    # 启动mock服务器 (http://localhost:3008)
-npm run dev     # 启动前端开发服务器 (http://localhost:3000)
+npm run dev     # 启动前端开发服务器 (http://localhost:3108)
 ```
 
 ### 构建生产版本
