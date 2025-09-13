@@ -19,65 +19,54 @@ export const newsSources = async (): Promise<NewsSource[]> => {
       name: '科技日报RSS',
       type: 'rss',
       url: 'https://www.kjrb.com/rss/news.xml',
-      category: 'technology',
+      category: ['technology'],
       status: 'active',
-      fetchInterval: 30,
-      lastFetch: '2024-01-15 10:30:00',
-      nextFetch: '2024-01-15 11:00:00',
-      totalFetched: 1245,
-      todayFetched: 25,
+      lastFetchTime: '2024-01-15 10:30:00',
+      requiresReview: true,
+      autoDedup: true,
+      autoCategory: false,
+      healthScore: 98,
       successRate: 98.5,
-      creator: '系统管理员',
+      todayFetchCount: 25,
       createTime: '2024-01-10 09:00:00',
-      config: {
-        titleSelector: 'title',
-        contentSelector: 'description',
-        dateSelector: 'pubDate',
-        authorSelector: 'author'
-      }
+      selectorTitle: 'title',
+      selectorContent: 'description'
     },
     {
       id: 2,
       name: '新浪财经API',
       type: 'api',
       url: 'https://finance.sina.com.cn/api/news',
-      category: 'finance',
+      category: ['finance'],
       status: 'active',
-      fetchInterval: 15,
-      lastFetch: '2024-01-15 10:45:00',
-      nextFetch: '2024-01-15 11:00:00',
-      totalFetched: 2156,
-      todayFetched: 42,
+      lastFetchTime: '2024-01-15 10:45:00',
+      requiresReview: true,
+      autoDedup: true,
+      autoCategory: false,
+      healthScore: 95,
       successRate: 95.2,
-      creator: '内容管理员',
+      todayFetchCount: 42,
       createTime: '2024-01-08 14:30:00',
-      config: {
-        apiKey: 'hidden',
-        format: 'json',
-        limit: 50
-      }
+      method: 'GET'
     },
     {
       id: 3,
       name: '网易新闻爬虫',
       type: 'crawler',
       url: 'https://news.163.com',
-      category: 'general',
+      category: ['general'],
       status: 'inactive',
-      fetchInterval: 60,
-      lastFetch: '2024-01-14 20:15:00',
-      nextFetch: null,
-      totalFetched: 856,
-      todayFetched: 0,
+      lastFetchTime: '2024-01-14 20:15:00',
+      requiresReview: true,
+      autoDedup: true,
+      autoCategory: false,
+      healthScore: 90,
       successRate: 89.7,
-      creator: '技术管理员',
+      todayFetchCount: 0,
       createTime: '2024-01-05 11:20:00',
-      config: {
-        listSelector: '.news-list li',
-        titleSelector: '.title a',
-        linkSelector: '.title a',
-        dateSelector: '.time'
-      }
+      contentSelector: '.news-list li',
+      titleSelector: '.title a',
+      linkSelector: '.title a'
     }
   ]
 }
@@ -90,12 +79,12 @@ export const newsArticles = async (): Promise<NewsArticle[]> => {
     {
       id: 1,
       title: 'AI技术发展迎来新突破',
-      content: '近日，国内外多家科技公司在人工智能领域取得重大进展...',
-      summary: '人工智能技术在多个领域实现突破性发展',
-      author: '李科技',
-      source: '科技日报',
+      description: '人工智能技术在多个领域实现突破性发展',
+      cleanContent: '近日，国内外多家科技公司在人工智能领域取得重大进展...',
+      sourceName: '科技日报',
       sourceId: 1,
       sourceUrl: 'https://www.kjrb.com/news/123456',
+      sourceType: 'rss',
       category: 'technology',
       tags: ['人工智能', '科技', '突破'],
       publishTime: '2024-01-15 09:30:00',
@@ -103,24 +92,19 @@ export const newsArticles = async (): Promise<NewsArticle[]> => {
       status: 'published',
       qualityScore: 85,
       viewCount: 1256,
-      shareCount: 45,
-      auditStatus: 'approved',
-      auditor: '内容审核员',
-      auditTime: '2024-01-15 09:45:00',
-      duplicateCount: 0,
-      isTop: false,
-      isRecommend: true,
-      visibility: ['public']
+      likeCount: 45,
+      isDuplicate: false,
+      createTime: '2024-01-15 09:30:00'
     },
     {
       id: 2,
       title: '股市今日大涨，科技股表现亮眼',
-      content: '今日A股市场表现强劲，特别是科技板块领涨...',
-      summary: 'A股科技板块今日表现强劲',
-      author: '张财经',
-      source: '新浪财经',
+      description: 'A股科技板块今日表现强劲',
+      cleanContent: '今日A股市场表现强劲，特别是科技板块领涨...',
+      sourceName: '新浪财经',
       sourceId: 2,
       sourceUrl: 'https://finance.sina.com.cn/news/789012',
+      sourceType: 'api',
       category: 'finance',
       tags: ['股市', '科技股', '大涨'],
       publishTime: '2024-01-15 11:15:00',
@@ -128,24 +112,20 @@ export const newsArticles = async (): Promise<NewsArticle[]> => {
       status: 'published',
       qualityScore: 78,
       viewCount: 892,
-      shareCount: 23,
-      auditStatus: 'approved',
-      auditor: '财经编辑',
-      auditTime: '2024-01-15 11:30:00',
-      duplicateCount: 1,
-      isTop: true,
-      isRecommend: true,
-      visibility: ['public']
+      likeCount: 23,
+      isDuplicate: true,
+      similarity: 85,
+      createTime: '2024-01-15 11:15:00'
     },
     {
       id: 3,
       title: '新能源汽车销量再创新高',
-      content: '据最新统计数据显示，本月新能源汽车销量突破历史记录...',
-      summary: '新能源汽车市场持续增长',
-      author: '王汽车',
-      source: '汽车之家',
+      description: '新能源汽车市场持续增长',
+      cleanContent: '据最新统计数据显示，本月新能源汽车销量突破历史记录...',
+      sourceName: '汽车之家',
       sourceId: 1,
       sourceUrl: 'https://www.autohome.com.cn/news/345678',
+      sourceType: 'crawler',
       category: 'automobile',
       tags: ['新能源', '汽车', '销量'],
       publishTime: '2024-01-15 14:20:00',
@@ -153,14 +133,110 @@ export const newsArticles = async (): Promise<NewsArticle[]> => {
       status: 'pending',
       qualityScore: 82,
       viewCount: 456,
-      shareCount: 12,
-      auditStatus: 'pending',
-      auditor: null,
-      auditTime: null,
-      duplicateCount: 0,
-      isTop: false,
-      isRecommend: false,
-      visibility: ['public']
+      likeCount: 12,
+      isDuplicate: false,
+      createTime: '2024-01-15 14:20:00'
+    },
+    // 为内容池演示新增的5条数据
+    {
+      id: 4,
+      title: '5G技术在智慧城市建设中的应用',
+      description: '5G技术推动智慧城市发展',
+      cleanContent: '随着5G技术的快速发展，其在智慧城市建设中的应用越来越广泛。从智能交通到环境监测，5G为城市管理提供了全新的解决方案...',
+      sourceName: '通信产业报',
+      sourceId: 1,
+      sourceUrl: 'https://www.txcb.com/news/5g-smart-city',
+      sourceType: 'rss',
+      category: 'technology',
+      tags: ['5G', '智慧城市', '通信'],
+      publishTime: '2024-01-16 10:15:00',
+      fetchTime: '2024-01-16 11:30:00',
+      status: 'pending',
+      qualityScore: 88,
+      viewCount: 0,
+      likeCount: 0,
+      isDuplicate: false,
+      createTime: '2024-01-16 10:15:00'
+    },
+    {
+      id: 5,
+      title: '数字货币发展现状与未来趋势',
+      description: '数字货币改变金融格局',
+      cleanContent: '数字货币作为金融科技的重要组成部分，正逐步改变着传统金融体系。本文分析了当前数字货币的发展现状，并展望了未来趋势...',
+      sourceName: '金融时报',
+      sourceId: 2,
+      sourceUrl: 'https://www.jrsb.com/news/digital-currency',
+      sourceType: 'api',
+      category: 'finance',
+      tags: ['数字货币', '金融科技', '区块链'],
+      publishTime: '2024-01-16 14:30:00',
+      fetchTime: '2024-01-16 15:45:00',
+      status: 'pending',
+      qualityScore: 92,
+      viewCount: 0,
+      likeCount: 0,
+      isDuplicate: false,
+      createTime: '2024-01-16 14:30:00'
+    },
+    {
+      id: 6,
+      title: '绿色能源转型加速，太阳能发电成本持续下降',
+      description: '太阳能发电成本持续下降',
+      cleanContent: '在全球碳中和目标推动下，绿色能源转型步伐不断加快。最新数据显示，太阳能发电成本已连续三年下降，有望成为最具竞争力的能源形式...',
+      sourceName: '能源报',
+      sourceId: 1,
+      sourceUrl: 'https://www.nyb.com/news/solar-energy-cost',
+      sourceType: 'rss',
+      category: 'technology',
+      tags: ['绿色能源', '太阳能', '碳中和'],
+      publishTime: '2024-01-17 09:45:00',
+      fetchTime: '2024-01-17 11:00:00',
+      status: 'pending',
+      qualityScore: 85,
+      viewCount: 0,
+      likeCount: 0,
+      isDuplicate: false,
+      createTime: '2024-01-17 09:45:00'
+    },
+    {
+      id: 7,
+      title: '人工智能在医疗诊断中的应用前景',
+      description: 'AI助力医疗诊断精准化',
+      cleanContent: '人工智能技术在医疗领域的应用正逐步深入，特别是在医学影像诊断方面展现出巨大潜力。专家预测，AI将在未来五年内显著提升诊断准确率...',
+      sourceName: '医学前沿',
+      sourceId: 1,
+      sourceUrl: 'https://www.yxyq.com/news/ai-medical-diagnosis',
+      sourceType: 'rss',
+      category: 'technology',
+      tags: ['人工智能', '医疗', '诊断'],
+      publishTime: '2024-01-17 13:20:00',
+      fetchTime: '2024-01-17 14:35:00',
+      status: 'pending',
+      qualityScore: 90,
+      viewCount: 0,
+      likeCount: 0,
+      isDuplicate: false,
+      createTime: '2024-01-17 13:20:00'
+    },
+    {
+      id: 8,
+      title: '跨境电商发展迎来新机遇',
+      description: '跨境电商发展势头良好',
+      cleanContent: '随着全球贸易数字化转型加速，跨境电商正迎来新的发展机遇。政策支持、物流完善和技术进步为行业发展提供了强劲动力...',
+      sourceName: '国际贸易报',
+      sourceId: 2,
+      sourceUrl: 'https://www.gjmyb.com/news/cross-border-ecommerce',
+      sourceType: 'api',
+      category: 'finance',
+      tags: ['跨境电商', '国际贸易', '数字化'],
+      publishTime: '2024-01-18 11:00:00',
+      fetchTime: '2024-01-18 12:15:00',
+      status: 'pending',
+      qualityScore: 78,
+      viewCount: 0,
+      likeCount: 0,
+      isDuplicate: false,
+      createTime: '2024-01-18 11:00:00'
     }
   ]
 }
@@ -174,55 +250,34 @@ export const newsTasks = async (): Promise<NewsTask[]> => {
       id: 1,
       sourceId: 1,
       sourceName: '科技日报RSS',
-      type: 'fetch',
-      status: 'completed',
+      status: 'success',
       startTime: '2024-01-15 10:30:00',
       endTime: '2024-01-15 10:32:15',
       duration: 135,
-      fetchedCount: 12,
-      processedCount: 10,
-      successCount: 9,
-      failedCount: 1,
-      duplicateCount: 2,
-      errorMessage: null,
-      creator: '系统定时任务',
-      progress: 100
+      fetchCount: 12,
+      errorMessage: undefined
     },
     {
       id: 2,
       sourceId: 2,
       sourceName: '新浪财经API',
-      type: 'fetch',
       status: 'running',
       startTime: '2024-01-15 11:00:00',
-      endTime: null,
-      duration: null,
-      fetchedCount: 25,
-      processedCount: 20,
-      successCount: 18,
-      failedCount: 2,
-      duplicateCount: 5,
-      errorMessage: null,
-      creator: '系统定时任务',
-      progress: 65
+      endTime: undefined,
+      duration: undefined,
+      fetchCount: 25,
+      errorMessage: undefined
     },
     {
       id: 3,
       sourceId: 3,
       sourceName: '网易新闻爬虫',
-      type: 'test',
       status: 'failed',
       startTime: '2024-01-15 09:15:00',
       endTime: '2024-01-15 09:16:30',
       duration: 75,
-      fetchedCount: 0,
-      processedCount: 0,
-      successCount: 0,
-      failedCount: 1,
-      duplicateCount: 0,
-      errorMessage: '连接超时，无法访问目标网站',
-      creator: '管理员',
-      progress: 0
+      fetchCount: 0,
+      errorMessage: '连接超时，无法访问目标网站'
     }
   ]
 }
@@ -236,31 +291,31 @@ export const newsLogs = async (): Promise<NewsLogEntry[]> => {
       id: 1,
       sourceId: 1,
       sourceName: '科技日报RSS',
-      taskId: 1,
-      level: 'info',
+      time: '2024-01-15 10:32:15',
+      level: 'success',
       message: '成功获取12篇新闻',
-      details: { fetchedCount: 12, processedCount: 10, successCount: 9 },
-      timestamp: '2024-01-15 10:32:15'
+      fetchCount: 12,
+      duration: 135
     },
     {
       id: 2,
       sourceId: 2,
       sourceName: '新浪财经API',
-      taskId: 2,
+      time: '2024-01-15 11:05:30',
       level: 'warning',
       message: 'API响应时间较慢',
-      details: { responseTime: 3500, threshold: 2000 },
-      timestamp: '2024-01-15 11:05:30'
+      fetchCount: 25,
+      duration: 3500
     },
     {
       id: 3,
       sourceId: 3,
       sourceName: '网易新闻爬虫',
-      taskId: 3,
+      time: '2024-01-15 09:16:30',
       level: 'error',
       message: '连接超时，无法访问目标网站',
-      details: { error: 'Connection timeout', url: 'https://news.163.com' },
-      timestamp: '2024-01-15 09:16:30'
+      fetchCount: 0,
+      duration: 75
     }
   ]
 }
@@ -270,23 +325,10 @@ export const newsLogs = async (): Promise<NewsLogEntry[]> => {
  */
 export const newsSourceStats = async (): Promise<NewsSourceStats> => {
   return {
-    totalSources: 15,
-    activeSources: 12,
-    inactiveSources: 3,
-    todayFetched: 156,
-    totalFetched: 12456,
-    avgSuccessRate: 94.2,
-    sourcesByType: [
-      { type: 'rss', count: 8 },
-      { type: 'api', count: 4 },
-      { type: 'crawler', count: 3 }
-    ],
-    sourcesByCategory: [
-      { category: 'technology', count: 6 },
-      { category: 'finance', count: 4 },
-      { category: 'general', count: 3 },
-      { category: 'sports', count: 2 }
-    ]
+    active: 12,
+    warning: 2,
+    error: 1,
+    totalFetched: 12456
   }
 }
 
@@ -295,32 +337,13 @@ export const newsSourceStats = async (): Promise<NewsSourceStats> => {
  */
 export const newsStats = async (): Promise<NewsStats> => {
   return {
-    totalNews: 8756,
-    todayNews: 45,
-    pendingNews: 12,
-    publishedNews: 8532,
-    rejectedNews: 212,
-    avgQualityScore: 78.5,
-    newsByCategory: [
-      { category: 'technology', count: 2856, percentage: 32.6 },
-      { category: 'finance', count: 2145, percentage: 24.5 },
-      { category: 'general', count: 1876, percentage: 21.4 },
-      { category: 'sports', count: 1879, percentage: 21.5 }
-    ],
-    qualityDistribution: [
-      { range: '90-100', count: 1245 },
-      { range: '80-90', count: 2856 },
-      { range: '70-80', count: 3456 },
-      { range: '60-70', count: 1199 }
-    ],
-    trendData: [
-      { date: '2024-01-10', count: 42, avgScore: 76.5 },
-      { date: '2024-01-11', count: 38, avgScore: 78.2 },
-      { date: '2024-01-12', count: 51, avgScore: 79.1 },
-      { date: '2024-01-13', count: 46, avgScore: 77.8 },
-      { date: '2024-01-14', count: 49, avgScore: 78.9 },
-      { date: '2024-01-15', count: 45, avgScore: 78.5 }
-    ]
+    pendingCount: 12,
+    duplicateCount: 5,
+    todayApproved: 45,
+    avgProcessTime: 12.5,
+    totalFetched: 8756,
+    activeSourceCount: 12,
+    errorSourceCount: 3
   }
 }
 
@@ -329,21 +352,10 @@ export const newsStats = async (): Promise<NewsStats> => {
  */
 export const newsTaskStats = async (): Promise<NewsTaskStats> => {
   return {
-    totalTasks: 456,
     runningTasks: 3,
-    completedTasks: 398,
-    failedTasks: 55,
-    avgDuration: 125,
-    successRate: 87.3,
-    tasksByType: [
-      { type: 'fetch', count: 380 },
-      { type: 'test', count: 76 }
-    ],
-    statusDistribution: [
-      { name: '已完成', value: 398 },
-      { name: '运行中', value: 3 },
-      { name: '失败', value: 55 }
-    ]
+    todaySuccess: 45,
+    todayFailed: 5,
+    totalFetched: 1245
   }
 }
 
@@ -353,23 +365,23 @@ export const newsTaskStats = async (): Promise<NewsTaskStats> => {
 export const organizations = async (): Promise<OrganizationNode[]> => {
   return [
     {
-      id: 1,
+      id: '1',
       name: '总部',
       type: 'department',
       parentId: null,
       children: [
         {
-          id: 2,
+          id: '2',
           name: '技术部',
           type: 'department',
-          parentId: 1,
+          parentId: '1',
           children: []
         },
         {
-          id: 3,
+          id: '3',
           name: '内容部',
           type: 'department',
-          parentId: 1,
+          parentId: '1',
           children: []
         }
       ]

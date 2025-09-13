@@ -187,6 +187,117 @@ export const posts = [
     createTime: '2024-12-07 11:20:00',
     updateTime: '2024-12-07 11:20:00',
     publishTime: '2024-12-07 11:30:00'
+  },
+  // 为内容池演示新增的5条数据
+  {
+    id: 6,
+    title: '公司新政策解读：远程办公制度更新',
+    content: '随着工作方式的不断演进，公司决定更新远程办公制度，以更好地平衡工作效率与员工福祉。新政策将从下月开始实施，主要变化包括：1）每周可申请2天远程办公；2）远程办公需提前一天申请；3）重要会议需到公司参加等。',
+    categoryId: 3,
+    category: categories[2],
+    author: {
+      id: 7,
+      name: '人事部',
+      avatar: '/avatars/hr.jpg'
+    },
+    status: 2,
+    isTop: false,
+    isEssence: false,
+    viewCount: 1245,
+    likeCount: 67,
+    commentCount: 32,
+    tags: ['政策', '远程办公', '人力资源'],
+    createTime: '2024-12-15 09:00:00',
+    updateTime: '2024-12-15 09:00:00',
+    publishTime: '2024-12-15 09:30:00'
+  },
+  {
+    id: 7,
+    title: '技术分享：微服务架构在电商平台的实践',
+    content: '本次分享将详细介绍我们团队在电商平台项目中实施微服务架构的经验和教训。内容包括服务拆分策略、数据一致性处理、分布式事务解决方案等关键技术点。',
+    categoryId: 1,
+    category: categories[0],
+    author: {
+      id: 8,
+      name: '架构师小王',
+      avatar: '/avatars/architect.jpg'
+    },
+    status: 2,
+    isTop: true,
+    isEssence: true,
+    viewCount: 2156,
+    likeCount: 189,
+    commentCount: 45,
+    tags: ['微服务', '架构', '电商'],
+    createTime: '2024-12-14 14:30:00',
+    updateTime: '2024-12-14 14:30:00',
+    publishTime: '2024-12-14 15:00:00'
+  },
+  {
+    id: 8,
+    title: '员工健康计划：年度体检安排通知',
+    content: '为了关爱员工健康，公司将于下月组织年度体检活动。体检时间从3月1日持续到3月15日，地点在市人民医院体检中心。请各位同事根据部门安排的时间前往体检。',
+    categoryId: 4,
+    category: categories[3],
+    author: {
+      id: 9,
+      name: '行政部',
+      avatar: '/avatars/admin.jpg'
+    },
+    status: 2,
+    isTop: false,
+    isEssence: false,
+    viewCount: 876,
+    likeCount: 42,
+    commentCount: 18,
+    tags: ['健康', '体检', '福利'],
+    createTime: '2024-12-13 11:20:00',
+    updateTime: '2024-12-13 11:20:00',
+    publishTime: '2024-12-13 11:45:00'
+  },
+  {
+    id: 9,
+    title: '前端技术趋势：2024年值得关注的框架和工具',
+    content: '随着2024年的到来，前端技术领域又有哪些新的发展趋势？本文将分析今年值得关注的前端框架、构建工具和开发实践，帮助开发者把握技术方向。',
+    categoryId: 1,
+    category: categories[0],
+    author: {
+      id: 10,
+      name: '前端专家',
+      avatar: '/avatars/frontend.jpg'
+    },
+    status: 1,
+    isTop: false,
+    isEssence: false,
+    viewCount: 0,
+    likeCount: 0,
+    commentCount: 0,
+    tags: ['前端', '框架', '技术趋势'],
+    createTime: '2024-12-16 10:30:00',
+    updateTime: '2024-12-16 10:30:00',
+    publishTime: null
+  },
+  {
+    id: 10,
+    title: '团队建设活动：春季户外拓展计划',
+    content: '为了增强团队凝聚力，公司计划在本月底组织春季户外拓展活动。活动地点在郊外度假村，包含团队协作游戏、烧烤聚餐等丰富内容。欢迎大家踊跃报名参与。',
+    categoryId: 5,
+    category: categories[4],
+    author: {
+      id: 11,
+      name: '工会',
+      avatar: '/avatars/union.jpg'
+    },
+    status: 2,
+    isTop: false,
+    isEssence: false,
+    viewCount: 567,
+    likeCount: 38,
+    commentCount: 25,
+    tags: ['团建', '活动', '户外'],
+    createTime: '2024-12-12 16:45:00',
+    updateTime: '2024-12-12 16:45:00',
+    publishTime: '2024-12-12 17:00:00'
   }
 ]
 
@@ -245,6 +356,143 @@ export const polls = [
     ],
     createTime: '2024-12-12 10:00:00',
     updateTime: '2024-12-14 16:00:00'
+  },
+  // 为投票页面演示新增的5条数据
+  {
+    id: 3,
+    title: '新办公室装修风格选择',
+    description: '公司即将搬迁到新办公室，请大家投票选择喜欢的装修风格',
+    type: 'single',
+    categoryId: 3,
+    category: categories[2],
+    author: {
+      id: 12,
+      name: '行政部李经理',
+      avatar: '/avatars/admin2.jpg'
+    },
+    status: 1,
+    isAnonymous: false,
+    allowAddOption: true,
+    startTime: '2024-12-15 09:00:00',
+    endTime: '2024-12-22 18:00:00',
+    totalVotes: 78,
+    options: [
+      { id: 1, text: '现代简约风格', votes: 32, voters: [] },
+      { id: 2, text: '工业风格', votes: 25, voters: [] },
+      { id: 3, text: '北欧风格', votes: 21, voters: [] }
+    ],
+    createTime: '2024-12-15 09:00:00',
+    updateTime: '2024-12-16 14:30:00'
+  },
+  {
+    id: 4,
+    title: '年度优秀员工评选',
+    description: '请为心目中的年度优秀员工投票（可多选）',
+    type: 'multiple',
+    categoryId: 3,
+    category: categories[2],
+    author: {
+      id: 13,
+      name: '人事部王主管',
+      avatar: '/avatars/hr2.jpg'
+    },
+    status: 1,
+    isAnonymous: true,
+    allowAddOption: false,
+    startTime: '2024-12-10 00:00:00',
+    endTime: '2024-12-25 23:59:59',
+    totalVotes: 156,
+    options: [
+      { id: 1, text: '技术部张工', votes: 67, voters: [] },
+      { id: 2, text: '市场部李经理', votes: 45, voters: [] },
+      { id: 3, text: '设计部王设计师', votes: 52, voters: [] },
+      { id: 4, text: '客服部赵专员', votes: 38, voters: [] }
+    ],
+    createTime: '2024-12-10 09:00:00',
+    updateTime: '2024-12-16 16:45:00'
+  },
+  {
+    id: 5,
+    title: '团队旅游目的地选择',
+    description: '公司计划组织年度团队旅游，请选择心仪的目的地',
+    type: 'single',
+    categoryId: 5,
+    category: categories[4],
+    author: {
+      id: 14,
+      name: '工会主席',
+      avatar: '/avatars/union2.jpg'
+    },
+    status: 2,
+    isAnonymous: false,
+    allowAddOption: true,
+    startTime: '2024-12-01 00:00:00',
+    endTime: '2024-12-10 23:59:59',
+    totalVotes: 134,
+    options: [
+      { id: 1, text: '三亚海滨', votes: 58, voters: [] },
+      { id: 2, text: '桂林山水', votes: 32, voters: [] },
+      { id: 3, text: '张家界', votes: 24, voters: [] },
+      { id: 4, text: '西安古城', votes: 20, voters: [] }
+    ],
+    createTime: '2024-12-01 10:00:00',
+    updateTime: '2024-12-10 18:30:00'
+  },
+  {
+    id: 6,
+    title: '新项目技术栈选择',
+    description: '即将启动的新项目，需要确定使用的技术栈（可多选）',
+    type: 'multiple',
+    categoryId: 1,
+    category: categories[0],
+    author: {
+      id: 15,
+      name: '技术总监',
+      avatar: '/avatars/cto.jpg'
+    },
+    status: 1,
+    isAnonymous: false,
+    allowAddOption: true,
+    startTime: '2024-12-14 00:00:00',
+    endTime: '2024-12-21 23:59:59',
+    totalVotes: 42,
+    options: [
+      { id: 1, text: 'Vue 3 + TypeScript', votes: 38, voters: [] },
+      { id: 2, text: 'React + TypeScript', votes: 35, voters: [] },
+      { id: 3, text: 'Angular', votes: 12, voters: [] },
+      { id: 4, text: 'Node.js后端', votes: 40, voters: [] },
+      { id: 5, text: 'Python后端', votes: 28, voters: [] }
+    ],
+    createTime: '2024-12-14 09:30:00',
+    updateTime: '2024-12-16 11:20:00'
+  },
+  {
+    id: 7,
+    title: '办公用品采购意见征集',
+    description: '为了提升办公舒适度，请选择需要采购的办公用品',
+    type: 'multiple',
+    categoryId: 3,
+    category: categories[2],
+    author: {
+      id: 16,
+      name: '行政助理',
+      avatar: '/avatars/admin3.jpg'
+    },
+    status: 1,
+    isAnonymous: true,
+    allowAddOption: true,
+    startTime: '2024-12-13 00:00:00',
+    endTime: '2024-12-20 23:59:59',
+    totalVotes: 65,
+    options: [
+      { id: 1, text: '人体工学椅', votes: 45, voters: [] },
+      { id: 2, text: '双屏显示器', votes: 38, voters: [] },
+      { id: 3, text: '机械键盘', votes: 32, voters: [] },
+      { id: 4, text: '降噪耳机', votes: 28, voters: [] },
+      { id: 5, text: '站立办公桌', votes: 25, voters: [] }
+    ],
+    createTime: '2024-12-13 14:20:00',
+    updateTime: '2024-12-16 09:15:00'
   }
 ]
 
