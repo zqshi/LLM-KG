@@ -430,12 +430,8 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  // 修改为 createWebHashHistory 以解决 Netlify 部署的路由问题
-  history: import.meta.env.VITE_STATIC_MODE === 'true' || 
-    import.meta.env.VITE_API_BASE_URL === '' || 
-    !import.meta.env.VITE_API_BASE_URL 
-    ? createWebHashHistory() 
-    : createWebHistory(),
+  // 强制使用 Hash 模式以解决 Netlify 部署的路由问题
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes
 })
 
