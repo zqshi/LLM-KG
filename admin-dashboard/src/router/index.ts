@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
@@ -430,7 +430,12 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  // 修改为 createWebHashHistory 以解决 Netlify 部署的路由问题
+  history: import.meta.env.VITE_STATIC_MODE === 'true' || 
+    import.meta.env.VITE_API_BASE_URL === '' || 
+    !import.meta.env.VITE_API_BASE_URL 
+    ? createWebHashHistory() 
+    : createWebHistory(),
   routes
 })
 
