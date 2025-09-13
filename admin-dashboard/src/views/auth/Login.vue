@@ -1,16 +1,25 @@
 <template>
   <div class="login-container">
-    <div class="login-form">
+    <div class="login-card">
       <div class="login-header">
-        <h2>企业知识聚合平台</h2>
-        <p>管理端登录</p>
+        <div class="logo">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 8L8 24L24 40L40 24L24 8Z" fill="var(--color-primary)" stroke="var(--color-primary)" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M24 8V40" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 24H40" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 16L32 32" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M32 16L16 32" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="title">企业知识聚合平台</h1>
+        <p class="subtitle">管理后台登录</p>
       </div>
       
       <el-form
         ref="loginFormRef"
         :model="loginForm"
         :rules="loginRules"
-        class="login-form-content"
+        class="login-form"
         @keyup.enter="handleLogin"
       >
         <el-form-item prop="username">
@@ -19,6 +28,7 @@
             placeholder="请输入用户名"
             size="large"
             prefix-icon="User"
+            class="login-input"
           />
         </el-form-item>
         
@@ -30,18 +40,22 @@
             size="large"
             prefix-icon="Lock"
             show-password
+            class="login-input"
           />
         </el-form-item>
         
         <el-form-item>
-          <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
+          <div class="remember-forgot">
+            <el-checkbox v-model="loginForm.remember" size="large">记住密码</el-checkbox>
+            <el-link type="primary" :underline="false">忘记密码？</el-link>
+          </div>
         </el-form-item>
         
         <el-form-item>
           <el-button
             type="primary"
             size="large"
-            style="width: 100%"
+            class="login-button"
             :loading="loading"
             @click="handleLogin"
           >
@@ -53,7 +67,7 @@
           <el-button
             type="success"
             size="large"
-            style="width: 100%"
+            class="demo-button"
             @click="handleDemoLogin"
           >
             演示模式
@@ -62,7 +76,8 @@
       </el-form>
       
       <div class="login-footer">
-        <p>演示账号：admin / 123456</p>
+        <p class="demo-info">演示账号：admin / admin123</p>
+        <div class="version-info">v2.0.0</div>
       </div>
     </div>
   </div>
@@ -82,7 +97,7 @@ const loading = ref(false)
 
 const loginForm = reactive({
   username: 'admin',
-  password: '123456',
+  password: 'admin123',
   remember: false
 })
 
@@ -107,7 +122,7 @@ const handleLogin = async () => {
       try {
         console.log('开始登录流程...')
         // 调用auth store的登录方法
-        await authStore.login({
+        const result = await authStore.login({
           username: loginForm.username,
           password: loginForm.password
         })
@@ -123,9 +138,13 @@ const handleLogin = async () => {
         // 获取重定向路径或默认跳转到dashboard
         const redirect = router.currentRoute.value.query.redirect as string
         console.log('准备跳转到:', redirect || '/dashboard')
-        router.push(redirect || '/dashboard')
-      } catch (error) {
-        ElMessage.error('用户名或密码错误')
+        
+        // 确保跳转执行
+        setTimeout(() => {
+          router.push(redirect || '/dashboard')
+        }, 100)
+      } catch (error: any) {
+        ElMessage.error(error.message || '用户名或密码错误')
         console.error('登录失败:', error)
       } finally {
         loading.value = false
@@ -148,7 +167,9 @@ const handleDemoLogin = async () => {
     ElMessage.success('已进入演示模式')
     
     // 跳转到仪表盘
-    router.push('/dashboard')
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 100)
   } catch (error) {
     ElMessage.error('进入演示模式失败')
     console.error('演示模式登录失败:', error)
@@ -164,32 +185,46 @@ const handleDemoLogin = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
   position: relative;
   overflow: hidden;
+  padding: var(--spacing-xl);
 }
 
 .login-container::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-  opacity: 0.3;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+  z-index: 0;
 }
 
-.login-form {
-  width: 420px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.2);
-  padding: var(--spacing-4xl);
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-2xl);
   position: relative;
   z-index: 1;
+  border: 1px solid var(--color-border-light);
   animation: slideInUp 0.6s ease-out;
+  transition: all var(--transition-medium);
+}
+
+.login-card:hover {
+  box-shadow: var(--shadow-2xl);
+  transform: translateY(-4px);
 }
 
 @keyframes slideInUp {
@@ -205,32 +240,155 @@ const handleDemoLogin = async () => {
 
 .login-header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
 }
 
-.login-header h2 {
-  font-size: 28px;
-  font-weight: 700;
+.logo {
+  margin: 0 auto var(--spacing-lg);
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--gradient-primary-soft);
+  padding: var(--spacing-sm);
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-sm) 0;
-  background: linear-gradient(135deg, var(--color-primary) 0%, #722ed1 100%);
+  margin: 0 0 var(--spacing-xs);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.login-header p {
+.subtitle {
   color: var(--color-text-secondary);
   margin: 0;
-  font-size: 16px;
-  font-weight: 400;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-normal);
 }
 
-.login-form-content {
-  margin-bottom: var(--spacing-lg);
+.login-form {
+  margin-bottom: var(--spacing-xl);
+}
+
+.login-input {
+  :deep(.el-input__wrapper) {
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border-light);
+    transition: all var(--transition-fast);
+    
+    &:hover {
+      border-color: var(--color-primary);
+    }
+    
+    &.is-focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+  }
+  
+  :deep(.el-input__prefix) {
+    margin-right: var(--spacing-sm);
+  }
+}
+
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  :deep(.el-checkbox__label) {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+  }
+  
+  :deep(.el-link) {
+    font-size: var(--text-sm);
+  }
+}
+
+.login-button,
+.demo-button {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-base);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  transition: all var(--transition-fast);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.login-button {
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  
+  &:hover {
+    box-shadow: var(--shadow-floating);
+  }
+}
+
+.demo-button {
+  background: var(--gradient-success);
+  border: none;
+  color: white;
+  
+  &:hover {
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+  }
 }
 
 .login-footer {
   text-align: center;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.demo-info {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.version-info {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .login-container {
+    padding: var(--spacing-md);
+  }
+  
+  .login-card {
+    padding: var(--spacing-xl);
+  }
+  
+  .title {
+    font-size: var(--text-xl);
+  }
+  
+  .logo {
+    width: 56px;
+    height: 56px;
+  }
 }
 </style>

@@ -90,6 +90,7 @@ export interface SystemLog {
   description: string
   ip: string
   userAgent: string
+  level?: 'debug' | 'info' | 'warn' | 'error'
   createdAt: string
 }
 

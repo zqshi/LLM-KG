@@ -46,14 +46,14 @@
           label="今日已处理"
           :icon="Check"
           type="info"
-          :trend="`${dashboardStats.avgProcessTime}分钟`"
+          :trend="dashboardStats.avgProcessTime"
           trend-label="平均处理时长"
           trend-type="neutral"
         />
       </el-col>
 
       <el-col :span="6">
-        <StatCard
+        <StatsCard
           :value="`${dashboardStats.approvalRate}%`"
           label="审核通过率"
           :icon="CircleCheck"
@@ -65,12 +65,12 @@
       </el-col>
 
       <el-col :span="6">
-        <StatCard
+        <StatsCard
           :value="dashboardStats.todayRejected"
           label="今日拒绝"
           :icon="Close"
           type="danger"
-          :trend="`${dashboardStats.rejectionRate}%`"
+          :trend="dashboardStats.rejectionRate"
           trend-label="拒绝率"
           trend-type="down"
         />

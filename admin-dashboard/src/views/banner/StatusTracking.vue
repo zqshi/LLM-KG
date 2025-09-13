@@ -66,7 +66,7 @@
                       {{ row.startTime }} ~ {{ row.endTime }}
                     </el-descriptions-item>
                     <el-descriptions-item label="优先级">
-                      <el-tag :type="getPriorityType(row.priority)" size="small">
+                      <el-tag :type="getPriorityType(row.priority) || undefined" size="small">
                         {{ getPriorityText(row.priority) }}
                       </el-tag>
                     </el-descriptions-item>
@@ -87,7 +87,7 @@
                   :key="index"
                   :title="step.name"
                   :description="getStepDescription(step)"
-                  :status="getStepStatus(step)"
+                  :status="getStepStatus(step) || undefined"
                 >
                   <template #icon>
                     <el-icon v-if="step.status === 'approved'"><SuccessFilled /></el-icon>
@@ -134,7 +134,7 @@
       <el-table-column prop="submitTime" label="提交时间" width="160" />
       <el-table-column label="当前状态" width="120">
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.currentStatus)">
+          <el-tag :type="getStatusType(row.currentStatus) || undefined">
             {{ getStatusText(row.currentStatus) }}
           </el-tag>
         </template>
@@ -301,7 +301,7 @@ const transformToWorkflowData = (item: TrackingItem): { workflowData: WorkflowDa
 }
 
 const getPriorityType = (priority: string) => {
-  const typeMap: Record<string, string> = {
+  const typeMap: Record<string, import('element-plus').TagProps['type'] | ''> = {
     high: 'danger',
     normal: 'warning',
     low: 'info'
@@ -319,7 +319,7 @@ const getPriorityText = (priority: string) => {
 }
 
 const getStatusType = (status: string) => {
-  const statusMap: Record<string, string> = {
+  const statusMap: Record<string, import('element-plus').TagProps['type'] | ''> = {
     pending: 'warning',
     reviewing: 'info',
     approved: 'success',
@@ -342,8 +342,8 @@ const getStatusText = (status: string) => {
   return statusMap[status] || status
 }
 
-const getStepStatus = (step: WorkflowStep) => {
-  const statusMap: Record<string, string> = {
+const getStepStatus = (step: TrackingItem['workflowSteps'][0]) => {
+  const statusMap: Record<string, import('element-plus').StepProps['status']> = {
     pending: 'wait',
     processing: 'process',
     approved: 'finish',
@@ -373,15 +373,15 @@ const getStepStatusText = (status: string) => {
   return textMap[status] || status
 }
 
-const getStepDescription = (step: WorkflowStep) => {
-  const approvers = step.approvers.join(', ')
+const getStepDescription = (step: TrackingItem['workflowSteps'][0]) => {
+  const approvers = step.approvers?.join(', ') || '未指定'
   if (step.processTime) {
     return `${approvers} | ${step.processTime}`
   }
   return approvers
 }
 
-const getActiveStep = (steps: WorkflowStep[]) => {
+const getActiveStep = (steps: TrackingItem['workflowSteps']) => {
   const processingIndex = steps.findIndex(step => step.status === 'processing')
   if (processingIndex !== -1) return processingIndex
   
@@ -389,7 +389,7 @@ const getActiveStep = (steps: WorkflowStep[]) => {
   return approvedCount
 }
 
-const getProgressPercentage = (steps: WorkflowStep[]) => {
+const getProgressPercentage = (steps: TrackingItem['workflowSteps']) => {
   const approvedCount = steps.filter(step => step.status === 'approved').length
   const rejectedCount = steps.filter(step => step.status === 'rejected').length
   
@@ -498,7 +498,7 @@ const fetchTrackingList = async () => {
       {
         id: 1,
         bannerTitle: '春节活动Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/FF6B6B/FFFFFF?text=Spring+Festival',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRkY2QjZCIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuWbouWbouS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/spring-festival',
         startTime: '2024-02-01 00:00:00',
         endTime: '2024-02-29 23:59:59',
@@ -557,7 +557,7 @@ const fetchTrackingList = async () => {
       {
         id: 2,
         bannerTitle: '产品发布会Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/4ECDC4/FFFFFF?text=Product+Launch',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNEVDREMwIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/product-launch',
         startTime: '2024-03-01 00:00:00',
         endTime: '2024-03-15 23:59:59',

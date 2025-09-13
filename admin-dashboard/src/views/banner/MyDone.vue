@@ -70,14 +70,14 @@
       </el-table-column>
       <el-table-column label="处理结果" width="100">
         <template #default="{ row }">
-          <el-tag :type="getResultType(row.result)">
+          <el-tag :type="getResultType(row.result) || undefined">
             {{ getResultText(row.result) }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="当前状态" width="100">
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.currentStatus)">
+          <el-tag :type="getStatusType(row.currentStatus) || undefined">
             {{ getStatusText(row.currentStatus) }}
           </el-tag>
         </template>
@@ -140,7 +140,7 @@
           <el-card shadow="never">
             <div class="record-header">
               <div class="result-info">
-                <el-tag :type="getResultType(currentBanner.result)" size="large">
+                <el-tag :type="getResultType(currentBanner.result) || undefined" size="large">
                   {{ getResultText(currentBanner.result) }}
                 </el-tag>
                 <span class="process-time">{{ currentBanner.processTime }}</span>
@@ -235,7 +235,7 @@ const currentBanner = ref<DoneItem | null>(null)
 const approvalHistory = ref<ApprovalRecord[]>([])
 
 const getResultType = (result: string) => {
-  const typeMap: Record<string, string> = {
+  const typeMap: Record<string, import('element-plus').TagProps['type']> = {
     approved: 'success',
     rejected: 'danger',
     delegated: 'warning'
@@ -253,7 +253,7 @@ const getResultText = (result: string) => {
 }
 
 const getStatusType = (status: string) => {
-  const statusMap: Record<string, string> = {
+  const statusMap: Record<string, import('element-plus').TagProps['type'] | ''> = {
     draft: '',
     pending: 'warning',
     reviewing: 'info',
@@ -349,7 +349,7 @@ const viewHistory = async (item: DoneItem) => {
     {
       time: item.processTime,
       operator: '当前用户',
-      action: item.result,
+      action: item.result === 'approved' ? 'approve' : item.result === 'rejected' ? 'reject' : 'delegate',
       comment: item.processComment,
       node: '运营总监审核'
     }
@@ -369,8 +369,9 @@ const revokeApproval = async (item: DoneItem) => {
     console.log('撤回审批:', item)
     ElMessage.success('撤回成功')
     fetchDoneList()
-  } catch {
-    
+  } catch (error) {
+    console.error('撤回审批失败:', error)
+    ElMessage.error('撤回审批失败')
   }
 }
 
@@ -417,7 +418,7 @@ const fetchDoneList = async () => {
       {
         id: 1,
         bannerTitle: '年终活动Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/FF6B6B/FFFFFF?text=Year+End+Activity',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRkY2QjZCIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuWbouWbouS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/year-end',
         startTime: '2024-01-15 00:00:00',
         endTime: '2024-01-31 23:59:59',
@@ -433,7 +434,7 @@ const fetchDoneList = async () => {
       {
         id: 2,
         bannerTitle: '新产品宣传Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/4ECDC4/FFFFFF?text=New+Product',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNEVDREMwIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/new-product',
         startTime: '2024-02-01 00:00:00',
         endTime: '2024-02-15 23:59:59',
@@ -449,7 +450,7 @@ const fetchDoneList = async () => {
       {
         id: 3,
         bannerTitle: '员工招聘Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/45B7D1/FFFFFF?text=Recruitment',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNDVCN0QxIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuWksei0p+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/recruitment',
         startTime: '2024-02-10 00:00:00',
         endTime: '2024-03-10 23:59:59',
@@ -465,7 +466,7 @@ const fetchDoneList = async () => {
       {
         id: 4,
         bannerTitle: '培训通知Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/96CEB4/FFFFFF?text=Training',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjOTZDRUI0Ii8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuWbhuWbhuWKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/training-notice',
         startTime: '2024-03-01 00:00:00',
         endTime: '2024-03-15 23:59:59',

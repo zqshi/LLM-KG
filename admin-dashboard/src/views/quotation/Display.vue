@@ -204,7 +204,7 @@
           </template>
           
           <div v-loading="popularLoading" class="popular-list">
-            <el-empty v-if="popularQuotations.length === 0" description="暂无数据" />
+            <el-empty v-if="!popularQuotations || popularQuotations.length === 0" description="暂无数据" />
             
             <div v-else>
               <div 
@@ -509,7 +509,7 @@ const loadPopularQuotations = async () => {
   popularLoading.value = true
   try {
     const response = await quotationApi.getPopularQuotations(10)
-    popularQuotations.value = response.data
+    popularQuotations.value = response.data || []
   } catch (error) {
     console.error('加载热门名言失败:', error)
     ElMessage.error('加载热门名言失败')

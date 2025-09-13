@@ -79,7 +79,7 @@
         </details>
       </section>
 
-      <!-- 简化版示例 */
+      <!-- 简化版示例 -->
       <section class="example-section">
         <h3>简化版（无Banner信息）</h3>
         <p>不显示Banner信息卡片，专注于工作流展示：</p>
@@ -102,7 +102,6 @@
         </details>
       </section>
 
-      <!-- 空状态示例 -->
       <section class="example-section">
         <h3>空状态展示</h3>
         <p>当没有工作流数据时的展示效果：</p>
@@ -123,7 +122,6 @@
         </details>
       </section>
 
-      <!-- API 文档 -->
       <section class="example-section">
         <h3>API 文档</h3>
         
@@ -268,7 +266,7 @@ import type { WorkflowData, BannerInfo } from './UnifiedWorkflowViewer.vue'
 const sampleBannerInfo: BannerInfo = {
   id: 1,
   title: '春节活动推广Banner',
-  imageUrl: 'https://via.placeholder.com/400x200/FF6B6B/FFFFFF?text=Spring+Festival',
+  imageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDQwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRkY2QjZCIi8+Cjx0ZXh0IHg9IjIwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuiJueS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7n+WKoOi9veS4lueVjOWksei0pTwvdGV4dD4KPC9zdmc+',
   linkUrl: 'https://example.com/spring-festival',
   startTime: '2024-02-01 00:00:00',
   endTime: '2024-02-29 23:59:59',

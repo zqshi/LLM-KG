@@ -227,10 +227,10 @@
         <el-table-column label="申请人" width="120">
           <template #default="{ row }">
             <div class="applicant-info">
-              <el-avatar :size="24" :src="row.applicant.avatar">
-                {{ row.applicant.name?.charAt(0) }}
+              <el-avatar :size="24" :src="row.applicant?.avatar">
+                {{ row.applicant?.name?.charAt(0) }}
               </el-avatar>
-              <span class="applicant-name">{{ row.applicant.name }}</span>
+              <span class="applicant-name">{{ row.applicant?.name }}</span>
             </div>
           </template>
         </el-table-column>
@@ -265,7 +265,7 @@
 
         <el-table-column label="审核人" width="100">
           <template #default="{ row }">
-            <span v-if="row.reviewer">{{ row.reviewer.name }}</span>
+            <span v-if="row.reviewer">{{ row.reviewer?.name }}</span>
             <el-text v-else type="info" size="small">-</el-text>
           </template>
         </el-table-column>

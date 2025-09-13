@@ -254,11 +254,14 @@ const iconMapping: Record<string, string> = {
 
 const menuList = computed(() => {
   try {
-    // console.log('=== Layout组件菜单数据详细分析 ===')
-    // console.log('用户登录状态:', authStore.isLoggedIn)
-    // console.log('用户权限数量:', authStore.permissions.length)
-    // console.log('用户角色:', getUserRole.value)
-    // console.log('角色显示名称:', getRoleDisplayName(getUserRole.value))
+    // 检查是否处于演示模式
+    const isDemoMode = authStore.token === 'demo-token';
+    console.log('=== Layout组件菜单数据详细分析 ===')
+    console.log('用户登录状态:', authStore.isLoggedIn)
+    console.log('演示模式:', isDemoMode)
+    console.log('用户权限数量:', authStore.permissions.length)
+    console.log('用户角色:', getUserRole.value)
+    console.log('角色显示名称:', getRoleDisplayName(getUserRole.value))
 
     // 使用基于角色过滤后的菜单，并映射图标名称
     const menus = filteredMenus.value.map(menu => {
@@ -276,6 +279,7 @@ const menuList = computed(() => {
       }
     })
 
+    console.log('最终菜单列表:', menus)
     return menus
   } catch (error) {
     console.error('菜单数据解析错误:', error)
@@ -398,9 +402,6 @@ const handleLogout = () => {
   border-right: none;
 }
 
-.modern-breadcrumb {
-  padding: var(--spacing-sm) 0;
-}
 
 .breadcrumb-icon {
   margin-right: var(--spacing-xs);
@@ -618,9 +619,6 @@ const handleLogout = () => {
   font-weight: 400;
 }
 
-
-
-
 .modern-menu {
   border-right: none;
   min-height: calc(100vh - 60px);
@@ -704,6 +702,7 @@ const handleLogout = () => {
 }
 
 .modern-breadcrumb {
+  padding: var(--spacing-sm) 0;
   font-size: 14px;
   
   .el-breadcrumb__item {
@@ -1215,3 +1214,4 @@ const handleLogout = () => {
   }
 }
 </style>
+```

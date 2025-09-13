@@ -95,6 +95,19 @@ const departmentTree = [
   }
 ]
 
+// 获取组织架构树
+app.get('/api/organization/tree', (req, res) => {
+  console.log('🏢 Organization tree requested')
+  res.json({
+    code: 200,
+    message: 'success',
+    data: departmentTree
+  })
+})
+
+// 跳蚤市场API路由
+console.log('Registering flea market API routes...')
+
 // 跳蚤市场API路由
 console.log('Registering flea market API routes...')
 // 获取举报列表

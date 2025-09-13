@@ -103,6 +103,12 @@ const routes: RouteRecordRaw[] = [
             meta: { title: '数据看板', icon: 'DataBoard', permission: 'content:view' }
           },
           {
+            path: 'list',
+            name: 'ContentList',
+            component: () => import('@/views/content/List.vue'),
+            meta: { title: '内容列表', icon: 'Document', permission: 'content:view' }
+          },
+          {
             path: 'detail/:id',
             name: 'ContentDetail',
             component: () => import('@/views/content/Detail.vue'),

@@ -149,27 +149,23 @@ export function useMenuFilter() {
 
   /**
    * 获取过滤后的菜单
+   * 静态模式下显示所有菜单（过滤掉hideInMenu项目）
    */
   const filteredMenus = computed(() => {
     const allMenus = authStore.menus
-    const currentRole = getUserRole.value
-
-    // 管理员返回全部菜单，但需要过滤 hideInMenu 项目
-    if (isAdminUser.value) {
-      return filterHiddenMenuItems(allMenus)
-    }
-
-    const filtered = filterMenuItems(allMenus, currentRole)
-
-    return filtered
+    
+    // 在静态模式下，直接返回所有菜单（但过滤掉隐藏项）
+    // 这样所有用户都能看到所有模块和页面
+    return filterHiddenMenuItems(allMenus)
   })
 
   /**
    * 检查用户是否有特定功能的访问权限
+   * 静态模式下始终返回true
    */
   const hasFeatureAccess = (feature: string): boolean => {
-    const currentRole = getUserRole.value
-    return ROLE_MENU_ACCESS[currentRole]?.includes(feature) || false
+    // 在静态模式下，所有用户都有所有功能的访问权限
+    return true
   }
 
   /**

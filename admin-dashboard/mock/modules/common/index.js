@@ -21,6 +21,12 @@ router.get('/departments', (req, res) => {
   res.json(responseFormatter.success(departmentTree, '获取部门列表成功'));
 });
 
+// 获取组织架构树
+router.get('/organization/tree', (req, res) => {
+  logger.info('Organization tree requested');
+  res.json(responseFormatter.success(departmentTree, '获取组织架构树成功'));
+});
+
 // 获取分类列表
 router.get('/categories', (req, res) => {
   logger.info('Categories requested');

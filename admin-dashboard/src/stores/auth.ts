@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, LoginResponse, MenuNode } from '@/types'
 import { SUPER_ADMIN_PERMISSIONS, isSuperAdmin, hasPermission as hasUserPermission } from './permissions'
+import { authApi } from '@/api/auth'
 
 // 生成默认菜单的函数 - 与router/index.ts保持严格一致
 function generateDefaultMenus(): MenuNode[] {
@@ -150,8 +151,14 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const currentUser = computed(() => user.value)
   const hasPermission = computed(() => (permission: string) => {
-    // 演示模式下拥有所有权限
+    // 静态模式或演示模式下拥有所有权限
     if (token.value === 'demo-token') {
+      return true;
+    }
+    // 在静态模式下也始终返回true
+    if (import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL) {
       return true;
     }
     return permissions.value.includes(permission)
@@ -161,27 +168,28 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(loginData: { username: string; password: string }) {
     loading.value = true
     try {
-      // 调用登录API（使用相对路径，通过Vite代理）
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      })
+      // 检查是否启用静态模式
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || '登录失败')
+      let loginResponse: any;
+      
+      if (isStaticMode) {
+        // 静态模式下使用 authApi.login
+        const result = await authApi.login(loginData);
+        if (result.code !== 200) {
+          throw new Error(result.message || '登录失败');
+        }
+        loginResponse = result.data;
+      } else {
+        // 调用登录API（使用相对路径，通过Vite代理）
+        const result = await authApi.login(loginData);
+        if (result.code !== 200) {
+          throw new Error(result.message || '登录失败');
+        }
+        loginResponse = result.data;
       }
-
-      const result = await response.json()
-      if (result.code !== 200) {
-        throw new Error(result.message || '登录失败')
-      }
-
-      // 使用API返回的数据
-      const loginResponse = result.data
 
       token.value = loginResponse.token
       user.value = loginResponse.user
@@ -444,8 +452,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查权限
   function checkPermission(permission: string): boolean {
-    // 演示模式下拥有所有权限
+    // 静态模式或演示模式下拥有所有权限
     if (token.value === 'demo-token') {
+      return true;
+    }
+    // 在静态模式下也始终返回true
+    if (import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL) {
       return true;
     }
     return hasUserPermission(user.value, permission)
@@ -453,8 +467,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查多个权限（AND关系）
   function checkPermissions(perms: string[]): boolean {
-    // 演示模式下拥有所有权限
+    // 静态模式或演示模式下拥有所有权限
     if (token.value === 'demo-token') {
+      return true;
+    }
+    // 在静态模式下也始终返回true
+    if (import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL) {
       return true;
     }
     // 超级管理员拥有所有权限
@@ -464,8 +484,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 检查多个权限（OR关系）
   function checkAnyPermission(perms: string[]): boolean {
-    // 演示模式下拥有所有权限
+    // 静态模式或演示模式下拥有所有权限
     if (token.value === 'demo-token') {
+      return true;
+    }
+    // 在静态模式下也始终返回true
+    if (import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL) {
       return true;
     }
     // 超级管理员拥有所有权限

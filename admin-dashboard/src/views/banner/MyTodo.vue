@@ -253,7 +253,8 @@ interface ApprovalRecord {
   comment?: string
 }
 
-interface User {
+// User interface already defined in other files, using local alias
+interface LocalUser {
   id: number
   name: string
   department: string
@@ -294,7 +295,7 @@ const pagination = reactive({
 })
 
 const todoList = ref<TodoItem[]>([])
-const userList = ref<User[]>([])
+const userList = ref<LocalUser[]>([])
 const approvalHistory = ref<ApprovalRecord[]>([])
 
 const rejectRules = {
@@ -307,12 +308,12 @@ const delegateRules = {
 }
 
 const getPriorityType = (priority: string) => {
-  const typeMap: Record<string, string> = {
+  const typeMap: Record<string, import('element-plus').TagProps['type'] | '' | undefined> = {
     high: 'danger',
     normal: 'warning',
     low: 'info'
   }
-  return typeMap[priority] || ''
+  return typeMap[priority] || undefined
 }
 
 const getPriorityText = (priority: string) => {
@@ -355,8 +356,9 @@ const approveTodo = async (item: TodoItem) => {
     console.log('通过审批:', item)
     ElMessage.success('审批通过')
     fetchTodoList()
-  } catch {
-    
+  } catch (error) {
+    console.error('审批通过失败:', error)
+    ElMessage.error('审批通过失败')
   }
 }
 
@@ -446,7 +448,7 @@ const handleCurrentChange = (page: number) => {
 const fetchUserList = async () => {
   try {
     // 模拟API调用
-    const mockUsers: User[] = [
+    const mockUsers: LocalUser[] = [
       { id: 1, name: '王五', department: '运营部' },
       { id: 2, name: '赵六', department: '市场部' },
       { id: 3, name: '孙七', department: '运营部' }
@@ -477,7 +479,7 @@ const fetchTodoList = async () => {
       {
         id: 1,
         bannerTitle: '春节活动Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/FF6B6B/FFFFFF?text=Spring+Festival',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRkY2QjZCIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuWbouWbouS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/spring-festival',
         startTime: '2024-02-01 00:00:00',
         endTime: '2024-02-29 23:59:59',
@@ -493,7 +495,7 @@ const fetchTodoList = async () => {
       {
         id: 2,
         bannerTitle: '产品发布会Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/4ECDC4/FFFFFF?text=Product+Launch',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNEVDREMwIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/product-launch',
         startTime: '2024-03-01 00:00:00',
         endTime: '2024-03-15 23:59:59',
@@ -509,7 +511,7 @@ const fetchTodoList = async () => {
       {
         id: 3,
         bannerTitle: '员工培训通知Banner',
-        bannerImageUrl: 'https://via.placeholder.com/800x400/45B7D1/FFFFFF?text=Training',
+        bannerImageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNDVCN0QxIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuWksei0p+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/training',
         startTime: '2024-03-10 00:00:00',
         endTime: '2024-03-20 23:59:59',

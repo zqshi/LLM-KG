@@ -376,6 +376,7 @@ const feedbackTypeMap = {
 
 // 方法
 const getUserInitial = (nickname: string) => {
+  if (!nickname) return '?'
   return nickname.charAt(0).toUpperCase()
 }
 

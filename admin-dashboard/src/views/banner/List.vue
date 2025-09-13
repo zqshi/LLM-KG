@@ -57,7 +57,7 @@
       </el-table-column>
       <el-table-column label="状态" width="100">
         <template #default="{ row }">
-          <el-tag :type="getStatusType(row.status)">
+          <el-tag :type="getStatusType(row.status) as any">
             {{ getStatusText(row.status) }}
           </el-tag>
         </template>
@@ -158,12 +158,16 @@
         <el-divider content-position="left">审核配置</el-divider>
         
         <el-form-item>
-          <el-checkbox v-model="bannerForm.auditOptions.submitForAuditImmediately">
+          <el-checkbox 
+            v-model="bannerForm.auditOptions.submitForAuditImmediately" 
+            :disabled="!bannerForm.auditOptions"
+            v-if="bannerForm.auditOptions"
+          >
             创建后立即提交审核
           </el-checkbox>
         </el-form-item>
 
-        <div v-if="bannerForm.auditOptions.submitForAuditImmediately">
+        <div v-if="bannerForm.auditOptions && bannerForm.auditOptions.submitForAuditImmediately">
           <ApprovalConfigPanel 
             :banner-data="{
               title: bannerForm.title,
@@ -244,7 +248,7 @@ const bannerForm = reactive<BannerForm & { id?: number, timeRange: string[] }>({
     submitForAuditImmediately: false,
     priority: 'normal' as 'high' | 'normal' | 'low',
     metadata: {},
-    approvalConfig: null,
+    approvalConfig: undefined,
     approvalReady: false
   }
 })
@@ -360,7 +364,7 @@ const createBanner = () => {
       submitForAuditImmediately: false,
       priority: 'normal' as 'high' | 'normal' | 'low',
       metadata: {},
-      approvalConfig: null,
+      approvalConfig: undefined,
       approvalReady: false
     }
   })
@@ -382,7 +386,7 @@ const editBanner = (banner: Banner) => {
       submitForAuditImmediately: false,
       priority: 'normal' as 'high' | 'normal' | 'low',
       metadata: {},
-      approvalConfig: null,
+      approvalConfig: undefined,
       approvalReady: false
     }
   })
@@ -415,8 +419,8 @@ const saveBanner = async () => {
   
   await bannerFormRef.value.validate(async (valid) => {
     if (valid) {
-      // 如果选择了立即提交审核但审批配置未就绪
-      if (bannerForm.auditOptions.submitForAuditImmediately && !bannerForm.auditOptions.approvalReady) {
+      // 如果配置了立即提交审核但审批配置未就绪
+      if (bannerForm.auditOptions?.submitForAuditImmediately && !bannerForm.auditOptions?.approvalReady) {
         ElMessage.warning('请完成审批流程配置后再保存')
         return
       }
@@ -442,8 +446,8 @@ const saveBanner = async () => {
           // 创建Banner
           await bannerApi.createBanner(data, authStore.user?.id || 0, authStore.user?.name || '')
           if (data.auditOptions?.submitForAuditImmediately) {
-            const configMode = bannerForm.auditOptions.approvalConfig?.mode || '默认'
-            const stepsCount = bannerForm.auditOptions.approvalConfig?.preview?.length || 0
+            const configMode = data.auditOptions.approvalConfig?.mode || '默认'
+            const stepsCount = data.auditOptions.approvalConfig?.preview?.length || 0
             ElMessage.success(`Banner创建成功，已提交审核（${configMode}模式，${stepsCount}个审批节点）`)
           } else {
             ElMessage.success('Banner创建成功')
@@ -719,8 +723,8 @@ const fetchBannerList = async () => {
     }
     
     const response = await bannerApi.getBanners(queryParams)
-    bannerList.value = response.data.data.list
-    pagination.total = response.data.data.total
+    bannerList.value = response.data.list
+    pagination.total = response.data.total
   } catch (error) {
     console.error('获取Banner列表失败:', error)
     ElMessage.error('获取Banner列表失败')
@@ -730,7 +734,7 @@ const fetchBannerList = async () => {
       {
         id: 1,
         title: '春节活动Banner',
-        imageUrl: 'https://via.placeholder.com/800x400/FF6B6B/FFFFFF?text=Spring+Festival',
+        imageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRkY2QjZCIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuiJueS9nOiKseW+iemHj+WKoOi9veS4lueVjOaUtuS4nOe7n+WKoOi9veS4lueVjOWksei0pTwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/spring-festival',
         startTime: '2024-02-01 00:00:00',
         endTime: '2024-02-29 23:59:59',
@@ -742,7 +746,7 @@ const fetchBannerList = async () => {
       {
         id: 2,
         title: '产品发布会Banner',
-        imageUrl: 'https://via.placeholder.com/800x400/4ECDC4/FFFFFF?text=Product+Launch',
+        imageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNEVDREMwIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuWksei0p+WbvueJh+WbnuWfuuWksei0p+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/product-launch',
         startTime: '2024-03-01 00:00:00',
         endTime: '2024-03-15 23:59:59',
@@ -754,7 +758,7 @@ const fetchBannerList = async () => {
       {
         id: 3,
         title: '员工培训Banner',
-        imageUrl: 'https://via.placeholder.com/800x400/45B7D1/FFFFFF?text=Training',
+        imageUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNDVCN0QxIi8+Cjx0ZXh0IHg9IjQwMCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMzIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPuW8gOWksei0p+WKoOi9veS4lueVjOaUtuS4nOe7nzwvdGV4dD4KPC9zdmc+',
         linkUrl: 'https://example.com/training',
         startTime: '2024-03-10 00:00:00',
         endTime: '2024-03-20 23:59:59',
@@ -774,13 +778,17 @@ const fetchBannerList = async () => {
 
 // 处理审批配置变化
 const handleApprovalConfigChange = (config: any) => {
-  bannerForm.auditOptions.approvalConfig = config
+  if (bannerForm.auditOptions) {
+    bannerForm.auditOptions.approvalConfig = config
+  }
   console.log('审批配置已更新:', config)
 }
 
 // 处理审批配置就绪状态
 const handleApprovalConfigReady = (isReady: boolean) => {
-  bannerForm.auditOptions.approvalReady = isReady
+  if (bannerForm.auditOptions) {
+    bannerForm.auditOptions.approvalReady = isReady
+  }
   console.log('审批配置就绪状态:', isReady)
 }
 

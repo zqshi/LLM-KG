@@ -94,15 +94,9 @@ export default defineConfig({
     cors: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:3001',
         changeOrigin: true,
-        secure: false
-      },
-      '/flea-market': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path.replace(/^\/flea-market/, '/api/flea-market')
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
   },

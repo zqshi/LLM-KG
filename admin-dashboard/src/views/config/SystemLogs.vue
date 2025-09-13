@@ -211,10 +211,10 @@
         <el-table-column prop="user" label="操作用户" width="120">
           <template #default="{ row }">
             <div class="user-info">
-              <el-avatar :size="24" :src="row.user.avatar">
-                {{ row.user.nickname.charAt(0) }}
+              <el-avatar :size="24" :src="row.user?.avatar">
+                {{ row.user?.nickname?.charAt(0) }}
               </el-avatar>
-              <span class="user-name">{{ row.user.nickname }}</span>
+              <span class="user-name">{{ row.user?.nickname }}</span>
             </div>
           </template>
         </el-table-column>
@@ -285,12 +285,12 @@
         >
           <div class="log-header">
             <div class="log-user">
-              <el-avatar :size="32" :src="log.user.avatar">
-                {{ log.user.nickname.charAt(0) }}
+              <el-avatar :size="32" :src="log.user?.avatar">
+                {{ log.user?.nickname?.charAt(0) }}
               </el-avatar>
               <div class="user-details">
-                <div class="user-name">{{ log.user.nickname }}</div>
-                <div class="user-meta">{{ log.user.department }}</div>
+                <div class="user-name">{{ log.user?.nickname }}</div>
+                <div class="user-meta">{{ log.user?.department }}</div>
               </div>
             </div>
             
@@ -341,11 +341,11 @@
             v-for="log in logList"
             :key="log.id"
             :timestamp="formatDateTime(log.createdAt)"
-            :type="getTimelineType(log.level)"
+            :type="log.level ? getTimelineType(log.level) : 'info'"
           >
             <div class="timeline-content">
               <div class="timeline-header">
-                <span class="timeline-user">{{ log.user.nickname }}</span>
+                <span class="timeline-user">{{ log.user?.nickname }}</span>
                 <span class="timeline-action">{{ log.action }}</span>
                 <span class="timeline-module">{{ log.module }}</span>
               </div>
@@ -385,10 +385,10 @@
           </el-descriptions-item>
           <el-descriptions-item label="操作用户">
             <div class="user-detail">
-              <el-avatar :size="24" :src="currentLog.user.avatar">
-                {{ currentLog.user.nickname.charAt(0) }}
+              <el-avatar :size="24" :src="currentLog.user?.avatar">
+                {{ currentLog.user?.nickname?.charAt(0) }}
               </el-avatar>
-              <span>{{ currentLog.user.nickname }} ({{ currentLog.user.department }})</span>
+              <span>{{ currentLog.user?.nickname }} ({{ currentLog.user?.department }})</span>
             </div>
           </el-descriptions-item>
           <el-descriptions-item label="用户ID">
@@ -558,13 +558,15 @@ const mockLogData = (): SystemLog[] => [
     user: {
       id: 1,
       username: 'admin',
+      name: '系统管理员',
       nickname: '系统管理员',
       email: 'admin@company.com',
       department: '技术部',
-      status: 'active',
+      status: 1,
+      groupId: 1,
       roles: [],
-      createdAt: '',
-      updatedAt: ''
+      createTime: '',
+      updateTime: ''
     },
     action: '登录',
     module: '用户管理',
@@ -579,13 +581,15 @@ const mockLogData = (): SystemLog[] => [
     user: {
       id: 2,
       username: 'editor',
+      name: '编辑员',
       nickname: '编辑员',
       email: 'editor@company.com',
       department: '运营部',
-      status: 'active',
+      status: 1,
+      groupId: 2,
       roles: [],
-      createdAt: '',
-      updatedAt: ''
+      createTime: '',
+      updateTime: ''
     },
     action: '审核',
     module: '审核中心',
@@ -597,8 +601,8 @@ const mockLogData = (): SystemLog[] => [
 ]
 
 const mockUserData = (): User[] => [
-  { id: 1, username: 'admin', nickname: '系统管理员', email: '', department: '技术部', status: 'active', roles: [], createdAt: '', updatedAt: '' },
-  { id: 2, username: 'editor', nickname: '编辑员', email: '', department: '运营部', status: 'active', roles: [], createdAt: '', updatedAt: '' }
+  { id: 1, username: 'admin', name: '系统管理员', nickname: '系统管理员', email: '', department: '技术部', status: 1, groupId: 1, roles: [], createTime: '', updateTime: '' },
+  { id: 2, username: 'editor', name: '编辑员', nickname: '编辑员', email: '', department: '运营部', status: 1, groupId: 2, roles: [], createTime: '', updateTime: '' }
 ]
 
 const getModuleColor = (module: string) => {
@@ -608,7 +612,7 @@ const getModuleColor = (module: string) => {
 }
 
 const getActionType = (action: string) => {
-  const typeMap: Record<string, string> = {
+  const typeMap: Record<string, 'success' | 'info' | 'primary' | 'warning' | 'danger'> = {
     '登录': 'success',
     '登出': 'info',
     '创建': 'primary',
@@ -630,7 +634,7 @@ const getLevelName = (level: string) => {
 }
 
 const getLevelType = (level: string) => {
-  const typeMap: Record<string, string> = {
+  const typeMap: Record<string, 'info' | 'success' | 'warning' | 'danger'> = {
     debug: 'info',
     info: 'success',
     warn: 'warning',
@@ -640,7 +644,7 @@ const getLevelType = (level: string) => {
 }
 
 const getTimelineType = (level?: string) => {
-  const typeMap: Record<string, string> = {
+  const typeMap: Record<string, 'info' | 'primary' | 'warning' | 'danger'> = {
     debug: 'info',
     info: 'primary',
     warn: 'warning',

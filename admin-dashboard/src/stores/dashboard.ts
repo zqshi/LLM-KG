@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useAuthStore } from './auth'
-import { dashboardService } from '@/api/dashboard'
+import { dashboardApi } from '@/api/dashboard'
 import type { 
   DashboardData, 
   DashboardMetrics, 
@@ -317,7 +317,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     error.value.overview = null
 
     try {
-      const response = await dashboardService.getOverview()
+      const response = await dashboardApi.getOverview()
       
       if (response.code === 200 && response.data) {
         dashboardData.value = response.data
@@ -348,7 +348,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     error.value.metrics = null
 
     try {
-      const response = await dashboardService.getMetrics()
+      const response = await dashboardApi.getMetrics()
       
       if (response.code === 200 && response.data) {
         metrics.value = response.data
@@ -376,10 +376,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
     try {
       const [activityRes, contentRes, departmentRes, resourceRes] = await Promise.allSettled([
-        dashboardService.getActivityTrend(activeTimeRange.value, activeCategory.value),
-        dashboardService.getContentDistribution(activeTimeRange.value),
-        dashboardService.getDepartmentContributions(),
-        dashboardService.getSystemResources()
+        dashboardApi.getActivityTrend(activeTimeRange.value, activeCategory.value),
+        dashboardApi.getContentDistribution(activeTimeRange.value),
+        dashboardApi.getDepartmentContributions(),
+        dashboardApi.getSystemResources()
       ])
 
       if (activityRes.status === 'fulfilled' && activityRes.value.code === 200) {
@@ -456,7 +456,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     error.value.tasks = null
 
     try {
-      await dashboardService.markTaskCompleted(taskId)
+      await dashboardApi.markTaskCompleted(taskId)
       
       // 更新本地数据
       pendingTasks.value = pendingTasks.value.map(task => 

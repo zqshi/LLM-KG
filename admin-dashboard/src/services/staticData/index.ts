@@ -1,0 +1,57 @@
+/**
+ * 静态数据服务层主导出文件
+ */
+
+// 用户管理数据
+export * from './users'
+
+// 内容管理数据  
+export * from './content'
+
+// 仪表盘数据
+export * from './dashboard'
+
+// 其他模块数据
+export * from './other'
+
+// 统一的静态数据集合
+export const staticData = {
+  // 用户管理
+  users: () => import('./users').then(m => m.users),
+  roles: () => import('./users').then(m => m.roles),
+  permissions: () => import('./users').then(m => m.permissions),
+  organizations: () => import('./users').then(m => m.organizations),
+  syncConfigs: () => import('./users').then(m => m.syncConfigs),
+  
+  // 内容管理
+  categories: () => import('./content').then(m => m.categories),
+  posts: () => import('./content').then(m => m.posts),
+  polls: () => import('./content').then(m => m.polls),
+  featureRequests: () => import('./content').then(m => m.featureRequests),
+  tags: () => import('./content').then(m => m.tags),
+  contentStats: () => import('./content').then(m => m.contentStats),
+  
+  // 仪表盘
+  overviewStats: () => import('./dashboard').then(m => m.overviewStats),
+  trendData: () => import('./dashboard').then(m => m.trendData),
+  contentDistribution: () => import('./dashboard').then(m => m.contentDistribution),
+  userActivity: () => import('./dashboard').then(m => m.userActivity),
+  systemHealth: () => import('./dashboard').then(m => m.systemHealth),
+  pendingTasks: () => import('./dashboard').then(m => m.pendingTasks),
+  recentActivities: () => import('./dashboard').then(m => m.recentActivities),
+  hotContent: () => import('./dashboard').then(m => m.hotContent),
+  announcements: () => import('./dashboard').then(m => m.announcements),
+  
+  // 其他模块
+  banners: () => import('./other').then(m => m.banners),
+  fleaMarket: () => import('./other').then(m => m.fleaMarket),
+  quotations: () => import('./other').then(m => m.quotations),
+  news: () => import('./other').then(m => m.news),
+  auditCenter: () => import('./other').then(m => m.auditCenter),
+  operation: () => import('./other').then(m => m.operation),
+  portalConfig: () => import('./other').then(m => m.portalConfig),
+  systemConfig: () => import('./other').then(m => m.systemConfig)
+}
+
+// 静态数据类型定义
+export type StaticDataKey = keyof typeof staticData

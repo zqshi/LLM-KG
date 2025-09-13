@@ -35,6 +35,40 @@ const policies = [
     priority: 'normal',
     rules: [],
     createTime: new Date().toISOString()
+  },
+  {
+    id: 4,
+    name: '论坛帖子审核策略',
+    bizType: 'forum_post',
+    enabled: true,
+    isActive: true,
+    mode: 'all',
+    priority: 'high',
+    rules: [],
+    createTime: new Date().toISOString()
+  },
+  {
+    id: 5,
+    name: '跳蚤市场商品审核策略',
+    bizType: 'flea_goods',
+    enabled: true,
+    isActive: true,
+    mode: 'sample',
+    priority: 'normal',
+    sampleRate: 30,
+    rules: [],
+    createTime: new Date().toISOString()
+  },
+  {
+    id: 6,
+    name: '新闻资讯审核策略',
+    bizType: 'news',
+    enabled: true,
+    isActive: true,
+    mode: 'all',
+    priority: 'high',
+    rules: [],
+    createTime: new Date().toISOString()
   }
 ];
 

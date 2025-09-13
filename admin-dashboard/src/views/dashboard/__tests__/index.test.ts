@@ -16,7 +16,7 @@ vi.mock('@/stores/dashboard', () => ({
 }))
 
 vi.mock('@/api/dashboard', () => ({
-  dashboardService: {
+  dashboardApi: {
     getDashboardData: vi.fn(),
     getMetrics: vi.fn(),
     getActivityTrend: vi.fn(),

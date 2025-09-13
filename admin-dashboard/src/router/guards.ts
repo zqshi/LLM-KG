@@ -31,9 +31,14 @@ export function setupRouterGuards(router: Router) {
       
       // 演示模式：允许访问所有路由
       const isDemoMode = authStore.token === 'demo-token';
+      // 静态模式：允许访问所有路由
+      const isStaticMode = import.meta.env.VITE_STATIC_MODE === 'true' || 
+        import.meta.env.VITE_API_BASE_URL === '' || 
+        !import.meta.env.VITE_API_BASE_URL;
       
-      if (whiteList.includes(to.path) || isDemoMode) {
-        console.log(isDemoMode ? '演示模式，直接通过' : '白名单路由，直接通过')
+      if (whiteList.includes(to.path) || isDemoMode || isStaticMode) {
+        console.log(isDemoMode ? '演示模式，直接通过' : 
+                   isStaticMode ? '静态模式，直接通过' : '白名单路由，直接通过')
         next()
         return
       }
@@ -65,8 +70,11 @@ export function setupRouterGuards(router: Router) {
             } else if (menu.children && menu.children.length > 0) {
               // 检查子菜单权限
               return menu.children.some(child => {
-                const childPermission = getRoutePermission(child.path)
-                return !childPermission || authStore.checkPermission(childPermission)
+                if (child.path) {
+                  const childPermission = getRoutePermission(child.path)
+                  return childPermission ? (!childPermission || authStore.checkPermission(childPermission)) : true
+                }
+                return true
               })
             }
             return false
@@ -75,16 +83,21 @@ export function setupRouterGuards(router: Router) {
           if (firstAvailableMenu) {
             if (firstAvailableMenu.children && firstAvailableMenu.children.length > 0) {
               const firstChild = firstAvailableMenu.children.find(child => {
-                const childPermission = getRoutePermission(child.path)
-                return !childPermission || authStore.checkPermission(childPermission)
+                if (child.path) {
+                  const childPermission = getRoutePermission(child.path)
+                  return childPermission ? (!childPermission || authStore.checkPermission(childPermission)) : true
+                }
+                return true
               })
-              if (firstChild) {
+              if (firstChild && firstChild.path) {
                 next(firstChild.path)
               } else {
                 next('/dashboard')
               }
-            } else {
+            } else if (firstAvailableMenu.path) {
               next(firstAvailableMenu.path)
+            } else {
+              next('/dashboard')
             }
           } else {
             next('/dashboard')
@@ -94,7 +107,7 @@ export function setupRouterGuards(router: Router) {
           console.log('权限检查通过')
         }
       } else {
-        console.log('该路由无需权限检查或处于演示模式')
+        console.log('该路由无需权限检查或处于演示/静态模式')
       }
       
       console.log('已登录，权限验证通过，允许访问')
@@ -132,6 +145,12 @@ export function hasPermission(permission: string): boolean {
   if (authStore.token === 'demo-token') {
     return true;
   }
+  // 静态模式下拥有所有权限
+  if (import.meta.env.VITE_STATIC_MODE === 'true' || 
+      import.meta.env.VITE_API_BASE_URL === '' || 
+      !import.meta.env.VITE_API_BASE_URL) {
+    return true;
+  }
   return authStore.checkPermission(permission)
 }
 
@@ -141,6 +160,12 @@ export function checkPermission(permission: string | string[]): boolean {
   
   // 演示模式下拥有所有权限
   if (authStore.token === 'demo-token') {
+    return true;
+  }
+  // 静态模式下拥有所有权限
+  if (import.meta.env.VITE_STATIC_MODE === 'true' || 
+      import.meta.env.VITE_API_BASE_URL === '' || 
+      !import.meta.env.VITE_API_BASE_URL) {
     return true;
   }
   

@@ -10,6 +10,9 @@ import 'element-plus/dist/index.css'
 import './styles/design-system.css'
 import './styles/index.css'
 
+// 导入部署后修复工具
+import { initDeploymentFixes } from './utils/deploymentFixes'
+
 // 导入 ECharts 核心模块和组件
 import * as echarts from 'echarts/core'
 import { BarChart, LineChart, PieChart } from 'echarts/charts'
@@ -111,6 +114,10 @@ setupRouterGuards(router)
 
 console.log('=== 路由守卫设置完成，准备挂载应用 ===')
 
+// 挂载应用
 app.mount('#app')
+
+// 执行部署后修复
+initDeploymentFixes()
 
 console.log('=== 应用挂载完成 ===')

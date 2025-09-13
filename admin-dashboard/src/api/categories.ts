@@ -1,4 +1,12 @@
 import { request } from '@/api/request'
+import { apiAdapter } from './adapter'
+import {
+  categories,
+  categoryStats,
+  departmentTree,
+  searchUsers,
+  latestPosts
+} from '@/services/staticData/categories'
 
 /**
  * 版块管理相关接口
@@ -82,96 +90,197 @@ export interface ApiResponse<T = any> {
 export const categoriesApi = {
   // 获取版块列表
   async getList(params: CategoryQueryParams = {}): Promise<ApiResponse<CategoryListResponse>> {
-    return request.get('/content/categories', { params })
+    return apiAdapter.get(
+      () => request.get<CategoryListResponse>('/content/categories', { params }),
+      async () => {
+        const allCategories = await categories()
+        const stats = await categoryStats()
+        return { categories: allCategories, stats }
+      },
+      { mockPagination: true, paginationParams: params }
+    )
   },
 
   // 获取版块详情
   async getDetail(id: number): Promise<ApiResponse<Category>> {
-    return request.get(`/content/categories/${id}`)
+    return apiAdapter.get(
+      () => request.get<Category>(`/content/categories/${id}`),
+      async () => {
+        const allCategories = await categories()
+        const category = allCategories.find(c => c.id === id)
+        if (!category) {
+          throw new Error('版块不存在')
+        }
+        return category
+      }
+    )
   },
 
   // 创建版块
   async create(data: CreateCategoryForm): Promise<ApiResponse<Category>> {
-    return request.post('/content/categories', data)
+    return apiAdapter.post(
+      () => request.post<Category>('/content/categories', data),
+      async () => ({
+        id: Date.now(),
+        ...data,
+        postCount: 0,
+        todayPosts: 0,
+        moderators: [],
+        createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      })
+    )
   },
 
   // 更新版块
   async update(data: UpdateCategoryForm): Promise<ApiResponse<Category>> {
-    return request.put(`/content/categories/${data.id}`, data)
+    return apiAdapter.put(
+      () => request.put<Category>(`/content/categories/${data.id}`, data),
+      async () => {
+        const allCategories = await categories()
+        const category = allCategories.find(c => c.id === data.id)
+        if (!category) {
+          throw new Error('版块不存在')
+        }
+        return {
+          ...category,
+          ...data,
+          updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 19)
+        }
+      }
+    )
   },
 
   // 删除版块
   async delete(id: number): Promise<ApiResponse<void>> {
-    return request.delete(`/content/categories/${id}`)
+    return apiAdapter.delete(
+      () => request.delete(`/content/categories/${id}`),
+      async () => undefined
+    )
   },
 
   // 批量删除版块
   async batchDelete(ids: number[]): Promise<ApiResponse<void>> {
-    return request.delete('/content/categories/batch', { data: { ids } })
+    return apiAdapter.delete(
+      () => request.delete('/content/categories/batch', { data: { ids } }),
+      async () => undefined
+    )
   },
 
   // 更新版块状态
   async updateStatus(id: number, isActive: boolean): Promise<ApiResponse<void>> {
-    return request.patch(`/content/categories/${id}/status`, { isActive })
+    return apiAdapter.patch(
+      () => request.patch(`/content/categories/${id}/status`, { isActive }),
+      async () => undefined
+    )
   },
 
   // 批量更新状态
   async batchUpdateStatus(ids: number[], isActive: boolean): Promise<ApiResponse<void>> {
-    return request.post('/content/categories/batch-status', { ids, isActive })
+    return apiAdapter.post(
+      () => request.post('/content/categories/batch-status', { ids, isActive }),
+      async () => undefined
+    )
   },
 
   // 获取版块统计
   async getStats(): Promise<ApiResponse<CategoryStats>> {
-    return request.get('/content/categories/stats')
+    return apiAdapter.get(
+      () => request.get<CategoryStats>('/content/categories/stats'),
+      async () => await categoryStats()
+    )
   },
 
   // 检查版块代码是否可用
   async checkCodeAvailable(code: string, excludeId?: number): Promise<ApiResponse<boolean>> {
-    return request.get('/content/categories/check-code', {
-      params: { code, excludeId }
-    })
+    return apiAdapter.get(
+      () => request.get<boolean>('/content/categories/check-code', {
+        params: { code, excludeId }
+      }),
+      async () => {
+        const allCategories = await categories()
+        return !allCategories.some(c => c.code === code && c.id !== excludeId)
+      }
+    )
   },
 
   // 重新排序版块
   async reorderCategories(orders: { id: number; sortOrder: number }[]): Promise<ApiResponse<void>> {
-    return request.patch('/content/categories/reorder', { orders })
+    return apiAdapter.patch(
+      () => request.patch('/content/categories/reorder', { orders }),
+      async () => undefined
+    )
   },
 
   // 获取版块最新帖子
   async getLatestPosts(categoryId: number, limit = 5): Promise<ApiResponse<any[]>> {
-    return request.get(`/content/categories/${categoryId}/latest-posts`, {
-      params: { limit }
-    })
+    return apiAdapter.get(
+      () => request.get<any[]>(`/content/categories/${categoryId}/latest-posts`, {
+        params: { limit }
+      }),
+      async () => {
+        const posts = await latestPosts(categoryId)
+        return posts.slice(0, limit)
+      }
+    )
   },
 
   // 获取版主列表
   async getModerators(categoryId: number): Promise<ApiResponse<any[]>> {
-    return request.get(`/content/categories/${categoryId}/moderators`)
+    return apiAdapter.get(
+      () => request.get<any[]>(`/content/categories/${categoryId}/moderators`),
+      async () => {
+        const allCategories = await categories()
+        const category = allCategories.find(c => c.id === categoryId)
+        return category?.moderators || []
+      }
+    )
   },
 
   // 设置版主
   async setModerators(categoryId: number, userIds: number[]): Promise<ApiResponse<void>> {
-    return request.post(`/content/categories/${categoryId}/moderators`, { userIds })
+    return apiAdapter.post(
+      () => request.post(`/content/categories/${categoryId}/moderators`, { userIds }),
+      async () => undefined
+    )
   },
 
   // 移除版主
   async removeModerator(categoryId: number, userId: number): Promise<ApiResponse<void>> {
-    return request.delete(`/content/categories/${categoryId}/moderators/${userId}`)
+    return apiAdapter.delete(
+      () => request.delete(`/content/categories/${categoryId}/moderators/${userId}`),
+      async () => undefined
+    )
   },
 
   // 获取组织架构树（用于部门选择）
   async getDepartmentTree(): Promise<ApiResponse<any[]>> {
-    return request.get('/departments/tree')
+    return apiAdapter.get(
+      () => request.get<any[]>('/departments/tree'),
+      async () => await departmentTree()
+    )
   },
 
   // 搜索用户（用于添加版主）
   async searchUsers(params: { keyword: string; excludeIds?: number[] }): Promise<ApiResponse<any[]>> {
-    return request.get('/users/search', { params })
+    return apiAdapter.get(
+      () => request.get<any[]>('/users/search', { params }),
+      async () => {
+        let users = await searchUsers(params.keyword)
+        if (params.excludeIds?.length) {
+          users = users.filter(user => !params.excludeIds!.includes(user.id))
+        }
+        return users
+      }
+    )
   },
 
   // 添加版主
   async addModerator(categoryId: number, userId: number): Promise<ApiResponse<void>> {
-    return request.post(`/content/categories/${categoryId}/moderators/${userId}`)
+    return apiAdapter.post(
+      () => request.post(`/content/categories/${categoryId}/moderators/${userId}`),
+      async () => undefined
+    )
   }
 }
 
