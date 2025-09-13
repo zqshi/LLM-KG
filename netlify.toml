@@ -7,6 +7,7 @@
   VITE_STATIC_MODE = "true"
   VITE_API_BASE_URL = ""
   NODE_ENV = "production"
+  NODE_VERSION = "20.10.0"
 
 [[redirects]]
   from = "/*"

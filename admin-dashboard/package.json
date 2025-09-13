@@ -61,7 +61,7 @@
     "eslint-plugin-vue": "^10.4.0",
     "express": "^4.21.2",
     "globals": "^16.3.0",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "^15.10.2",
     "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
     "sass-embedded": "^1.91.0",
@@ -74,6 +74,6 @@
     "vue-tsc": "^3.0.6"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }

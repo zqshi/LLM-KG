@@ -22,6 +22,13 @@ export VITE_API_BASE_URL=
 echo "安装依赖..."
 npm ci
 
+# 检查vite是否安装成功
+if ! command -v vite &> /dev/null
+then
+    echo "vite未找到，尝试重新安装..."
+    npm install vite --save-dev
+fi
+
 # 构建项目
 echo "构建项目..."
 npm run build
