@@ -1,6 +1,7 @@
 import { http } from './request'
 import { apiAdapter } from './adapter'
-import { fleaMarket } from '@/services/staticData'
+import { fleaMarket } from '@/services/staticData/other'
+
 import type { 
   ApiResponse, 
   PaginationParams,
@@ -32,8 +33,17 @@ export function getGoodsList(params: FleaGoodsQueryParams): Promise<ApiResponse<
   return apiAdapter.get(
     () => http.get('/flea-market/goods', { params }),
     async () => {
-      const data = await fleaMarket()
-      return { list: data, total: data.length }
+      // 转换静态数据以匹配FleaGoods类型
+      const goodsList: any[] = fleaMarket.goods.map((item: any) => ({
+        ...item,
+        condition: 'almost_new',
+        transactionMethod: 'self_pickup',
+        sellerId: item.seller.id,
+        likeCount: item.favoriteCount || 0,
+        updateTime: item.createTime,
+        status: item.status === 1 ? 'published' : 'offline'
+      }))
+      return { list: goodsList, total: goodsList.length }
     },
     { mockPagination: true, paginationParams: params }
   )
@@ -46,12 +56,21 @@ export function getGoodsDetail(id: number): Promise<ApiResponse<FleaGoodsDetail>
   return apiAdapter.get(
     () => http.get(`/flea-market/goods/${id}`),
     async () => {
-      const data = await fleaMarket()
-      const goods = data.find(g => g.id === id)
+      const goods = fleaMarket.goods.find((g: any) => g.id === id)
       if (!goods) {
         throw new Error('商品不存在')
       }
-      return goods
+      // 转换静态数据以匹配FleaGoodsDetail类型
+      const goodsDetail: any = {
+        ...goods,
+        condition: 'almost_new',
+        transactionMethod: 'self_pickup',
+        sellerId: goods.seller.id,
+        likeCount: goods.favoriteCount || 0,
+        updateTime: goods.createTime,
+        status: goods.status === 1 ? 'published' : 'offline'
+      }
+      return goodsDetail
     }
   )
 }
@@ -60,27 +79,10 @@ export function getGoodsDetail(id: number): Promise<ApiResponse<FleaGoodsDetail>
  * 创建商品
  */
 export function createGoods(data: FleaGoodsForm): Promise<ApiResponse<FleaGoods>> {
-  return apiAdapter.post(
+  return apiAdapter.post<FleaGoods>(
     () => http.post('/flea-market/goods', data),
-    async () => ({
-      id: Date.now(),
-      title: data.title,
-      description: data.description,
-      price: data.price,
-      category: data.category,
-      images: data.images || [],
-      status: 'draft',
-      seller: {
-        id: 1,
-        username: 'admin',
-        name: '管理员',
-        avatar: ''
-      },
-      createTime: new Date().toISOString(),
-      updateTime: new Date().toISOString(),
-      viewCount: 0,
-      favoriteCount: 0
-    })
+    undefined,
+    '创建成功'
   )
 }
 
@@ -90,88 +92,88 @@ export function createGoods(data: FleaGoodsForm): Promise<ApiResponse<FleaGoods>
 export function updateGoods(id: number, data: FleaGoodsForm): Promise<ApiResponse<FleaGoods>> {
   return apiAdapter.put(
     () => http.put(`/flea-market/goods/${id}`, data),
-    async () => {
-      const allGoods = await fleaMarket()
-      const goods = allGoods.find(g => g.id === id)
-      if (!goods) {
-        throw new Error('商品不存在')
-      }
-      return {
-        ...goods,
-        ...data,
-        updateTime: new Date().toISOString()
-      }
-    }
+    id,
+    {
+      ...data,
+      updateTime: new Date().toISOString()
+    } as unknown as Partial<FleaGoods>
   )
 }
 
 /**
  * 删除商品
  */
-export function deleteGoods(id: number): Promise<ApiResponse<void>> {
-  return apiAdapter.delete(
+export function deleteGoods(id: number): Promise<ApiResponse<null>> {
+  return apiAdapter.action<null>(
     () => http.delete(`/flea-market/goods/${id}`),
-    async () => undefined
+    null,
+    '删除成功'
   )
 }
 
 /**
  * 批量操作商品
  */
-export function batchOperateGoods(data: FleaGoodsBatchOperation): Promise<ApiResponse<void>> {
-  return apiAdapter.post(
+export function batchOperateGoods(data: FleaGoodsBatchOperation): Promise<ApiResponse<null>> {
+  return apiAdapter.action<null>(
     () => http.post('/flea-market/goods/batch', data),
-    async () => undefined
+    null,
+    '批量操作成功'
   )
 }
 
 /**
  * 审核商品（通过）
  */
-export function approveGoods(id: number, remark?: string): Promise<ApiResponse<void>> {
-  return apiAdapter.post(
+export function approveGoods(id: number, remark?: string): Promise<ApiResponse<null>> {
+  return apiAdapter.action<null>(
     () => http.post(`/flea-market/goods/${id}/approve`, { remark }),
-    async () => undefined
+    null,
+    '审核通过成功'
   )
 }
 
 /**
  * 审核商品（拒绝）
  */
-export function rejectGoods(id: number, reason: string): Promise<ApiResponse<void>> {
-  return apiAdapter.post(
+export function rejectGoods(id: number, reason: string): Promise<ApiResponse<null>> {
+  return apiAdapter.action<null>(
     () => http.post(`/flea-market/goods/${id}/reject`, { reason }),
-    async () => undefined
+    null,
+    '审核拒绝成功'
   )
 }
 
 /**
  * 上架商品
  */
-export function publishGoods(id: number): Promise<ApiResponse<void>> {
-  return apiAdapter.post(
+export function publishGoods(id: number): Promise<ApiResponse<null>> {
+  return apiAdapter.action<null>(
     () => http.post(`/flea-market/goods/${id}/publish`),
-    async () => undefined
+    null,
+    '上架成功'
   )
 }
 
 /**
  * 下架商品
  */
-export function offlineGoods(id: number, reason?: string): Promise<ApiResponse<void>> {
-  return apiAdapter.post(
+export function offlineGoods(id: number, reason?: string): Promise<ApiResponse<null>> {
+  return apiAdapter.action<null>(
     () => http.post(`/flea-market/goods/${id}/offline`, { reason }),
-    async () => undefined
+    null,
+    '下架成功'
   )
 }
 
 /**
  * 标记商品为已售出
  */
-export function markGoodsAsSold(id: number): Promise<ApiResponse<void>> {
-  return apiAdapter.post(
+export function markGoodsAsSold(id: number): Promise<ApiResponse<null>> {
+  return apiAdapter.action<null>(
     () => http.post(`/flea-market/goods/${id}/sold`),
-    async () => undefined
+    null,
+    '标记已售出成功'
   )
 }
 
@@ -182,14 +184,13 @@ export function getUserGoodsStats(userId: number): Promise<ApiResponse<UserGoods
   return apiAdapter.get(
     () => http.get(`/flea-market/users/${userId}/goods-stats`),
     async () => ({
-      totalGoods: 25,
-      onSaleGoods: 15,
-      soldGoods: 8,
-      draftGoods: 2,
+      published: 15,
+      sold: 8,
+      offline: 2,
+      underReview: 0,
       totalViews: 1250,
-      totalFavorites: 89,
-      totalSales: 12600
-    })
+      totalLikes: 89
+    } as UserGoodsStats)
   )
 }
 
@@ -238,11 +239,11 @@ export function getCategoryDetail(id: number): Promise<ApiResponse<FleaCategory>
 export function createCategory(data: Omit<FleaCategory, 'id' | 'createTime'>): Promise<ApiResponse<FleaCategory>> {
   return apiAdapter.post(
     () => http.post('/flea-market/categories', data),
-    async () => ({
+    {
       id: Date.now(),
       ...data,
       createTime: new Date().toISOString()
-    })
+    } as FleaCategory
   )
 }
 
@@ -252,21 +253,21 @@ export function createCategory(data: Omit<FleaCategory, 'id' | 'createTime'>): P
 export function updateCategory(id: number, data: Omit<FleaCategory, 'id' | 'createTime'>): Promise<ApiResponse<FleaCategory>> {
   return apiAdapter.put(
     () => http.put(`/flea-market/categories/${id}`, data),
-    async () => ({
+    id,
+    {
       id,
       ...data,
       createTime: new Date().toISOString()
-    })
+    } as FleaCategory
   )
 }
 
 /**
  * 删除分类
  */
-export function deleteCategory(id: number): Promise<ApiResponse<void>> {
+export function deleteCategory(id: number): Promise<ApiResponse<null>> {
   return apiAdapter.delete(
-    () => http.delete(`/flea-market/categories/${id}`),
-    async () => undefined
+    () => http.delete(`/flea-market/categories/${id}`)
   )
 }
 
@@ -287,16 +288,15 @@ export function getReportList(params: FleaReportQueryParams): Promise<ApiRespons
           id: 1,
           targetType: 'goods',
           targetId: 1,
-          targetTitle: '二手iPhone',
+          reporterId: 2,
           reporter: { id: 2, name: '举报用户', avatar: '' },
           reason: '虚假信息',
-          description: '商品描述与实际不符',
           status: 'pending',
           createTime: new Date().toISOString()
         }
       ],
       total: 1
-    }),
+    } as { list: FleaReport[]; total: number }),
     { mockPagination: true, paginationParams: params }
   )
 }
@@ -311,13 +311,12 @@ export function getReportDetail(id: number): Promise<ApiResponse<FleaReport>> {
       id,
       targetType: 'goods',
       targetId: 1,
-      targetTitle: '二手iPhone',
+      reporterId: 2,
       reporter: { id: 2, name: '举报用户', avatar: '' },
       reason: '虚假信息',
-      description: '商品描述与实际不符',
       status: 'pending',
       createTime: new Date().toISOString()
-    })
+    } as FleaReport)
   )
 }
 
@@ -331,17 +330,16 @@ export function createReport(data: {
 }): Promise<ApiResponse<FleaReport>> {
   return apiAdapter.post(
     () => http.post('/flea-market/reports', data),
-    async () => ({
+    {
       id: Date.now(),
       targetType: data.targetType,
       targetId: data.targetId,
-      targetTitle: '举报目标',
+      reporterId: 1,
       reporter: { id: 1, name: '当前用户', avatar: '' },
       reason: data.reason,
-      description: '',
       status: 'pending',
       createTime: new Date().toISOString()
-    })
+    } as FleaReport
   )
 }
 
@@ -354,7 +352,7 @@ export function handleReport(id: number, data: {
 }): Promise<ApiResponse<void>> {
   return apiAdapter.post(
     () => http.post(`/flea-market/reports/${id}/handle`, data),
-    async () => undefined
+    undefined
   )
 }
 
@@ -374,18 +372,68 @@ export function getChatSessionList(params: FleaChatSessionQueryParams): Promise<
         {
           id: 1,
           goodsId: 1,
-          goodsTitle: '二手iPhone',
-          seller: { id: 1, name: '卖家', avatar: '' },
-          buyer: { id: 2, name: '买家', avatar: '' },
-          lastMessage: '这个还能优惠吗？',
-          lastMessageTime: new Date().toISOString(),
-          unreadCount: 2,
-          status: 'active',
+          goods: {
+            id: 1,
+            title: '二手iPhone',
+            description: '几乎全新',
+            price: 3000,
+            categoryId: 1,
+            category: {
+              id: 1,
+              name: '数码电子',
+              sort: 1,
+              createTime: new Date().toISOString()
+            },
+            condition: 'almost_new',
+            transactionMethod: 'self_pickup',
+            status: 'published',
+            sellerId: 1,
+            seller: { 
+              id: 1, 
+              username: 'seller', 
+              name: '卖家', 
+              email: 'seller@example.com', 
+              groupId: 1, 
+              status: 1, 
+              roles: [], 
+              createTime: new Date().toISOString(), 
+              updateTime: new Date().toISOString() 
+            },
+            viewCount: 100,
+            likeCount: 10,
+            images: [],
+            createTime: new Date().toISOString(),
+            updateTime: new Date().toISOString()
+          },
+          buyerId: 2,
+          buyer: { 
+            id: 2, 
+            username: 'buyer', 
+            name: '买家', 
+            email: 'buyer@example.com', 
+            groupId: 1, 
+            status: 1, 
+            roles: [], 
+            createTime: new Date().toISOString(), 
+            updateTime: new Date().toISOString() 
+          },
+          sellerId: 1,
+          seller: { 
+            id: 1, 
+            username: 'seller', 
+            name: '卖家', 
+            email: 'seller@example.com', 
+            groupId: 1, 
+            status: 1, 
+            roles: [], 
+            createTime: new Date().toISOString(), 
+            updateTime: new Date().toISOString() 
+          },
           createTime: new Date().toISOString()
         }
       ],
       total: 1
-    }),
+    } as { list: FleaChatSession[]; total: number }),
     { mockPagination: true, paginationParams: params }
   )
 }
@@ -399,15 +447,65 @@ export function getChatSessionDetail(id: number): Promise<ApiResponse<FleaChatSe
     async () => ({
       id,
       goodsId: 1,
-      goodsTitle: '二手iPhone',
-      seller: { id: 1, name: '卖家', avatar: '' },
-      buyer: { id: 2, name: '买家', avatar: '' },
-      lastMessage: '这个还能优惠吗？',
-      lastMessageTime: new Date().toISOString(),
-      unreadCount: 2,
-      status: 'active',
+      goods: {
+        id: 1,
+        title: '二手iPhone',
+        description: '几乎全新',
+        price: 3000,
+        categoryId: 1,
+        category: {
+          id: 1,
+          name: '数码电子',
+          sort: 1,
+          createTime: new Date().toISOString()
+        },
+        condition: 'almost_new',
+        transactionMethod: 'self_pickup',
+        status: 'published',
+        sellerId: 1,
+        seller: { 
+          id: 1, 
+          username: 'seller', 
+          name: '卖家', 
+          email: 'seller@example.com', 
+          groupId: 1, 
+          status: 1, 
+          roles: [], 
+          createTime: new Date().toISOString(), 
+          updateTime: new Date().toISOString() 
+        },
+        viewCount: 100,
+        likeCount: 10,
+        images: [],
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString()
+      },
+      buyerId: 2,
+      buyer: { 
+        id: 2, 
+        username: 'buyer', 
+        name: '买家', 
+        email: 'buyer@example.com', 
+        groupId: 1, 
+        status: 1, 
+        roles: [], 
+        createTime: new Date().toISOString(), 
+        updateTime: new Date().toISOString() 
+      },
+      sellerId: 1,
+      seller: { 
+        id: 1, 
+        username: 'seller', 
+        name: '卖家', 
+        email: 'seller@example.com', 
+        groupId: 1, 
+        status: 1, 
+        roles: [], 
+        createTime: new Date().toISOString(), 
+        updateTime: new Date().toISOString() 
+      },
       createTime: new Date().toISOString()
-    })
+    } as FleaChatSession)
   )
 }
 
@@ -420,18 +518,69 @@ export function createChatSession(data: {
 }): Promise<ApiResponse<FleaChatSession>> {
   return apiAdapter.post(
     () => http.post('/flea-market/chat/sessions', data),
-    async () => ({
+    {
       id: Date.now(),
       goodsId: data.goodsId,
-      goodsTitle: '商品标题',
-      seller: { id: 1, name: '卖家', avatar: '' },
-      buyer: { id: data.buyerId, name: '买家', avatar: '' },
-      lastMessage: '',
-      lastMessageTime: new Date().toISOString(),
-      unreadCount: 0,
-      status: 'active',
+      goods: {
+        id: data.goodsId,
+        title: '商品标题',
+        description: '商品描述',
+        price: 100,
+        categoryId: 1,
+        category: {
+          id: 1,
+          name: '分类名称',
+          sort: 1,
+          createTime: new Date().toISOString()
+        },
+        condition: 'almost_new',
+        transactionMethod: 'self_pickup',
+        status: 'published',
+        sellerId: 1,
+        seller: { 
+          id: 1, 
+          username: 'seller', 
+          name: '卖家', 
+          email: 'seller@example.com', 
+          groupId: 1, 
+          status: 1, 
+          roles: [], 
+          createTime: new Date().toISOString(), 
+          updateTime: new Date().toISOString() 
+        },
+        viewCount: 0,
+        likeCount: 0,
+        images: [],
+        createTime: new Date().toISOString(),
+        updateTime: new Date().toISOString()
+      },
+      buyerId: data.buyerId,
+      buyer: { 
+        id: data.buyerId, 
+        username: 'buyer', 
+        name: '买家', 
+        email: 'buyer@example.com', 
+        groupId: 1, 
+        status: 1, 
+        roles: [], 
+        createTime: new Date().toISOString(), 
+        updateTime: new Date().toISOString() 
+      },
+      sellerId: 1,
+      seller: { 
+        id: 1, 
+        username: 'seller', 
+        name: '卖家', 
+        email: 'seller@example.com', 
+        groupId: 1, 
+        status: 1, 
+        roles: [], 
+        createTime: new Date().toISOString(), 
+        updateTime: new Date().toISOString() 
+      },
       createTime: new Date().toISOString()
-    })
+    } as FleaChatSession,
+    '创建成功'
   )
 }
 
@@ -450,23 +599,41 @@ export function getChatMessages(sessionId: number, params?: PaginationParams): P
           id: 1,
           sessionId,
           senderId: 1,
-          senderName: '卖家',
+          sender: { 
+            id: 1, 
+            username: 'sender1', 
+            name: '卖家', 
+            email: 'sender1@example.com', 
+            groupId: 1, 
+            status: 1, 
+            roles: [], 
+            createTime: new Date().toISOString(), 
+            updateTime: new Date().toISOString() 
+          },
           content: '您好，这个商品还在吗？',
-          messageType: 'text',
-          sendTime: new Date().toISOString()
+          createTime: new Date().toISOString()
         },
         {
           id: 2,
           sessionId,
           senderId: 2,
-          senderName: '买家',
+          sender: { 
+            id: 2, 
+            username: 'sender2', 
+            name: '买家', 
+            email: 'sender2@example.com', 
+            groupId: 1, 
+            status: 1, 
+            roles: [], 
+            createTime: new Date().toISOString(), 
+            updateTime: new Date().toISOString() 
+          },
           content: '在的，请问有什么问题吗？',
-          messageType: 'text',
-          sendTime: new Date().toISOString()
+          createTime: new Date().toISOString()
         }
       ],
       total: 2
-    }),
+    } as { list: FleaChatMessage[]; total: number }),
     { mockPagination: true, paginationParams: params }
   )
 }
@@ -479,15 +646,25 @@ export function sendChatMessage(sessionId: number, data: {
 }): Promise<ApiResponse<FleaChatMessage>> {
   return apiAdapter.post(
     () => http.post(`/flea-market/chat/sessions/${sessionId}/messages`, data),
-    async () => ({
+    {
       id: Date.now(),
       sessionId,
       senderId: 1,
-      senderName: '当前用户',
+      sender: { 
+        id: 1, 
+        username: 'current_user', 
+        name: '当前用户', 
+        email: 'current_user@example.com', 
+        groupId: 1, 
+        status: 1, 
+        roles: [], 
+        createTime: new Date().toISOString(), 
+        updateTime: new Date().toISOString() 
+      },
       content: data.content,
-      messageType: 'text',
-      sendTime: new Date().toISOString()
-    })
+      createTime: new Date().toISOString()
+    } as FleaChatMessage,
+    '发送成功'
   )
 }
 
@@ -501,21 +678,25 @@ export function getFleaMarketStatistics(): Promise<ApiResponse<FleaMarketStatist
     () => http.get('/flea-market/statistics'),
     async () => ({
       totalGoods: 1286,
-      onSaleGoods: 456,
+      publishedGoods: 456,
+      pendingGoods: 23,
       soldGoods: 789,
-      draftGoods: 41,
+      offlineGoods: 41,
+      todayNewGoods: 23,
+      weeklyNewGoods: 156,
+      monthlyNewGoods: 456,
       totalUsers: 2345,
       activeUsers: 1567,
-      totalTransactions: 892,
-      totalTransactionAmount: 156789,
-      todayNewGoods: 23,
-      todayTransactions: 15,
+      totalSales: 892,
+      averagePrice: 175.5,
       popularCategories: [
         { categoryId: 1, categoryName: '数码电子', count: 456 },
         { categoryId: 2, categoryName: '生活用品', count: 234 },
         { categoryId: 3, categoryName: '图书文具', count: 189 }
-      ]
-    })
+      ],
+      recentReports: 12,
+      pendingReports: 5
+    } as FleaMarketStatistics)
   )
 }
 
@@ -625,11 +806,12 @@ export function uploadGoodsImage(file: File): Promise<ApiResponse<{
         }
       })
     },
-    async () => ({
+    {
       url: '/mock/flea-market/images/' + file.name,
       name: file.name,
       size: file.size
-    })
+    },
+    '上传成功'
   )
 }
 
@@ -654,11 +836,12 @@ export function uploadGoodsImages(files: File[]): Promise<ApiResponse<{
         }
       })
     },
-    async () => files.map(file => ({
+    files.map(file => ({
       url: '/mock/flea-market/images/' + file.name,
       name: file.name,
       size: file.size
-    }))
+    })),
+    '上传成功'
   )
 }
 

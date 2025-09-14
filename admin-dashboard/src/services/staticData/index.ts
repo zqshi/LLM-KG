@@ -15,6 +15,7 @@ export * from './dashboard'
 export * from './other'
 
 // AI工具数据
+export * from './aiTools'
 
 // 反馈管理数据
 export * from './feedback'
@@ -38,6 +39,8 @@ export const staticData = {
   polls: () => import('./content').then(m => m.polls),
   tags: () => import('./content').then(m => m.tags),
   contentStats: () => import('./content').then(m => m.contentStats),
+  // 置顶/加精申请数据
+  featureRequests: () => import('./content').then(m => m.featureRequests),
   
   // 仪表盘
   overviewStats: () => import('./dashboard').then(m => m.overviewStats),
@@ -59,8 +62,8 @@ export const staticData = {
   operation: () => import('./other').then(m => m.operation),
   portalConfig: () => import('./other').then(m => m.portalConfig),
   systemConfig: () => import('./other').then(m => m.systemConfig),
-  // aiTools: () => import('./aiTools').then(m => m.aiTools),
-  // aiToolTags: () => import('./aiTools').then(m => m.aiToolTags),
+  aiTools: () => import('./aiTools').then(m => m.aiTools),
+  aiToolTags: () => import('./aiTools').then(m => m.aiToolTags),
   
   // 反馈管理
   feedbackItems: () => import('./feedback').then(m => m.feedbackItems),
