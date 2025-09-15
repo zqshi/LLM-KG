@@ -52,7 +52,7 @@ LLM-KG/
 ## 快速开始
 
 ### 环境要求
-- Node.js >= 18.0.0
+- Node.js >= 20.0.0
 - pnpm >= 9.0.0
 
 ### 安装依赖
@@ -106,7 +106,7 @@ pnpm typecheck  # TypeScript类型检查
 
 根据项目配置和实际运行情况：
 
-- 管理后台开发服务器：http://localhost:3108 (默认3106)
+- 管理后台开发服务器：http://localhost:3102 (默认端口)
 - 管理后台Mock服务：http://localhost:3008
 - 开发环境API基础路径：/api
 

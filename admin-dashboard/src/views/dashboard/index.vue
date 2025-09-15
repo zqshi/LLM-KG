@@ -28,11 +28,11 @@
       <div class="header-actions">
         <div class="quick-stats">
           <div class="stat-item">
-            <div class="stat-value">{{ dashboardStore.metrics?.todayActive || 0 }}</div>
+            <div class="stat-value">{{ dashboardStore.metrics?.todayActiveUsers || 0 }}</div>
             <div class="stat-label">今日活跃</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">{{ dashboardStore.metrics?.pendingTasks || 0 }}</div>
+            <div class="stat-value">{{ dashboardStore.metrics?.pendingAuditCount || 0 }}</div>
             <div class="stat-label">待办任务</div>
           </div>
         </div>
@@ -156,6 +156,7 @@
                 :feedback-list="dashboardStore.recentFeedback"
                 :loading="dashboardStore.loading.overview"
                 :error="dashboardStore.error.overview"
+                :max-display-count="3"
                 @feedback-click="handleFeedbackClick"
                 @mark-all-read="handleMarkAllFeedbackRead"
                 @mark-read="handleMarkFeedbackRead"
@@ -189,6 +190,7 @@
               :feedback-list="dashboardStore.recentFeedback"
               :loading="dashboardStore.loading.overview"
               :error="dashboardStore.error.overview"
+              :max-display-count="3"
               @feedback-click="handleFeedbackClick"
               @mark-all-read="handleMarkAllFeedbackRead"
               @mark-read="handleMarkFeedbackRead"
@@ -209,6 +211,7 @@
       :before-close="handleCloseDetailModal"
       destroy-on-close
       class="detail-modal"
+      :class="{ 'tasks-detail-modal': detailModal.type === 'tasks' }"
     >
       <!-- 活跃度趋势详情 -->
       <template v-if="detailModal.type === 'activity'">
@@ -256,15 +259,18 @@
 
       <!-- 待办任务详情 -->
       <template v-if="detailModal.type === 'tasks'">
-        <PendingTasks
-          :pending-tasks="dashboardStore.pendingTasks"
-          :loading="dashboardStore.loading.tasks"
-          :error="dashboardStore.error.tasks"
-          @refresh="handleTasksRefresh"
-          @task-click="handleTaskClick"
-          @task-action="handleTaskAction"
-          @view-all="handleViewAllTasks"
-        />
+        <div class="tasks-detail-container">
+          <PendingTasks
+            :pending-tasks="dashboardStore.pendingTasks"
+            :loading="dashboardStore.loading.tasks"
+            :error="dashboardStore.error.tasks"
+            :max-display-count="20"
+            @refresh="handleTasksRefresh"
+            @task-click="handleTaskClick"
+            @task-action="handleTaskAction"
+            @view-all="handleViewAllTasks"
+          />
+        </div>
       </template>
 
       <template #footer>
@@ -297,7 +303,7 @@
           <div class="progress-bar">
             <div class="progress-fill" :style="{ width: loadingProgress + '%' }"></div>
           </div>
-          <span class="progress-text">{{ loadingProgress }}%</span>
+          <span class="progress-text">{{ loadingProgress.toFixed(2) }}%</span>
         </div>
       </div>
     </div>
@@ -382,12 +388,12 @@ const systemMetrics = computed(() => {
   return [
     { 
       label: 'CPU使用率', 
-      value: `${metrics.systemCpuUsage.toFixed(1)}%`, 
+      value: `${metrics.systemCpuUsage.toFixed(2)}%`, 
       class: cpuClass
     },
     { 
       label: '内存使用', 
-      value: `${metrics.systemMemoryUsage.toFixed(1)}%`, 
+      value: `${metrics.systemMemoryUsage.toFixed(2)}%`, 
       class: memoryClass
     }
   ]
@@ -653,7 +659,7 @@ const handleFeedbackAction = (feedback: any, action: string) => {
 }
 
 const handleViewAllFeedback = () => {
-  router.push('/system/feedback')
+  router.push('/dashboard/operation/feedback')
 }
 
 // 新增的详情查看方法
@@ -662,7 +668,7 @@ const handleViewActivityDetail = () => {
     visible: true,
     type: 'activity',
     title: '用户活跃度趋势详情',
-    jumpUrl: '/analytics/activity'
+    jumpUrl: '/dashboard/rbac/users'
   }
 }
 
@@ -671,7 +677,7 @@ const handleViewContentDetail = () => {
     visible: true,
     type: 'content',
     title: '内容类型分布详情',
-    jumpUrl: '/analytics/content'
+    jumpUrl: '/dashboard/content/dashboard'
   }
 }
 
@@ -680,7 +686,7 @@ const handleViewSystemDetail = () => {
     visible: true,
     type: 'system',
     title: '系统监控详情',
-    jumpUrl: '/system/monitor'
+    jumpUrl: '/dashboard/system/settings'
   }
 }
 
@@ -689,7 +695,7 @@ const handleViewTaskDetail = () => {
     visible: true,
     type: 'tasks',
     title: '待办任务详情',
-    jumpUrl: '/audit/center'
+    jumpUrl: '/dashboard/audit/center'
   }
 }
 
@@ -2048,6 +2054,47 @@ onUnmounted(() => {
   .stat-item {
     padding: var(--spacing-sm) var(--spacing-md);
     min-width: auto;
+  }
+}
+/* 待办任务详情模态框样式 */
+.tasks-detail-modal :deep(.el-dialog) {
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.tasks-detail-modal :deep(.el-dialog__body) {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+}
+
+.tasks-detail-container {
+  height: 60vh;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+}
+
+.tasks-detail-container :deep(.pending-tasks-card) {
+  height: 100%;
+  border: none;
+  box-shadow: none;
+}
+
+.tasks-detail-container :deep(.tasks-container) {
+  height: 100%;
+}
+
+.tasks-detail-container :deep(.tasks-list) {
+  max-height: none;
+  flex: 1;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .tasks-detail-container {
+    height: 45vh;
+    padding: var(--spacing-md);
   }
 }
 </style>

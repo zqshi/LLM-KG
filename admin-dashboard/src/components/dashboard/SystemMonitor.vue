@@ -435,7 +435,7 @@ const handleRefresh = () => {
 
 const handleViewDetail = () => {
   emit('view-detail')
-  router.push('/system/monitor')
+  router.push('/dashboard/system/settings')
 }
 
 // 自动刷新

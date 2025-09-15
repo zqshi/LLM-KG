@@ -216,7 +216,7 @@ const formatNumber = (num: number): string => {
 
 const formatTrend = (trend: number): string => {
   const abs = Math.abs(trend)
-  return `${trend >= 0 ? '+' : '-'}${abs.toFixed(1)}%`
+  return `${trend >= 0 ? '+' : '-'}${abs.toFixed(2)}%`
 }
 
 const getTrendClass = (trend: number): string => {
@@ -226,7 +226,7 @@ const getTrendClass = (trend: number): string => {
 const getTrendText = (trend: number): string => {
   if (trend === 0) return '持平'
   const abs = Math.abs(trend)
-  return trend > 0 ? `增长 ${abs.toFixed(1)}%` : `下降 ${abs.toFixed(1)}%`
+  return trend > 0 ? `增长 ${abs.toFixed(2)}%` : `下降 ${abs.toFixed(2)}%`
 }
 
 const getSystemStatusText = (): string => {

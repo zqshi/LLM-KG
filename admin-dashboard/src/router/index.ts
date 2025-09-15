@@ -395,6 +395,12 @@ const routes: RouteRecordRaw[] = [
             meta: { title: '操作告警', icon: 'Bell' }
           },
           {
+            path: 'test-pages',
+            name: 'SystemTestPages',
+            component: () => import('@/views/system/TestSystemPages.vue'),
+            meta: { title: '系统页面测试', icon: 'Test' }
+          },
+          {
             path: 'permissions-test',
             name: 'PermissionsTest',
             component: () => import('@/views/system/permissions-test.vue'),

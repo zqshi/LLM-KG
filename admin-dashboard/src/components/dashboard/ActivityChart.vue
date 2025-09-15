@@ -194,11 +194,11 @@ const chartOption = computed(() => ({
         </div>
         <div style="margin-bottom: 4px;">
           <span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#52c41a;"></span>
-          新增内容: ${newContent}篇
+          新增内容: ${Math.round(newContent)}篇
         </div>
         <div>
           <span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#faad14;"></span>
-          已审核: ${auditedContent}篇
+          已审核: ${Math.round(auditedContent)}篇
         </div>
       `
     }
@@ -248,7 +248,7 @@ const chartOption = computed(() => ({
         fontSize: 12,
         formatter: (value: number) => {
           if (value >= 1000) {
-            return (value / 1000).toFixed(1) + 'K'
+            return Math.round(value / 1000) + 'K'
           }
           return value.toString()
         }

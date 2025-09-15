@@ -87,7 +87,7 @@
       <!-- 反馈列表 -->
       <div v-else class="feedback-list">
         <div
-          v-for="feedback in feedbackList"
+          v-for="feedback in displayFeedbackList"
           :key="feedback.id"
           class="feedback-item"
           :class="{ 'unread': !feedback.isRead }"
@@ -366,6 +366,11 @@ const unreadCount = computed(() => {
   return props.feedbackList.filter(item => !item.isRead).length
 })
 
+const displayFeedbackList = computed(() => {
+  if (!props.feedbackList) return []
+  return props.feedbackList.slice(0, props.maxDisplayCount)
+})
+
 // 反馈类型映射
 const feedbackTypeMap = {
   'bug': { name: 'Bug反馈', tag: 'danger' },
@@ -460,7 +465,7 @@ const handleAction = (feedback: FeedbackItem, action: string) => {
 
 const handleViewAll = () => {
   emit('view-all')
-  router.push('/system/feedback')
+  router.push('/dashboard/operation/feedback')
 }
 
 const handleReplyDialogClose = () => {
@@ -487,9 +492,17 @@ const handleSendReply = () => {
 
 <style scoped>
 .feedback-card {
-  height: 500px;
+  height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.feedback-card :deep(.el-card__body) {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg);
 }
 
 .card-header {
@@ -497,6 +510,9 @@ const handleSendReply = () => {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .header-left {
@@ -535,6 +551,7 @@ const handleSendReply = () => {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
 }
 
 .feedback-loading {
@@ -567,18 +584,22 @@ const handleSendReply = () => {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-xs) 0;
+  height: 100%;
 }
 
 .feedback-item {
   display: flex;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
   border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
   cursor: pointer;
   transition: all var(--transition-medium);
   border: 1px solid var(--color-border-light);
   background: var(--color-bg-card);
+  min-height: 110px;
+  position: relative;
+  z-index: 1;
 }
 
 .feedback-item:hover {
@@ -623,6 +644,8 @@ const handleSendReply = () => {
 .feedback-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .feedback-header {
@@ -630,6 +653,8 @@ const handleSendReply = () => {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
 }
 
 .user-info {
@@ -668,14 +693,16 @@ const handleSendReply = () => {
 }
 
 .feedback-text {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-primary);
   line-height: 1.5;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word;
+  flex: 1;
 }
 
 .feedback-actions {
@@ -794,22 +821,28 @@ const handleSendReply = () => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .feedback-item {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
+    min-height: 140px;
   }
   
   .feedback-header {
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
   }
   
   .feedback-actions {
     flex-direction: column;
     align-items: stretch;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
   }
   
   .action-left {
     justify-content: space-between;
+  }
+  
+  .feedback-text {
+    -webkit-line-clamp: 4;
+    font-size: 12px;
   }
 }
 

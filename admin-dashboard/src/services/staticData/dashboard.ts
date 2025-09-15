@@ -110,43 +110,45 @@ export const pendingTasks = async () => [
 export const recentActivities = async () => [
   {
     id: 1,
-    user: { name: '张三', avatar: '/avatars/zhangsan.jpg' },
-    action: '发布了新文章',
-    target: 'Vue 3 Composition API 最佳实践分享',
-    time: '2024-12-14 16:30:00',
-    type: 'publish'
+    user: { 
+      id: 1,
+      nickname: '张三', 
+      avatar: '/avatars/zhangsan.jpg' 
+    },
+    content: 'Vue 3 Composition API 最佳实践分享这篇文章写得非常好，学到了很多新知识',
+    type: 'suggestion',
+    rating: 5,
+    tags: ['技术分享', 'Vue'],
+    isRead: false,
+    createdAt: '2024-12-14 16:30:00'
   },
   {
     id: 2,
-    user: { name: '李四', avatar: '/avatars/lisi.jpg' },
-    action: '创建了新投票',
-    target: '技术分享主题征集',
-    time: '2024-12-14 15:45:00',
-    type: 'poll'
+    user: { 
+      id: 2,
+      nickname: '李四', 
+      avatar: '/avatars/lisi.jpg' 
+    },
+    content: '技术分享主题征集这个投票活动很有意义，希望能多举办类似的活动',
+    type: 'praise',
+    rating: 4,
+    tags: ['活动建议', '投票'],
+    isRead: true,
+    createdAt: '2024-12-14 15:45:00'
   },
   {
     id: 3,
-    user: { name: '王五', avatar: '/avatars/wangwu.jpg' },
-    action: '评论了文章',
-    target: '关于员工食堂菜品改进的建议',
-    time: '2024-12-14 14:20:00',
-    type: 'comment'
-  },
-  {
-    id: 4,
-    user: { name: '赵六', avatar: '/avatars/zhaoliu.jpg' },
-    action: '审核通过了',
-    target: '年终奖发放时间确认',
-    time: '2024-12-14 13:15:00',
-    type: 'audit'
-  },
-  {
-    id: 5,
-    user: { name: '孙七', avatar: '/avatars/sunqi.jpg' },
-    action: '更新了',
-    target: '员工福利版块设置',
-    time: '2024-12-14 12:30:00',
-    type: 'update'
+    user: { 
+      id: 3,
+      nickname: '王五', 
+      avatar: '/avatars/wangwu.jpg' 
+    },
+    content: '关于员工食堂菜品改进的建议中提到的问题确实存在，希望尽快改善',
+    type: 'complaint',
+    rating: 3,
+    tags: ['员工福利', '食堂'],
+    isRead: false,
+    createdAt: '2024-12-14 14:20:00'
   }
 ]
 

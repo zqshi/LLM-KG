@@ -10,7 +10,7 @@
 
 ```toml
 [build]
-  command = "cd admin-dashboard && npm ci && npm run build"
+  command = "cd admin-dashboard && pnpm install --no-frozen-lockfile --prod=false && pnpm run build"
   publish = "admin-dashboard/dist"
   base = "/"
 
@@ -18,6 +18,7 @@
   VITE_STATIC_MODE = "true"
   VITE_API_BASE_URL = ""
   NODE_ENV = "production"
+  NODE_VERSION = "20.10.0"
 
 [[redirects]]
   from = "/*"
@@ -36,9 +37,9 @@
 
 ### 关键配置说明
 
-1. **构建命令**: `cd admin-dashboard && npm ci && npm run build`
+1. **构建命令**: `cd admin-dashboard && pnpm install --no-frozen-lockfile --prod=false && pnpm run build`
    - 进入 admin-dashboard 目录
-   - 使用 npm ci 安装依赖（比 npm install 更快更可靠）
+   - 使用 pnpm install 安装依赖
    - 运行构建命令
 
 2. **发布目录**: `admin-dashboard/dist`
@@ -48,6 +49,7 @@
    - `VITE_STATIC_MODE = "true"`: 启用静态模式，不调用真实API
    - `VITE_API_BASE_URL = ""`: API基础URL为空
    - `NODE_ENV = "production"`: 设置生产环境
+   - `NODE_VERSION = "20.10.0"`: 指定Node.js版本
 
 4. **重定向规则**:
    - 所有请求都重定向到 `/index.html`，支持 Vue Router 的 history 模式
@@ -84,7 +86,7 @@
 ### 构建失败
 
 如果构建失败，请检查：
-1. Node.js 版本是否兼容（项目要求 >=18.0.0）
+1. Node.js 版本是否兼容（项目要求 >=20.0.0）
 2. 依赖是否正确安装
 3. TypeScript 编译是否有错误
 

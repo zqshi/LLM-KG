@@ -263,25 +263,25 @@ const taskTypeMap = {
   'content_audit': {
     name: '内容审核',
     icon: Document,
-    route: '/audit/center',
+    route: '/dashboard/audit/center',
     tagType: 'warning'
   },
   'user_report': {
     name: '用户举报',
     icon: User,
-    route: '/system/alerts',
+    route: '/dashboard/system/alerts',
     tagType: 'danger'
   },
   'banner_approval': {
     name: 'Banner审批',
     icon: Picture,
-    route: '/banner/my-todo',
+    route: '/dashboard/banner/my-todo',
     tagType: 'primary'
   },
   'quotation_audit': {
     name: '名言审核',
     icon: ChatDotRound,
-    route: '/quotation/audit',
+    route: '/dashboard/quotation/list',
     tagType: 'info'
   }
 } as const
@@ -410,7 +410,7 @@ const handleTaskAction = (task: PendingTask, action: string) => {
 
 const handleViewAll = () => {
   emit('view-all')
-  router.push('/audit/center')
+  router.push('/dashboard/audit/center')
 }
 
 const handleTaskDialogClose = () => {
@@ -429,6 +429,13 @@ const handleTaskProcess = () => {
 <style scoped>
 .pending-tasks-card {
   height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pending-tasks-card :deep(.el-card__body) {
+  flex: 1;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -482,6 +489,7 @@ const handleTaskProcess = () => {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-xs) 0;
+  max-height: 400px;
 }
 
 .task-item {

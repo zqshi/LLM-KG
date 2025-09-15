@@ -134,12 +134,12 @@ const cardMetrics = computed(() => {
   return [
     { 
       label: '平均活跃', 
-      value: avgActiveUsers >= 1000 ? `${(avgActiveUsers / 1000).toFixed(1)}k` : avgActiveUsers.toString(),
+      value: avgActiveUsers >= 1000 ? `${Math.round(avgActiveUsers / 1000)}k` : avgActiveUsers.toString(),
       class: 'primary'
     },
     { 
       label: '总新增', 
-      value: totalNewContent.toString(),
+      value: totalNewContent >= 1000 ? `${Math.round(totalNewContent / 1000)}k` : totalNewContent.toString(),
       class: 'success'
     }
   ]

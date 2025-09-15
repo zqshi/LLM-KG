@@ -153,7 +153,7 @@ const cardMetrics = computed(() => {
     },
     { 
       label: '总内容', 
-      value: total >= 1000 ? `${(total / 1000).toFixed(1)}k` : total.toString(),
+      value: total >= 1000 ? `${Math.round(total / 1000)}k` : total.toString(),
       class: 'primary'
     }
   ]
