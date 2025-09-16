@@ -116,7 +116,7 @@ export const dashboardApi = {
           {
             id: 'content_audit',
             name: '内容审核',
-            path: '/audit/center',
+            path: '/dashboard/audit/center',
             icon: 'View',
             type: 'primary',
             permission: 'content:audit',
@@ -125,7 +125,7 @@ export const dashboardApi = {
           {
             id: 'user_management',
             name: '用户管理',
-            path: '/rbac/users',
+            path: '/dashboard/rbac/users',
             icon: 'User',
             type: 'success',
             permission: 'rbac:user:view',
@@ -134,7 +134,7 @@ export const dashboardApi = {
           {
             id: 'publish_content',
             name: '发布内容',
-            path: '/content/create',
+            path: '/dashboard/content/list',
             icon: 'EditPen',
             type: 'info',
             permission: 'content:create',
@@ -143,7 +143,7 @@ export const dashboardApi = {
           {
             id: 'system_settings',
             name: '系统设置',
-            path: '/system/settings',
+            path: '/dashboard/system/settings',
             icon: 'Setting',
             type: 'warning',
             permission: 'system:config',
@@ -237,7 +237,7 @@ export const dashboardApi = {
         {
           id: 'publish_content',
           name: '发布内容',
-          path: '/content/create',
+          path: '/dashboard/content/list',
           icon: 'EditPen',
           type: 'info',
           permission: 'content:create',
@@ -324,7 +324,8 @@ export const dashboardApi = {
   async markTaskCompleted(taskId: number): Promise<ApiResponse<void>> {
     return apiAdapter.post(
       () => http.post(`/dashboard/tasks/${taskId}/complete`),
-      async () => undefined
+      undefined,
+      '任务标记完成'
     )
   },
 

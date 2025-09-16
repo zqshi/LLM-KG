@@ -161,6 +161,52 @@
         </div>
       </div>
     </el-drawer>
+
+    <!-- 自定义快捷操作对话框 -->
+    <el-dialog
+      v-model="customizeDialogVisible"
+      title="自定义快捷操作"
+      width="600px"
+      class="customize-dialog"
+    >
+      <div class="customize-content">
+        <el-alert
+          title="提示"
+          description="请选择您常用的快捷操作，最多可选择8个"
+          type="info"
+          :closable="false"
+          show-icon
+          class="customize-tip"
+        />
+        
+        <div class="actions-selection">
+          <el-checkbox-group v-model="selectedActions" class="actions-checkbox-group">
+            <el-checkbox
+              v-for="action in availableActions"
+              :key="action.id"
+              :label="action.id"
+              class="action-checkbox"
+            >
+              <div class="action-item-preview">
+                <div class="action-icon">
+                  <el-icon :size="20">
+                    <component :is="getActionIcon(action.icon)" />
+                  </el-icon>
+                </div>
+                <span class="action-name">{{ action.name }}</span>
+              </div>
+            </el-checkbox>
+          </el-checkbox-group>
+        </div>
+      </div>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="customizeDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="saveCustomization">保存</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -175,7 +221,7 @@ import {
   Picture, ChatDotRound, Lock, Bell, House,
   Star, DataBoard, Tools, Monitor, Connection,
   Checked, Operation, Timer, Menu, Warning,
-  Goods, FolderOpened
+  Goods, FolderOpened, Postcard, Management
 } from '@element-plus/icons-vue'
 
 // Props 定义
@@ -206,17 +252,60 @@ const authStore = useAuthStore()
 
 // 响应式数据
 const moreActionsVisible = ref(false)
+const customizeDialogVisible = ref(false)
 const searchKeyword = ref('')
 const todayUsageCount = ref(23) // 模拟数据
 const newActionIds = ref(['publish_content', 'ai_assist']) // 新功能ID列表
 const hotActionIds = ref(['content_audit', 'user_management']) // 热门功能ID列表
+
+// 自定义快捷操作相关数据
+const selectedActions = ref<string[]>([])
+const availableActions = ref<QuickAction[]>([
+  {
+    id: 'content_audit',
+    name: '内容审核',
+    path: '/dashboard/audit/center',
+    icon: 'View',
+    type: 'primary',
+    permission: 'content:audit',
+    visible: true
+  },
+  {
+    id: 'user_management',
+    name: '用户管理',
+    path: '/dashboard/rbac/users',
+    icon: 'User',
+    type: 'success',
+    permission: 'rbac:user:view',
+    visible: true
+  },
+  {
+    id: 'publish_content',
+    name: '发布内容',
+    path: '/dashboard/content/list',
+    icon: 'EditPen',
+    type: 'info',
+    permission: 'content:create',
+    visible: true
+  },
+  {
+    id: 'system_settings',
+    name: '系统设置',
+    path: '/dashboard/system/settings',
+    icon: 'Setting',
+    type: 'warning',
+    permission: 'system:config',
+    visible: true
+  }
+])
 
 // 图标映射
 const iconMap = {
   View, User, EditPen, TrendCharts, Document, Picture,
   ChatDotRound, Lock, Bell, House, Star, DataBoard,
   Tools, Monitor, Connection, Checked, Operation,
-  Timer, Menu, Warning, Goods, FolderOpened, Setting
+  Timer, Menu, Warning, Goods, FolderOpened, Setting,
+  Postcard, Management
 } as any
 
 // 计算属性
@@ -225,7 +314,17 @@ const visibleActions = computed(() => {
   
   // 过滤有权限且可见的操作
   const availableActions = props.quickActions.filter(action => {
-    return action.visible && (!action.permission || authStore.checkPermission(action.permission))
+    // 检查操作是否可见
+    if (!action.visible) return false
+    
+    // 检查权限 - 在静态模式下总是返回true
+    if (action.permission) {
+      const hasPerm = authStore.checkPermission(action.permission)
+      console.log(`检查权限 ${action.permission}: ${hasPerm}`)
+      return hasPerm
+    }
+    
+    return true
   })
   
   return availableActions.slice(0, props.maxDisplayCount)
@@ -290,9 +389,32 @@ const handleActionClick = (action: QuickAction) => {
   // 记录使用统计
   todayUsageCount.value++
   
+  // 检查权限
+  if (action.permission && !authStore.checkPermission(action.permission)) {
+    ElMessage.error('您没有权限执行此操作')
+    return
+  }
+  
   // 跳转到指定页面
   if (action.path) {
-    router.push(action.path)
+    // 确保路径以/开头
+    const path = action.path.startsWith('/') ? action.path : `/${action.path}`
+    
+    // 检查路由是否存在
+    const route = router.resolve(path)
+    if (route.matched.length === 0) {
+      ElMessage.error(`页面路径 ${path} 不存在`)
+      return
+    }
+    
+    router.push(path).catch(err => {
+      console.error('路由跳转失败:', err)
+      // 如果路由跳转失败，尝试使用相对路径
+      router.push({ path, replace: true }).catch(err2 => {
+        console.error('备用路由跳转也失败:', err2)
+        ElMessage.error('页面跳转失败，请检查页面是否存在')
+      })
+    })
   }
   
   // 关闭抽屉
@@ -303,11 +425,21 @@ const handleActionClick = (action: QuickAction) => {
 
 const handleCustomize = () => {
   emit('customize')
-  // TODO: 打开自定义设置对话框
+  customizeDialogVisible.value = true
 }
 
 const handleShowMore = () => {
   moreActionsVisible.value = true
+}
+
+const saveCustomization = () => {
+  // 保存自定义设置
+  console.log('保存自定义快捷操作:', selectedActions.value)
+  ElMessage.success('自定义设置已保存')
+  customizeDialogVisible.value = false
+  
+  // 这里应该调用API保存用户的自定义设置
+  // emit('customization-saved', selectedActions.value)
 }
 
 // 获取操作的使用频率（模拟数据）- 暂时注释掉未使用的函数
@@ -647,6 +779,60 @@ const handleShowMore = () => {
     flex-direction: column;
     gap: var(--spacing-sm);
   }
+}
+
+/* 自定义对话框样式 */
+.customize-dialog :deep(.el-dialog__body) {
+  padding: var(--spacing-lg);
+}
+
+.customize-tip {
+  margin-bottom: var(--spacing-lg);
+}
+
+.actions-selection {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.actions-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.action-checkbox {
+  margin-right: 0;
+}
+
+.action-item-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-medium);
+}
+
+.action-item-preview:hover {
+  background-color: var(--color-bg-light);
+}
+
+.action-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.action-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 /* 动画效果 */
