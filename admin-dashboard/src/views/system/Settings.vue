@@ -296,7 +296,7 @@
     </el-row>
 
     <!-- 告警规则对话框 -->
-    <el-dialog v-model="alertRuleDialog.visible" :title="alertRuleDialog.title" width="600px">
+    <BaseModal v-model="alertRuleDialog.visible" :title="alertRuleDialog.title" width="600px">
       <el-form :model="alertRuleDialog.form" label-width="100px">
         <el-form-item label="规则名称" required>
           <el-input v-model="alertRuleDialog.form.name" />
@@ -314,12 +314,13 @@
           <el-button type="primary" @click="saveAlertRule">确定</el-button>
         </span>
       </template>
-    </el-dialog>
+    </BaseModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 import { ElMessage } from 'element-plus'
 import {
   Setting, Check, Document, Monitor, Bell, 

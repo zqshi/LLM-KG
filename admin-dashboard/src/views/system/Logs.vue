@@ -183,7 +183,7 @@
               <el-table-column prop="operatorName" label="操作人" width="100" />
               <el-table-column prop="action" label="操作类型" width="120">
                 <template #default="{ row }">
-                  <el-tag :type="getBatchOperationTag(row.action)" size="small">
+                  <el-tag :type="getBatchOperationTag(row.action) as any" size="small">
                     {{ getBatchOperationLabel(row.action) }}
                   </el-tag>
                 </template>
@@ -191,7 +191,7 @@
               <el-table-column prop="taskCount" label="任务数量" width="100" />
               <el-table-column prop="result" label="执行结果" width="100">
                 <template #default="{ row }">
-                  <el-tag :type="row.success ? 'success' : 'danger'" size="small">
+                  <el-tag :type="(row.success ? 'success' : 'danger') as any" size="small">
                     {{ row.success ? '成功' : '失败' }}
                   </el-tag>
                 </template>
@@ -258,7 +258,7 @@
     </el-card>
 
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="操作详情" width="600px" :close-on-click-modal="false">
+    <BaseModal v-model="detailDialogVisible" title="操作详情" width="600px" :close-on-click-modal="false">
       <div v-if="selectedLog" class="detail-content">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="操作人">
@@ -273,7 +273,7 @@
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="操作类型">
-            <el-tag :type="getOperationTypeColor(selectedLog.operationType)" size="small">
+            <el-tag :type="getOperationTypeColor(selectedLog.operationType) as any" size="small">
               {{ getOperationTypeText(selectedLog.operationType) }}
             </el-tag>
           </el-descriptions-item>
@@ -301,12 +301,13 @@
           <el-button @click="detailDialogVisible = false">关闭</el-button>
         </span>
       </template>
-    </el-dialog>
+    </BaseModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Download, Refresh, Search, DocumentChecked, Calendar,

@@ -1,5 +1,5 @@
 <template>
-  <el-dialog
+  <BaseModal
     v-model="visible"
     :title="isEditing ? '编辑快捷入口' : '新建快捷入口'"
     width="600px"
@@ -183,7 +183,6 @@
         </div>
       </div>
     </el-dialog>
-    
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="handleCancel">取消</el-button>
@@ -192,11 +191,12 @@
         </el-button>
       </div>
     </template>
-  </el-dialog>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, watch, computed } from 'vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Upload } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'

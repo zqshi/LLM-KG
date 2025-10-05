@@ -1,11 +1,11 @@
 <template>
-  <el-dialog
+  <BaseModal
     :model-value="visible"
-    @update:model-value="(val) => emit('update:visible', val)"
+    @update:modelValue="(val: boolean) => emit('update:visible', val)"
     :title="`管理版块「${categoryName}」的版主`"
     width="800px"
     :close-on-click-modal="false"
-    :before-close="handleClose"
+    @close="handleClose"
     class="moderator-dialog"
   >
     <div class="dialog-content">
@@ -179,11 +179,12 @@
         </el-button>
       </div>
     </template>
-  </el-dialog>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, watch, nextTick } from 'vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 import { ElMessage } from 'element-plus'
 import type { User } from '@/types'
 import { categoriesApi } from '@/api/categories'

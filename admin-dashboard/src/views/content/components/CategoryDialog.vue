@@ -1,11 +1,11 @@
 <template>
-  <el-dialog
+  <BaseModal
     :model-value="visible"
-    @update:model-value="(val) => emit('update:visible', val)"
+    @update:modelValue="(val) => emit('update:visible', val)"
     :title="isEdit ? '编辑版块' : '新增版块'"
     width="600px"
     :close-on-click-modal="false"
-    :before-close="handleClose"
+    @close="handleClose"
     class="category-dialog"
   >
     <el-form
@@ -196,11 +196,12 @@
         </el-button>
       </div>
     </template>
-  </el-dialog>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, nextTick, onMounted } from 'vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { categoriesApi } from '@/api/categories'

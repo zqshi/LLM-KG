@@ -11,6 +11,7 @@ declare module 'vue' {
     ActivityPreviewCard: typeof import('./src/components/dashboard/ActivityPreviewCard.vue')['default']
     AnimatedNumber: typeof import('./src/components/AnimatedNumber.vue')['default']
     ApprovalConfigPanel: typeof import('./src/components/ApprovalConfigPanel.vue')['default']
+    BaseModal: typeof import('./src/components/modal/BaseModal.vue')['default']
     Button: typeof import('./src/components/common/Button.vue')['default']
     ContentCard: typeof import('./src/components/common/ContentCard.vue')['default']
     ContentDistributionChart: typeof import('./src/components/dashboard/ContentDistributionChart.vue')['default']

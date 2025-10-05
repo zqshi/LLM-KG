@@ -167,7 +167,7 @@
     </el-card>
 
     <!-- 告警详情对话框 -->
-    <el-dialog v-model="detailDialog.visible" :title="detailDialog.title" width="700px">
+    <BaseModal v-model="detailDialog.visible" :title="detailDialog.title" width="700px">
       <div v-if="detailDialog.alert" class="alert-detail">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="告警类型">
@@ -222,10 +222,10 @@
           </el-button>
         </span>
       </template>
-    </el-dialog>
+    </BaseModal>
 
     <!-- 处理告警对话框 -->
-    <el-dialog v-model="resolveDialog.visible" title="处理告警" width="500px">
+    <BaseModal v-model="resolveDialog.visible" title="处理告警" width="500px">
       <el-form :model="resolveForm" label-width="80px">
         <el-form-item label="处理说明">
           <el-input 
@@ -242,12 +242,13 @@
           <el-button type="primary" @click="confirmResolve">确定</el-button>
         </span>
       </template>
-    </el-dialog>
+    </BaseModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Warning, Refresh, Search, Bell, 

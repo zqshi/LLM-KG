@@ -1,11 +1,11 @@
 <template>
-  <el-dialog 
+  <BaseModal 
     v-model="visible"
     title="创建资讯"
     width="1000px"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
-    @closed="handleClosed"
+    @close="handleClosed"
   >
     <el-form
       ref="formRef"
@@ -214,11 +214,12 @@
         </div>
       </template>
     </el-dialog>
-  </el-dialog>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, nextTick, watch } from 'vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { 
