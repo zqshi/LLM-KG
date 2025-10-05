@@ -1,5 +1,5 @@
 <template>
-  <el-dialog
+  <BaseModal
     v-model="dialogVisible"
     title="投票统计分析"
     width="1000px"
@@ -171,7 +171,7 @@
         刷新数据
       </el-button>
     </template>
-  </el-dialog>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
@@ -187,6 +187,7 @@ import {
   Download,
   Document
 } from '@element-plus/icons-vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 
 // Props
 interface Props {

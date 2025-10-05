@@ -1,0 +1,66 @@
+/* 全局统一 Element Plus 弹窗样式，适用于所有 el-dialog */
+/* 基础圆角与阴影 */
+.el-dialog {
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+/* 头部统一样式（浅色背景 + 更紧凑的布局） */
+.el-dialog__header {
+  background: #f7f8fa;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+.el-dialog__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+.el-dialog__headerbtn {
+  top: 14px;
+  right: 16px;
+}
+
+/* 内容区域统一内边距与滚动表现 */
+.el-dialog__body {
+  padding: 20px;
+  max-height: 68vh;
+  overflow-y: auto;
+}
+
+/* 底部按钮区统一布局 */
+.el-dialog__footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--el-border-color-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #fff;
+}
+
+/* 类型化头部风格（用于错误/警告/成功信息类弹窗）可在容器上添加以下类名以区分 */
+.modal-info .el-dialog__header { background: #f5f7fa; }
+.modal-success .el-dialog__header { background: #e1f3d8; }
+.modal-warning .el-dialog__header { background: #fdf6ec; }
+.modal-error .el-dialog__header { background: #fde2e2; }
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .el-dialog {
+    width: 95% !important;
+    margin: 0 auto;
+  }
+  .el-dialog__body {
+    max-height: 60vh;
+  }
+}
+
+/* 统一一些常见对话框内容的内边距与栅格 */
+.create-poll-dialog .el-form,
+.statistics-dialog .statistics-content {
+  max-height: 68vh;
+  overflow-y: auto;
+}
+
+/* 防止个别页面用 :deep 覆盖导致样式偏差，尽量保持一致 */

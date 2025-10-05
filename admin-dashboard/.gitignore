@@ -124,3 +124,5 @@ public/
 .idea/
 *.swp
 *.swo
+# Re-include SPA redirects file
+!public/_redirects

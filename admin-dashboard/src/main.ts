@@ -9,6 +9,7 @@ import { useAuthStore } from './stores/auth'
 import 'element-plus/dist/index.css'
 import './styles/design-system.css'
 import './styles/index.css'
+import './styles/modal.css'
 
 // 导入部署后修复工具
 import { initDeploymentFixes } from './utils/deploymentFixes'

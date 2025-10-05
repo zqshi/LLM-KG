@@ -101,3 +101,6 @@ ehthumbs.db
 Icon?
 Thumbs.db**/*.log
 .npm-cache/
+# Re-include SPA redirects under admin-dashboard/public
+!admin-dashboard/public/
+!admin-dashboard/public/_redirects

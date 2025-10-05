@@ -1,11 +1,11 @@
 <template>
-  <el-dialog
+  <BaseModal
     v-model="dialogVisible"
     :title="isEdit ? '编辑投票帖' : '创建投票帖'"
     width="800px"
-    :before-close="handleClose"
-    destroy-on-close
+    :destroy-on-close="true"
     class="create-poll-dialog"
+    @close="handleClose"
   >
     <el-form
       ref="formRef"
@@ -139,7 +139,7 @@
             </div>
             
             <el-button
-              type="dashed"
+              plain
               @click="addOption"
               :disabled="form.options.length >= 10"
               style="width: 100%; margin-top: 10px"
@@ -339,7 +339,7 @@
             </el-form-item>
           </div>
           
-          <el-button type="dashed" @click="addReward" style="width: 100%">
+          <el-button plain @click="addReward" style="width: 100%">
             <el-icon><Plus /></el-icon>
             添加奖励
           </el-button>
@@ -356,7 +356,7 @@
         </el-button>
       </div>
     </template>
-  </el-dialog>
+  </BaseModal>
 </template>
 
 <script setup lang="ts">
@@ -366,6 +366,7 @@ import type { CreatePollPostForm, PollPostListItem } from '@/types/poll'
 import PollAdminAPI, { PollCommonAPI } from '@/api/poll'
 import { ElMessage } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
+import BaseModal from '@/components/modal/BaseModal.vue'
 
 // Props
 interface Props {
@@ -581,7 +582,17 @@ const handleSaveDraft = async () => {
   
   saving.value = true
   try {
-    const formData = { ...form.value, publishImmediately: false }
+    const rewardsPayload = (form.value.rewards || []).map((r, idx) => ({
+      id: (r as any).id ?? idx + 1,
+      name: r.name,
+      type: r.type,
+      description: r.description,
+      value: (r as any).value,
+      image: (r as any).image,
+      condition: r.condition,
+      quantity: (r as any).quantity ?? 1
+    }))
+    const formData = { ...form.value, publishImmediately: false, rewards: rewardsPayload }
     
     if (isEdit.value && props.pollData) {
       await PollAdminAPI.updatePollPost({
@@ -612,7 +623,17 @@ const handleSubmit = async () => {
     
     saving.value = true
     try {
-      const formData = { ...form.value, publishImmediately: true }
+      const rewardsPayload = (form.value.rewards || []).map((r, idx) => ({
+        id: (r as any).id ?? idx + 1,
+        name: r.name,
+        type: r.type,
+        description: r.description,
+        value: (r as any).value,
+        image: (r as any).image,
+        condition: r.condition,
+        quantity: (r as any).quantity ?? 1
+      }))
+      const formData = { ...form.value, publishImmediately: true, rewards: rewardsPayload }
       
       if (isEdit.value && props.pollData) {
         await PollAdminAPI.updatePollPost({
