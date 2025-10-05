@@ -348,13 +348,11 @@
     </el-form>
 
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button @click="handleSaveDraft" :loading="saving">保存草稿</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="saving">
-          {{ isEdit ? '更新' : '创建并发布' }}
-        </el-button>
-      </div>
+      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleSaveDraft" :loading="saving">保存草稿</el-button>
+      <el-button type="primary" @click="handleSubmit" :loading="saving">
+        {{ isEdit ? '更新' : '创建并发布' }}
+      </el-button>
     </template>
   </BaseModal>
 </template>
@@ -792,9 +790,7 @@ onMounted(() => {
     }
   }
   
-  .dialog-footer {
-    text-align: right;
-  }
+
 }
 
 .el-form-item {

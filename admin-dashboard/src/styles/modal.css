@@ -37,6 +37,13 @@
   gap: 10px !important;
   background: #fff !important;
 }
+/* 统一按钮间距与尺寸（覆盖局部差异） */
+:root body .el-dialog__footer .el-button {
+  min-width: 96px !important;
+}
+:root body .el-dialog__footer .el-button + .el-button {
+  margin-left: 0 !important; /* 使用 gap 控制间距 */
+}
 
 /* 类型化头部风格（可通过容器类区分） */
 :root body .modal-info .el-dialog__header { background: #f5f7fa !important; }

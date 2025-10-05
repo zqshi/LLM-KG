@@ -173,11 +173,9 @@
     </div>
 
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="handleClose">
-          关闭
-        </el-button>
-      </div>
+      <el-button @click="handleClose">
+        关闭
+      </el-button>
     </template>
   </BaseModal>
 </template>
@@ -527,10 +525,7 @@ const handleClose = () => {
   padding: 40px 20px;
 }
 
-.dialog-footer {
-  padding: 10px 0 0 0;
-  text-align: right;
-}
+
 
 /* 响应式设计 */
 @media (max-width: 600px) {
