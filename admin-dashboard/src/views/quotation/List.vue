@@ -315,7 +315,7 @@
           </el-col>
         </el-row>
         
-        <el-form-item label="发生场合" prop="occasion" required>
+        <el-form-item label="发生场合" prop="occasion" required style="margin-top: 16px;">
           <el-input
             v-model="formData.occasion"
             placeholder="如：2023年年会演讲、季度总结会议等"
