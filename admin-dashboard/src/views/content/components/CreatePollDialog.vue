@@ -88,13 +88,13 @@
                   v-model="option.text"
                   placeholder="选项内容"
                   maxlength="100"
-                  style="flex: 1"
+                  class="option-input"
                 />
                 <el-input
                   v-model="option.description"
                   placeholder="选项描述（可选）"
                   maxlength="200"
-                  style="flex: 1; margin-left: 10px"
+                  class="option-input option-input-description"
                 />
                 <el-button
                   type="danger"
@@ -766,6 +766,15 @@ onMounted(() => {
         display: flex;
         align-items: center;
         margin-bottom: 10px;
+        gap: 10px;
+
+        .option-input {
+          flex: 1;
+
+          &.option-input-description {
+            flex: 1.5;
+          }
+        }
       }
       
       .option-image {
@@ -797,18 +806,60 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
+/* 优化帖子内容文本框样式 */
+.create-poll-dialog .poll-form .el-form-item:not(.option-input) textarea.el-textarea__inner {
+  border-width: 1px !important;
+  border-color: #d1d5db !important;
+  border-style: solid !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.create-poll-dialog .poll-form .el-form-item:not(.option-input) textarea.el-textarea__inner:hover {
+  border-color: #3b82f6 !important;
+}
+
+.create-poll-dialog .poll-form .el-form-item:not(.option-input) textarea.el-textarea__inner:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+  outline: none !important;
+}
+
+/* 优化版块选择框样式 */
+.create-poll-dialog .poll-form .el-form-item:not(.option-input) .el-select__wrapper {
+  border-width: 1px !important;
+  border-color: #d1d5db !important;
+  border-style: solid !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.create-poll-dialog .poll-form .el-form-item:not(.option-input) .el-select__wrapper:hover {
+  border-color: #3b82f6 !important;
+}
+
+.create-poll-dialog .poll-form .el-form-item:not(.option-input) .el-select__wrapper.is-focused {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+  outline: none !important;
+}
+
 @media (max-width: 768px) {
   .create-poll-dialog {
     width: 95% !important;
     
-    .option-content {
-      flex-direction: column !important;
-      align-items: stretch !important;
-      
-      .el-input {
-        margin: 5px 0 !important;
+      .option-content {
+        flex-direction: column !important;
+        align-items: stretch !important;
+
+        .option-input {
+          margin: 5px 0 !important;
+
+          &.option-input-description {
+            flex: 1 !important; /* 在移动端将弹性比例重置为1 */
+          }
+        }
       }
-    }
   }
 }
 </style>

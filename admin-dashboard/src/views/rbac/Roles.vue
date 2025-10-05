@@ -692,6 +692,45 @@ onMounted(async () => {
   gap: 8px;
 }
 
+/* 优化新建角色弹窗表单间距 */
+.el-dialog .el-form .el-row {
+  margin-bottom: 16px !important;
+}
+
+.el-dialog .el-form .el-form-item {
+  margin-bottom: 16px !important;
+}
+
+.el-dialog .el-form .el-form-item:last-child {
+  margin-bottom: 0 !important;
+}
+
+.el-dialog .el-form .el-form-item__content {
+  margin-top: 4px !important;
+}
+
+/* 优化新建角色弹窗文本框样式 */
+.el-dialog .el-form .el-form-item .el-input__wrapper,
+.el-dialog .el-form .el-form-item .el-select__wrapper {
+  border-width: 1px !important;
+  border-color: #d1d5db !important;
+  border-style: solid !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}
+
+.el-dialog .el-form .el-form-item .el-input__wrapper:hover,
+.el-dialog .el-form .el-form-item .el-select__wrapper:hover {
+  border-color: #3b82f6 !important;
+}
+
+.el-dialog .el-form .el-form-item .el-input__wrapper.is-focus,
+.el-dialog .el-form .el-form-item .el-select__wrapper.is-focused {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+  outline: none !important;
+}
+
 .permission-assign {
   max-height: 600px;
   overflow-y: auto;
