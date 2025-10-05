@@ -1181,31 +1181,7 @@ const getRoleName = (roleId: string) => {
 // ================================
 // 全局样式覆盖
 // ================================
-:deep(.el-dialog) {
-  border-radius: 8px;
-  overflow: hidden;
 
-  .el-dialog__header {
-    background: #fafbfc;
-    padding: 20px 24px;
-    border-bottom: 1px solid #e4e7ed;
-
-    .el-dialog__title {
-      font-weight: 600;
-      color: #303133;
-    }
-  }
-
-  .el-dialog__body {
-    padding: 24px;
-  }
-
-  .el-dialog__footer {
-    padding: 16px 24px;
-    background: #fafbfc;
-    border-top: 1px solid #e4e7ed;
-  }
-}
 
 :deep(.el-dropdown-menu) {
   border-radius: 8px;

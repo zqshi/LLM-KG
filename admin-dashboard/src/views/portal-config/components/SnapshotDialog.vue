@@ -306,62 +306,7 @@ const handleSubmit = async () => {
 // ================================
 // 对话框样式优化
 // ================================
-:deep(.el-dialog) {
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
-  
-  .el-dialog__header {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    color: white;
-    padding: 24px 32px;
-    border: none;
-    
-    .el-dialog__title {
-      font-size: 20px;
-      font-weight: 700;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      
-      &::before {
-        content: '📸';
-        font-size: 24px;
-      }
-    }
-    
-    .el-dialog__headerbtn {
-      top: 20px;
-      right: 20px;
-      width: 36px;
-      height: 36px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        background: rgba(255, 77, 79, 0.9);
-        transform: scale(1.1) rotate(90deg);
-        
-        .el-dialog__close {
-          color: white;
-        }
-      }
-    }
-  }
-  
-  .el-dialog__body {
-    padding: 28px 32px;
-    background: linear-gradient(135deg, #fafbfc 0%, #f1f5f9 100%);
-  }
-  
-  .el-dialog__footer {
-    background: white;
-    padding: 20px 32px;
-    border-top: 1px solid #e4e7ed;
-  }
-}
+
 
 // ================================
 // 表单样式优化

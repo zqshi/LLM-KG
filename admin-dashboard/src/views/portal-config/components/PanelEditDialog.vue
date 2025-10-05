@@ -281,36 +281,17 @@ const handleSubmit = async () => {
   --dialog-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.el-dialog) {
-  border-radius: var(--dialog-border-radius);
-  box-shadow: var(--dialog-shadow);
-  overflow: hidden;
-}
 
-:deep(.el-dialog__header) {
-  background: var(--dialog-primary);
-  padding: 20px 24px 16px;
-  margin: 0;
-}
 
-:deep(.el-dialog__title) {
-  color: white;
-  font-weight: 600;
-  font-size: 18px;
-}
 
-:deep(.el-dialog__close) {
-  color: white;
-  font-size: 18px;
-}
 
-:deep(.el-dialog__close:hover) {
-  color: rgba(255, 255, 255, 0.8);
-}
 
-:deep(.el-dialog__body) {
-  padding: 24px;
-}
+
+
+
+
+
+
 
 .panel-form {
   .form-input,

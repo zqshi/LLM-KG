@@ -1215,15 +1215,6 @@ onUnmounted(() => {
 }
 
 .log-detail-dialog {
-  :deep(.el-dialog) {
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  :deep(.el-dialog__header) {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    color: white;
-  }
 }
 
 .log-detail-content {

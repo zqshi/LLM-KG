@@ -137,8 +137,8 @@
 
     <!-- 图标选择器对话框 -->
     <IconPickerDialog
-      v-model="showIconPicker"
-      @confirm="handleIconSelect"
+      v-model:visible="showIconPicker"
+      @select="handleIconSelect"
     />
 
     <template #footer>
@@ -190,18 +190,17 @@ const visible = computed({
 })
 
 const form = reactive<EntryItemForm>({
+  panel_id: 0,
   title: '',
   description: '',
   icon: '',
   url: '',
   target: '_blank',
-  style: 'default',
-  roles: [],
-  is_active: true,
-  is_new: false,
-  is_hot: false,
   sort_order: 0,
-  panel_id: 0
+  status: 'active',
+  roles: [],
+  tags: [],
+  meta: {}
 })
 
 const rules: FormRules = {
@@ -217,9 +216,6 @@ const rules: FormRules = {
   ],
   url: [
     { required: true, message: '请输入链接地址', trigger: 'blur' }
-  ],
-  style: [
-    { required: true, message: '请选择项目样式', trigger: 'change' }
   ]
 }
 
@@ -255,18 +251,17 @@ const getUrlPlaceholder = () => {
 watch(() => props.editingItem, (item) => {
   if (item && props.modelValue) {
     Object.assign(form, {
+      panel_id: item.panel_id,
       title: item.title,
       description: item.description || '',
       icon: item.icon,
       url: item.url,
       target: item.target || '_blank',
-      style: item.style || 'default',
-      roles: item.roles || [],
-      is_active: item.is_active !== false,
-      is_new: item.is_new || false,
-      is_hot: item.is_hot || false,
       sort_order: item.sort_order || 0,
-      panel_id: item.panel_id
+      status: item.status || 'active',
+      roles: item.roles || [],
+      tags: item.tags || [],
+      meta: item.meta || {}
     })
 
     // 根据URL判断类型
@@ -288,18 +283,17 @@ watch(() => props.panelId, (panelId) => {
 
 const resetForm = () => {
   Object.assign(form, {
+    panel_id: props.panelId || 0,
     title: '',
     description: '',
     icon: '',
     url: '',
     target: '_blank',
-    style: 'default',
-    roles: [],
-    is_active: true,
-    is_new: false,
-    is_hot: false,
     sort_order: 0,
-    panel_id: props.panelId || 0
+    status: 'active',
+    roles: [],
+    tags: [],
+    meta: {}
   })
   urlType.value = 'external'
   formRef.value?.clearValidate()
@@ -336,36 +330,17 @@ const handleSubmit = async () => {
   --dialog-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.el-dialog) {
-  border-radius: var(--dialog-border-radius);
-  box-shadow: var(--dialog-shadow);
-  overflow: hidden;
-}
 
-:deep(.el-dialog__header) {
-  background: var(--dialog-primary);
-  padding: 20px 24px 16px;
-  margin: 0;
-}
 
-:deep(.el-dialog__title) {
-  color: white;
-  font-weight: 600;
-  font-size: 18px;
-}
 
-:deep(.el-dialog__close) {
-  color: white;
-  font-size: 18px;
-}
 
-:deep(.el-dialog__close:hover) {
-  color: rgba(255, 255, 255, 0.8);
-}
 
-:deep(.el-dialog__body) {
-  padding: 24px;
-}
+
+
+
+
+
+
 
 .item-form {
   .form-input,
