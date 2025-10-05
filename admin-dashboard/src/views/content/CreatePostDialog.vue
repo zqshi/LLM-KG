@@ -148,7 +148,7 @@
             :data="organizationTree"
             :props="treeProps"
             show-checkbox
-            node-key="value"
+            node-key="id"
             :default-checked-keys="form.visibleRange"
             @check="handleOrgTreeCheck"
             class="org-tree"
@@ -306,7 +306,7 @@ const cascaderProps = {
 
 const treeProps = {
   children: 'children',
-  label: 'label'
+  label: 'name'
 }
 
 const uploadAction = '/api/forum/posts/upload-attachment'
@@ -380,7 +380,7 @@ const loadOrganizationTree = async () => {
       organizationTree.value = response.data
       // 默认选择全公司
       if (organizationTree.value.length > 0) {
-        form.visibleRange = [organizationTree.value[0].value]
+        form.visibleRange = [organizationTree.value[0].id]
       }
     }
   } catch (error) {
@@ -620,7 +620,7 @@ const resetForm = () => {
     tags: [],
     content: '',
     contentHtml: '',
-    visibleRange: organizationTree.value.length > 0 ? [organizationTree.value[0].value] : [],
+    visibleRange: organizationTree.value.length > 0 ? [organizationTree.value[0].id] : [],
     attachments: [],
     officialFlag: true
   })
@@ -636,17 +636,13 @@ const resetForm = () => {
   
   // 重置组织架构树选中状态
   if (orgTreeRef.value && organizationTree.value.length > 0) {
-    orgTreeRef.value.setCheckedKeys([organizationTree.value[0].value])
+    orgTreeRef.value.setCheckedKeys([organizationTree.value[0].id])
   }
 }
 </script>
 
 <style scoped>
-.create-post-dialog :deep(.el-dialog__body) {
-  max-height: 70vh;
-  overflow-y: auto;
-  padding: 20px 30px;
-}
+
 
 .dialog-content {
   width: 100%;
@@ -776,10 +772,6 @@ const resetForm = () => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .create-post-dialog :deep(.el-dialog) {
-    width: 95%;
-    margin: 0;
-  }
   
   .advanced-options {
     flex-direction: column;

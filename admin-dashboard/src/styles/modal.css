@@ -1,66 +1,63 @@
-/* 全局统一 Element Plus 弹窗样式，适用于所有 el-dialog */
-/* 基础圆角与阴影 */
-.el-dialog {
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  overflow: hidden;
+/* 全局统一 Element Plus 弹窗样式（强化优先级与生产一致性） */
+:root body .el-dialog {
+  border-radius: 12px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden !important;
 }
 
 /* 头部统一样式（浅色背景 + 更紧凑的布局） */
-.el-dialog__header {
-  background: #f7f8fa;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--el-border-color-light);
+:root body .el-dialog__header {
+  background: #f7f8fa !important;
+  padding: 14px 20px !important;
+  border-bottom: 1px solid var(--el-border-color-light) !important;
 }
-.el-dialog__title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--el-text-color-primary);
+:root body .el-dialog__title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--el-text-color-primary) !important;
 }
-.el-dialog__headerbtn {
-  top: 14px;
-  right: 16px;
+:root body .el-dialog__headerbtn {
+  top: 14px !important;
+  right: 16px !important;
 }
 
 /* 内容区域统一内边距与滚动表现 */
-.el-dialog__body {
-  padding: 20px;
-  max-height: 68vh;
-  overflow-y: auto;
+:root body .el-dialog__body {
+  padding: 20px !important;
+  max-height: 68vh !important;
+  overflow-y: auto !important;
 }
 
 /* 底部按钮区统一布局 */
-.el-dialog__footer {
-  padding: 12px 20px;
-  border-top: 1px solid var(--el-border-color-light);
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  background: #fff;
+:root body .el-dialog__footer {
+  padding: 12px 20px !important;
+  border-top: 1px solid var(--el-border-color-light) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  background: #fff !important;
 }
 
-/* 类型化头部风格（用于错误/警告/成功信息类弹窗）可在容器上添加以下类名以区分 */
-.modal-info .el-dialog__header { background: #f5f7fa; }
-.modal-success .el-dialog__header { background: #e1f3d8; }
-.modal-warning .el-dialog__header { background: #fdf6ec; }
-.modal-error .el-dialog__header { background: #fde2e2; }
+/* 类型化头部风格（可通过容器类区分） */
+:root body .modal-info .el-dialog__header { background: #f5f7fa !important; }
+:root body .modal-success .el-dialog__header { background: #e1f3d8 !important; }
+:root body .modal-warning .el-dialog__header { background: #fdf6ec !important; }
+:root body .modal-error .el-dialog__header { background: #fde2e2 !important; }
 
 /* 移动端优化 */
 @media (max-width: 768px) {
-  .el-dialog {
+  :root body .el-dialog {
     width: 95% !important;
-    margin: 0 auto;
+    margin: 0 auto !important;
   }
-  .el-dialog__body {
-    max-height: 60vh;
+  :root body .el-dialog__body {
+    max-height: 60vh !important;
   }
 }
 
-/* 统一一些常见对话框内容的内边距与栅格 */
-.create-poll-dialog .el-form,
-.statistics-dialog .statistics-content {
-  max-height: 68vh;
-  overflow-y: auto;
+/* 常见内容区域统一滚动表现 */
+:root body .create-poll-dialog .el-form,
+:root body .statistics-dialog .statistics-content {
+  max-height: 68vh !important;
+  overflow-y: auto !important;
 }
-
-/* 防止个别页面用 :deep 覆盖导致样式偏差，尽量保持一致 */

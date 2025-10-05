@@ -401,9 +401,7 @@ watch(() => form.name, async (newName) => {
 </script>
 
 <style scoped>
-.tag-dialog :deep(.el-dialog__body) {
-  padding: 20px 20px 0 20px;
-}
+
 
 .form-tip {
   font-size: 12px;

@@ -392,11 +392,7 @@ const handleClose = () => {
 </script>
 
 <style scoped>
-.moderator-dialog :deep(.el-dialog__body) {
-  padding: 20px;
-  max-height: 70vh;
-  overflow-y: auto;
-}
+
 
 .dialog-content {
   display: flex;
