@@ -1,24 +1,9 @@
 [build]
-  command = "cd admin-dashboard && pnpm install --no-frozen-lockfile --prod=false && pnpm run build"
-  publish = "admin-dashboard/dist"
-  base = "/"
-
-[build.environment]
-  VITE_STATIC_MODE = "true"
-  VITE_API_BASE_URL = ""
-  NODE_ENV = "production"
-  NODE_VERSION = "20.10.0"
+  base = "admin-dashboard"
+  command = "npm ci && npm run build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
