@@ -266,19 +266,19 @@ const handleCardClick = (type: string) => {
 
 .metrics-card-enhanced {
   height: 160px;
-  border-radius: var(--border-radius-md);
+  border-radius: var(--radius-xl);
   padding: var(--spacing-lg);
   transition: all var(--transition-medium);
-  background: var(--color-bg-white);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
   position: relative;
   cursor: pointer;
 }
 
 .metrics-card-enhanced:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
 }
 

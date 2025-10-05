@@ -118,15 +118,121 @@ const handleDelete = (row: any) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/operation-styles.scss';
+
 .recommendations-page {
-  padding: 20px;
+  padding: var(--spacing-xl);
 }
 
 .page-content {
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-light);
+  padding: var(--spacing-xl);
+  transition: all var(--transition-medium);
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
+// 表格样式优化
+::v-deep(.el-table) {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+
+  .el-table__header-wrapper {
+    th {
+      background-color: var(--color-bg-elevated);
+      color: var(--color-text-primary);
+      font-weight: var(--font-weight-medium);
+      border-bottom: 1px solid var(--color-border-light);
+    }
+  }
+
+  .el-table__body-wrapper {
+    tr:hover {
+      > td {
+        background-color: var(--color-bg-section) !important;
+      }
+    }
+
+    td {
+      border-bottom: 1px solid var(--color-border-lighter);
+    }
+  }
+}
+
+// 按钮样式优化
+::v-deep(.el-button) {
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// 标签样式优化
+::v-deep(.el-tag) {
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+
+  &.el-tag--primary {
+    background-color: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  &.el-tag--success {
+    background-color: var(--color-success-light);
+    border-color: var(--color-success);
+    color: var(--color-success-dark);
+  }
+
+  &.el-tag--warning {
+    background-color: var(--color-warning-light);
+    border-color: var(--color-warning);
+    color: var(--color-warning-dark);
+  }
+
+  &.el-tag--danger {
+    background-color: var(--color-danger-light);
+    border-color: var(--color-danger);
+    color: var(--color-danger-dark);
+  }
+
+  &.el-tag--info {
+    background-color: var(--color-info-light);
+    border-color: var(--color-info);
+    color: var(--color-info-dark);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .recommendations-page {
+    padding: var(--spacing-md);
+  }
+
+  .page-content {
+    padding: var(--spacing-lg);
+  }
+
+  ::v-deep(.el-table) {
+    font-size: var(--text-xs);
+
+    .el-table__cell {
+      padding: var(--spacing-xs) var(--spacing-sm);
+    }
+  }
 }
 </style>

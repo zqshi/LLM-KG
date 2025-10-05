@@ -1,7 +1,7 @@
 <template>
   <div class="rankings-page">
-    <UnifiedPageHeader 
-      title="榜单管理" 
+    <UnifiedPageHeader
+      title="榜单管理"
       description="管理平台各类榜单数据，包括用户活跃榜和内容热门榜"
     >
       <template #actions>
@@ -16,11 +16,14 @@
     <el-row :gutter="20">
       <el-col :span="16">
         <div class="ranking-tabs">
-          <el-tabs v-model="activeTab" type="border-card">
+          <el-tabs v-model="activeTab">
             <el-tab-pane label="用户活跃榜" name="users">
               <div class="ranking-content">
                 <div class="ranking-header">
-                  <h3>用户活跃榜 (本周)</h3>
+                  <div class="header-left">
+                    <h3>用户活跃榜</h3>
+                    <span class="period-badge">{{ getPeriodLabel(userRankingPeriod) }}</span>
+                  </div>
                   <div class="ranking-controls">
                     <el-select v-model="userRankingPeriod" size="small">
                       <el-option label="今日" value="today" />
@@ -29,22 +32,27 @@
                     </el-select>
                   </div>
                 </div>
-                
+
                 <div class="ranking-list">
                   <div
                     v-for="(user, index) in userRankings"
                     :key="user.id"
                     class="ranking-item"
-                    :class="{ 'top-three': index < 3 }"
+                    :class="{
+                      'top-three': index < 3,
+                      'ranking-item--gold': index === 0,
+                      'ranking-item--silver': index === 1,
+                      'ranking-item--bronze': index === 2
+                    }"
                   >
                     <div class="ranking-position">
                       <span class="position-number" :class="`position-${index + 1}`">
                         {{ index + 1 }}
                       </span>
                     </div>
-                    
+
                     <div class="ranking-user">
-                      <el-avatar :size="40" :src="user.avatar">
+                      <el-avatar :size="48" :src="user.avatar">
                         {{ user.name.charAt(0) }}
                       </el-avatar>
                       <div class="user-info">
@@ -52,25 +60,33 @@
                         <div class="user-dept">{{ user.department }}</div>
                       </div>
                     </div>
-                    
+
+                    <div class="ranking-progress">
+                      <el-progress
+                        :percentage="getUserProgress(user.score)"
+                        :color="getRankColor(index)"
+                        :stroke-width="12"
+                        :show-text="false"
+                      />
+                      <span class="progress-text">{{ user.score }}分</span>
+                    </div>
+
                     <div class="ranking-stats">
                       <div class="stat-item">
-                        <span class="stat-label">发帖</span>
+                        <el-icon><Document /></el-icon>
                         <span class="stat-value">{{ user.posts }}</span>
+                        <span class="stat-label">发帖</span>
                       </div>
                       <div class="stat-item">
-                        <span class="stat-label">点赞</span>
+                        <el-icon><Star /></el-icon>
                         <span class="stat-value">{{ user.likes }}</span>
+                        <span class="stat-label">点赞</span>
                       </div>
                       <div class="stat-item">
-                        <span class="stat-label">评论</span>
+                        <el-icon><ChatDotRound /></el-icon>
                         <span class="stat-value">{{ user.comments }}</span>
+                        <span class="stat-label">评论</span>
                       </div>
-                    </div>
-                    
-                    <div class="ranking-score">
-                      <div class="score-value">{{ user.score }}</div>
-                      <div class="score-label">积分</div>
                     </div>
                   </div>
                 </div>
@@ -80,7 +96,10 @@
             <el-tab-pane label="热门内容榜" name="content">
               <div class="ranking-content">
                 <div class="ranking-header">
-                  <h3>热门内容榜 (本周)</h3>
+                  <div class="header-left">
+                    <h3>热门内容榜</h3>
+                    <span class="period-badge">{{ getPeriodLabel(contentRankingPeriod) }}</span>
+                  </div>
                   <div class="ranking-controls">
                     <el-select v-model="contentRankingPeriod" size="small">
                       <el-option label="今日" value="today" />
@@ -89,19 +108,22 @@
                     </el-select>
                   </div>
                 </div>
-                
+
                 <div class="content-ranking-list">
                   <div
                     v-for="(content, index) in contentRankings"
                     :key="content.id"
                     class="content-ranking-item"
+                    :class="{
+                      'content-ranking-item--top': index < 3
+                    }"
                   >
                     <div class="ranking-position">
                       <span class="position-number" :class="`position-${index + 1}`">
                         {{ index + 1 }}
                       </span>
                     </div>
-                    
+
                     <div class="content-info">
                       <div class="content-title">{{ content.title }}</div>
                       <div class="content-meta">
@@ -112,20 +134,25 @@
                         <span class="content-date">{{ formatDate(content.createdAt) }}</span>
                       </div>
                     </div>
-                    
+
                     <div class="content-stats">
-                      <div class="stat-item">
+                      <div class="stat-item stat-item--compact">
                         <el-icon><View /></el-icon>
-                        <span>{{ content.views }}</span>
+                        <span class="stat-value">{{ formatNumber(content.views) }}</span>
                       </div>
-                      <div class="stat-item">
+                      <div class="stat-item stat-item--compact">
                         <el-icon><Star /></el-icon>
-                        <span>{{ content.likes }}</span>
+                        <span class="stat-value">{{ formatNumber(content.likes) }}</span>
                       </div>
-                      <div class="stat-item">
+                      <div class="stat-item stat-item--compact">
                         <el-icon><ChatDotRound /></el-icon>
-                        <span>{{ content.comments }}</span>
+                        <span class="stat-value">{{ formatNumber(content.comments) }}</span>
                       </div>
+                    </div>
+
+                    <div class="content-score">
+                      <div class="score-value">{{ calculateContentScore(content) }}</div>
+                      <div class="score-label">热度</div>
                     </div>
                   </div>
                 </div>
@@ -135,27 +162,40 @@
             <el-tab-pane label="部门贡献榜" name="departments">
               <div class="ranking-content">
                 <div class="ranking-header">
-                  <h3>部门贡献榜 (本月)</h3>
+                  <div class="header-left">
+                    <h3>部门贡献榜</h3>
+                    <span class="period-badge">本月</span>
+                  </div>
                 </div>
-                
-                <div class="department-chart">
+
+                <div class="department-rankings">
                   <div
                     v-for="(dept, index) in departmentRankings"
                     :key="dept.name"
                     class="department-item"
+                    :class="{
+                      'department-item--top': index < 3
+                    }"
                   >
-                    <div class="dept-info">
-                      <div class="dept-rank">{{ index + 1 }}</div>
-                      <div class="dept-name">{{ dept.name }}</div>
+                    <div class="department-position">
+                      <span class="dept-rank" :class="`rank-${index + 1}`">
+                        {{ index + 1 }}
+                      </span>
                     </div>
-                    <div class="dept-progress">
-                      <el-progress 
-                        :percentage="dept.percentage" 
+
+                    <div class="department-info">
+                      <div class="dept-name">{{ dept.name }}</div>
+                      <div class="dept-score">{{ dept.score }}分</div>
+                    </div>
+
+                    <div class="department-progress">
+                      <el-progress
+                        :percentage="dept.percentage"
                         :color="getDeptColor(index)"
-                        :stroke-width="20"
+                        :stroke-width="16"
                         :show-text="false"
                       />
-                      <span class="dept-score">{{ dept.score }}分</span>
+                      <div class="progress-text">贡献度 {{ dept.percentage }}%</div>
                     </div>
                   </div>
                 </div>
@@ -253,7 +293,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { Refresh, View, Star, ChatDotRound } from '@element-plus/icons-vue'
+import { Refresh, View, Star, ChatDotRound, Document } from '@element-plus/icons-vue'
 import UnifiedPageHeader from '@/components/UnifiedPageHeader.vue'
 
 const activeTab = ref('users')
@@ -325,6 +365,37 @@ const departmentRankings = ref([
   { name: '人事部', score: 1234, percentage: 50 }
 ])
 
+const getPeriodLabel = (period: string) => {
+  const periodMap: Record<string, string> = {
+    today: '今日',
+    week: '本周',
+    month: '本月'
+  }
+  return periodMap[period] || period
+}
+
+const getUserProgress = (score: number) => {
+  const maxScore = Math.max(...userRankings.value.map(u => u.score))
+  return Math.round((score / maxScore) * 100)
+}
+
+const getRankColor = (index: number) => {
+  const colors = ['#FFD700', '#C0C0C0', '#CD7F32', '#409eff']
+  return colors[index] || '#409eff'
+}
+
+const formatNumber = (num: number) => {
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k'
+  }
+  return num.toString()
+}
+
+const calculateContentScore = (content: any) => {
+  const { views, likes, comments } = content
+  return Math.round(views * 0.1 + likes * 0.3 + comments * 0.6)
+}
+
 const getContentTypeName = (type: string) => {
   const typeMap: Record<string, string> = {
     article: '文章',
@@ -363,312 +434,658 @@ const handleSaveConfig = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/operation-styles.scss';
+
 .rankings-page {
-  padding: 20px;
+  padding: var(--spacing-xl);
 }
 
 .ranking-tabs {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-xl);
+
+  ::v-deep(.el-tabs__header) {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    margin: 0;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  ::v-deep(.el-tabs__nav-wrap::after) {
+    content: none !important;
+  }
+
+  ::v-deep(.el-tabs__content) {
+    background: var(--color-bg-card);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--color-border-light);
+    border-top: none;
+  }
+
+  ::v-deep(.el-tabs__item) {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+    padding: 0 var(--spacing-lg);
+    margin-left: var(--spacing-lg);
+
+    &.is-active {
+      color: var(--color-primary);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
 }
 
 .ranking-content {
-  padding: 20px 0;
+  padding: var(--spacing-lg) 0;
 }
 
 .ranking-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e4e7ed;
-}
+  margin-bottom: var(--spacing-xl);
+  padding: 0 var(--spacing-lg);
 
-.ranking-header h3 {
-  margin: 0;
-  color: #303133;
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+
+    h3 {
+      margin: 0;
+      color: var(--color-text-primary);
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .period-badge {
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: var(--font-weight-medium);
+    }
+  }
 }
 
 .ranking-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg);
 }
 
 .ranking-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
-  padding: 16px;
-  background-color: #fff;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--color-bg-section) 0%, var(--color-bg-card) 100%);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-medium);
+  cursor: pointer;
 
-.ranking-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-primary);
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-bg-card) 5%);
+  }
 
-.ranking-item.top-three {
-  background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-  background: linear-gradient(90deg, #fff9e6 0%, #fff 20%);
-  border-color: #faad14;
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.ranking-item--gold {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, var(--color-bg-card) 20%);
+    border-color: #FFD700;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+  }
+
+  &.ranking-item--silver {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.1) 0%, var(--color-bg-card) 20%);
+    border-color: #C0C0C0;
+    box-shadow: 0 4px 12px rgba(192, 192, 192, 0.2);
+  }
+
+  &.ranking-item--bronze {
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.1) 0%, var(--color-bg-card) 20%);
+    border-color: #CD7F32;
+    box-shadow: 0 4px 12px rgba(205, 127, 50, 0.2);
+  }
 }
 
 .ranking-position {
-  margin-right: 16px;
+  margin-right: var(--spacing-lg);
 }
 
 .position-number {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  color: #fff;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--text-lg);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
 }
 
 .position-number.position-1 {
-  background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+  background: linear-gradient(135deg, #FFD700 0%, #FFB347 100%);
+  box-shadow: var(--shadow-md);
 }
 
 .position-number.position-2 {
-  background: linear-gradient(135deg, #c0c0c0 0%, #a9a9a9 100%);
+  background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
 }
 
 .position-number.position-3 {
-  background: linear-gradient(135deg, #cd7f32 0%, #b8860b 100%);
+  background: linear-gradient(135deg, #CD7F32 0%, #B8860B 100%);
 }
 
 .position-number:not(.position-1):not(.position-2):not(.position-3) {
-  background: #909399;
+  background: var(--color-text-tertiary);
+  font-size: var(--text-base);
 }
 
 .ranking-user {
   display: flex;
   align-items: center;
-  flex: 1;
-  margin-right: 20px;
+  gap: var(--spacing-md);
+  min-width: 0;
 }
 
 .user-info {
-  margin-left: 12px;
+  min-width: 0;
 }
 
 .user-name {
-  font-weight: 500;
-  color: #303133;
-  margin-bottom: 4px;
-}
-
-.user-dept {
-  font-size: 12px;
-  color: #909399;
-}
-
-.ranking-stats {
-  display: flex;
-  gap: 20px;
-  margin-right: 20px;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-label {
-  display: block;
-  font-size: 12px;
-  color: #909399;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  font-weight: 600;
-  color: #303133;
-}
-
-.ranking-score {
-  text-align: center;
-}
-
-.score-value {
-  font-size: 20px;
-  font-weight: 600;
-  color: #409eff;
-  line-height: 1;
-}
-
-.score-label {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.content-ranking-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.content-ranking-item {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  background-color: #fff;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
-
-.content-ranking-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.content-info {
-  flex: 1;
-  margin: 0 20px;
-}
-
-.content-title {
-  font-weight: 500;
-  color: #303133;
-  margin-bottom: 8px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--text-base);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.user-dept {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+}
+
+.ranking-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 120px;
+
+  .progress-text {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-align: center;
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+.ranking-stats {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: rgba(255, 255, 255, 0.9);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  min-width: 60px;
+
+  .el-icon {
+    color: var(--color-text-tertiary);
+    font-size: 16px;
+  }
+
+  .stat-value {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    font-size: var(--text-base);
+  }
+
+  .stat-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+.content-ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg);
+}
+
+.content-ranking-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-bg-section) 0%, var(--color-bg-card) 100%);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  gap: var(--spacing-lg);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-primary);
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-bg-card) 5%);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.content-ranking-item--top {
+    background: linear-gradient(135deg, var(--color-warning-light) 0%, var(--color-bg-card) 20%);
+    border-color: var(--color-warning);
+  }
+}
+
+.content-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.content-title {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-base);
+}
+
 .content-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  color: #909399;
+  gap: var(--spacing-md);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
 }
 
 .content-stats {
   display: flex;
-  gap: 16px;
+  gap: var(--spacing-md);
 }
 
-.content-stats .stat-item {
+.stat-item--compact {
   display: flex;
   align-items: center;
-  gap: 4px;
-  color: #909399;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  background: rgba(255, 255, 255, 0.8);
+
+  .el-icon {
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+  }
+
+  .stat-value {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+  }
 }
 
-.department-chart {
+.content-score {
+  text-align: center;
+  background: linear-gradient(135deg, var(--color-warning-light) 0%, var(--color-bg-card) 100%);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-warning);
+  min-width: 80px;
+
+  .score-value {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-warning);
+    line-height: 1;
+  }
+
+  .score-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+.department-rankings {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-md);
+  padding: 0 var(--spacing-lg);
 }
 
 .department-item {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-bg-section) 0%, var(--color-bg-card) 100%);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-medium);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-border-primary);
+  }
+
+  &.department-item--top {
+    background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-bg-card) 15%);
+    border-color: var(--color-primary);
+  }
 }
 
-.dept-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 100px;
+.department-position {
+  flex-shrink: 0;
 }
 
 .dept-rank {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #409eff;
-  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--color-white);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-sm);
+
+  &.rank-1 {
+    background: linear-gradient(135deg, #FFD700 0%, #FFB347 100%);
+  }
+
+  &.rank-2 {
+    background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
+  }
+
+  &.rank-3 {
+    background: linear-gradient(135deg, #CD7F32 0%, #B8860B 100%);
+  }
 }
 
-.dept-name {
-  font-weight: 500;
-  color: #303133;
-}
-
-.dept-progress {
+.department-info {
   flex: 1;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+
+  .dept-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    font-size: var(--text-base);
+  }
+
+  .dept-score {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    font-weight: var(--font-weight-medium);
+  }
 }
 
-.dept-score {
-  font-weight: 600;
-  color: #409eff;
-  min-width: 60px;
+.department-progress {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+
+  .progress-text {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+    min-width: 80px;
+    text-align: right;
+  }
 }
 
 .ranking-sidebar {
   position: sticky;
-  top: 20px;
+  top: var(--spacing-xl);
+}
+
+.ranking-sidebar .el-card {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-medium);
+
+  ::v-deep(.el-card__header) {
+    border-bottom: 1px solid var(--color-border-light);
+    background-color: var(--color-bg-elevated);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 .config-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-lg);
 }
 
 .config-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .config-label {
-  font-size: 14px;
-  color: #606266;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .weight-config {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-section);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
 }
 
 .weight-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: var(--spacing-xs) 0;
+}
+
+.weight-item span {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .stats-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-lg);
 }
 
 .stats-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .stats-label {
-  color: #606266;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
 }
 
 .stats-value {
-  font-weight: 600;
-  color: #409eff;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  font-size: var(--text-lg);
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .rankings-page {
+    padding: var(--spacing-md);
+  }
+
+  .ranking-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .ranking-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+
+  .ranking-user {
+    margin-right: 0;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .ranking-stats {
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-right: 0;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .stat-item {
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .ranking-score {
+    align-self: stretch;
+    min-width: auto;
+  }
+
+  .content-ranking-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+
+  .content-info {
+    margin: 0;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .content-stats {
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .department-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .dept-progress {
+    width: 100%;
+  }
+
+  .ranking-sidebar {
+    position: relative;
+    top: 0;
+    margin-top: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 576px) {
+  .ranking-tabs {
+    ::v-deep(.el-tabs__nav-wrap) {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+  }
+
+  .ranking-position {
+    margin-right: var(--spacing-md);
+  }
+
+  .position-number {
+    width: 36px;
+    height: 36px;
+  }
+
+  .ranking-user {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .user-info {
+    margin-left: 0;
+  }
+
+  .user-name {
+    font-size: var(--text-sm);
+  }
+
+  .content-title {
+    font-size: var(--text-sm);
+    white-space: normal;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+  }
+
+  .dept-rank {
+    width: 24px;
+    height: 24px;
+    font-size: var(--text-xs);
+  }
+
+  .dept-name {
+    font-size: var(--text-sm);
+  }
 }
 </style>

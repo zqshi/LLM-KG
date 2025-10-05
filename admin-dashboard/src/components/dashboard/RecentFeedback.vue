@@ -495,6 +495,11 @@ const handleSendReply = () => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-card);
+  transition: all var(--transition-medium);
 }
 
 .feedback-card :deep(.el-card__body) {

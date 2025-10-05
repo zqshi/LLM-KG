@@ -15,7 +15,7 @@
     <!-- 核心指标卡片 -->
     <el-row :gutter="16" class="stats-row">
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
+        <el-card class="stats-card" shadow="never">
           <div class="stats-content">
             <div class="stats-icon total">
               <el-icon><DataBoard /></el-icon>
@@ -29,7 +29,7 @@
       </el-col>
 
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
+        <el-card class="stats-card" shadow="never">
           <div class="stats-content">
             <div class="stats-icon today">
               <el-icon><Calendar /></el-icon>
@@ -43,7 +43,7 @@
       </el-col>
 
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
+        <el-card class="stats-card" shadow="never">
           <div class="stats-content">
             <div class="stats-icon pending">
               <el-icon><Clock /></el-icon>
@@ -57,7 +57,7 @@
       </el-col>
 
       <el-col :span="6">
-        <el-card class="stats-card" shadow="hover">
+        <el-card class="stats-card" shadow="never">
           <div class="stats-content">
             <div class="stats-icon engagement">
               <el-icon><TrendCharts /></el-icon>
@@ -74,7 +74,7 @@
     <!-- 图表区域 -->
     <el-row :gutter="20" class="charts-section">
       <el-col :span="12">
-        <el-card class="chart-card" shadow="hover">
+        <el-card class="chart-card" shadow="never">
           <template #header>
             <div class="card-header">
               <span class="card-title">活动参与趋势（近7天）</span>
@@ -107,7 +107,7 @@
       </el-col>
 
       <el-col :span="12">
-        <el-card class="chart-card" shadow="hover">
+        <el-card class="chart-card" shadow="never">
           <template #header>
             <div class="card-header">
               <span class="card-title">内容类型分布</span>
@@ -141,7 +141,7 @@
     </el-row>
 
     <!-- 模块数据统计 -->
-    <el-card class="module-stats-card" shadow="hover">
+    <el-card class="module-stats-card" shadow="never">
       <template #header>
         <span class="card-title">各模块运营数据</span>
       </template>
@@ -163,7 +163,7 @@
     </el-card>
 
     <!-- 热门内容 -->
-    <el-card class="hot-content-card" shadow="hover">
+    <el-card class="hot-content-card" shadow="never">
       <template #header>
         <div class="card-header">
           <span class="card-title">热门运营内容 TOP5</span>
@@ -523,24 +523,15 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/operation-styles.scss';
+
 .operation-dashboard {
-  padding: 20px;
+  padding: var(--spacing-xl);
 }
 
 .stats-row {
-  margin-bottom: 20px;
-}
-
-.stats-card {
-  min-height: 80px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
+  margin-bottom: var(--spacing-xl);
 
   .stats-content {
     display: flex;
@@ -552,12 +543,12 @@ onMounted(() => {
   .stats-icon {
     width: 48px;
     height: 48px;
-    border-radius: 8px;
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 16px;
-    color: #fff;
+    margin-right: var(--spacing-lg);
+    color: var(--color-white);
     font-size: 20px;
 
     &.total {
@@ -580,28 +571,33 @@ onMounted(() => {
   .stats-info {
     flex: 1;
     overflow: hidden;
-  }
 
-  .stats-value {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--el-text-color-primary);
-    line-height: 1;
-  }
+    .stats-value {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      line-height: 1;
+    }
 
-  .stats-label {
-    color: var(--el-text-color-secondary);
-    font-size: 14px;
-    margin-top: 4px;
+    .stats-label {
+      color: var(--color-text-secondary);
+      font-size: var(--text-sm);
+      margin-top: var(--spacing-xs);
+    }
   }
 }
 
 .charts-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-xl);
 }
 
 .chart-card {
   min-height: 350px;
+
+  ::v-deep(.el-card__header) {
+    border-bottom: 1px solid var(--color-border-light);
+    background-color: var(--color-bg-elevated);
+  }
 }
 
 .card-header {
@@ -611,73 +607,61 @@ onMounted(() => {
 }
 
 .card-title {
-  font-weight: 600;
-  color: #303133;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .chart-container {
   height: 300px;
   position: relative;
-}
 
-.chart-wrapper {
-  height: 100%;
-  width: 100%;
-}
+  .chart-wrapper {
+    height: 100%;
+    width: 100%;
+  }
 
-.chart {
-  height: 100%;
-  width: 100%;
-}
-
-.chart-loading,
-.chart-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  .chart-loading,
+  .chart-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
 }
 
 .module-stats-card {
-  margin-bottom: 20px;
-  
+  margin-bottom: var(--spacing-xl);
+
   .el-row {
     margin: 0;
   }
-  
+
   .el-col {
-    padding: 0 8px;
+    padding: 0 var(--spacing-sm);
   }
 }
 
 .module-item {
   display: flex;
   align-items: center;
-  padding: 20px 16px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  border: 1px solid #e4e7ed;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-bg-section) 0%, var(--color-bg-card) 100%);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
   height: 80px;
-  
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border-color: #c0c4cc;
-  }
 }
 
 .module-icon {
   width: 40px;
   height: 40px;
-  margin-right: 12px;
+  margin-right: var(--spacing-md);
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
-  
+
   .el-icon {
     font-size: 20px !important;
     width: 20px;
@@ -688,153 +672,154 @@ onMounted(() => {
 .module-info {
   flex: 1;
   overflow: hidden;
-}
 
-.module-name {
-  font-size: 13px;
-  color: var(--el-text-color-regular);
-  margin-bottom: 4px;
-  font-weight: 500;
-  line-height: 1;
-}
+  .module-name {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+  }
 
-.module-count {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--el-text-color-primary);
-  line-height: 1;
+  .module-count {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
 }
 
 .hot-content-card {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-xl);
+
+  ::v-deep(.el-card__header) {
+    border-bottom: 1px solid var(--color-border-light);
+    background-color: var(--color-bg-elevated);
+  }
 }
 
 .hot-content-list {
-  padding: 10px 0;
+  padding: var(--spacing-sm) 0;
 }
 
 .hot-item {
   display: flex;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid var(--color-border-light);
 
-.hot-item:hover {
-  background-color: #f5f7fa;
-  border-radius: 6px;
-  padding-left: 8px;
-  padding-right: 8px;
-}
-
-.hot-item:last-child {
-  border-bottom: none;
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .hot-rank {
   width: 24px;
   height: 24px;
-  background: #f0f2f5;
-  border-radius: 50%;
+  background: var(--color-bg-section);
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 12px;
-  color: #666;
-  margin-right: 12px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-right: var(--spacing-md);
 }
 
 .hot-rank:nth-child(1) {
   background: linear-gradient(135deg, #FFD700, #FFA500);
-  color: #fff;
+  color: var(--color-white);
 }
 
 .hot-info {
   flex: 1;
   overflow: hidden;
-}
 
-.hot-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #303133;
-  margin-bottom: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+  .hot-title {
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-.hot-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #909399;
+  .hot-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+  }
 }
 
 .hot-author {
-  color: #606266;
+  color: var(--color-text-secondary);
 }
 
 .hot-stats {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .hot-stats .el-icon {
-  font-size: 12px;
+  font-size: var(--text-xs);
 }
 
 .hot-score {
-  font-size: 16px;
-  font-weight: 600;
-  color: #E6A23C;
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-warning);
 }
 
 .empty-state {
-  padding: 40px 0;
+  padding: var(--spacing-2xl) 0;
   text-align: center;
 }
 
+// 响应式设计
 @media (max-width: 768px) {
+  .operation-dashboard {
+    padding: var(--spacing-md);
+  }
+
   .stats-row .el-col {
     width: 50% !important;
     max-width: 50% !important;
     flex: 0 0 50% !important;
-    margin-bottom: 16px;
+    margin-bottom: var(--spacing-md);
   }
-  
+
   .module-stats-card {
     .el-col {
-      margin-bottom: 12px;
+      margin-bottom: var(--spacing-md);
     }
   }
-  
+
   .module-item {
     height: 70px;
-    padding: 12px;
-    
+    padding: var(--spacing-md);
+
     .module-icon {
       width: 36px;
       height: 36px;
-      
+
       .el-icon {
         font-size: 16px !important;
         width: 16px;
         height: 16px;
       }
     }
-    
+
     .module-name {
-      font-size: 12px;
+      font-size: var(--text-xs);
     }
-    
+
     .module-count {
-      font-size: 18px;
+      font-size: var(--text-lg);
     }
   }
 }
@@ -844,19 +829,19 @@ onMounted(() => {
     width: 100% !important;
     max-width: 100% !important;
     flex: 0 0 100% !important;
-    margin-bottom: 12px;
+    margin-bottom: var(--spacing-md);
   }
-  
+
   .module-stats-card {
     .el-row {
       flex-direction: column;
     }
-    
+
     .el-col {
       width: 100% !important;
       max-width: 100% !important;
       flex: 0 0 100% !important;
-      margin-bottom: 8px;
+      margin-bottom: var(--spacing-sm);
     }
   }
 }

@@ -948,6 +948,21 @@ onUnmounted(() => {
   animation: slideUp var(--transition-medium);
 }
 
+/* 现代化卡片样式 - 统一卡片外观 */
+.modern-card {
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition-medium);
+  overflow: hidden;
+}
+
+.modern-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-primary);
+}
+
 .function-card {
   height: 100%;
 }
